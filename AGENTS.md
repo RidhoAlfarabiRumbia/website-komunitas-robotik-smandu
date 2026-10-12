@@ -1,5 +1,39 @@
 # Portal Robotik Agent Guide
 
+## Before Every Task: Read First, Never Guess
+
+Do this at the start of **every prompt**, before planning or editing, even for "small" changes. Do not rely on memory of earlier turns or on assumptions about what a file contains. The code in the repo is the source of truth, not your expectations.
+
+1. **Map the repo.** List the full file tree (skip `.git/`, `public/uploads/`, `storage/terbatas/`) so you know what actually exists.
+2. **Read the foundation in full:** this file, `app/includes/bootstrap.php`, `app/config/*`, and everything in `app/core/` (`Auth`, `Csrf`, `Model`, helpers, `CrudConfig`).
+3. **Read everything the task touches:** the target page(s), the model(s) they use, the partials/includes they pull in, and at least one sibling page that does a similar job. Follow every `require`, `new Class`, and `Class::method()` to its definition.
+4. **Read the data and product layer when relevant:** the related tables in `database.sql` (and `migrate.sql`), and the matching section of `PRD.md`.
+5. **Search before you claim.** Before using or mentioning any function, class, method, column, enum value, constant, route, or file path, confirm it exists (grep/glob) and read its real signature. If you cannot find it, it does not exist. Say so; do not invent it.
+6. **Show your basis.** Begin your plan or reply with the list of files you read, and label anything you did not read as "not verified".
+7. **Ask instead of filling gaps.** If something is still unclear after reading, ask one focused question. Never guess.
+
+Notes: never read `.env` (ask the user for specific values if truly needed). If the repo is too large to read in full, say which parts you skipped rather than pretending you covered them.
+
+## Large Changes: Ask Before Executing
+
+Never execute a large change without explicit approval **in the current conversation**. First propose: what will change (files), why, risks, how you will verify it, and how to roll it back. Then wait for a clear "yes" before touching anything.
+
+A change is **large** if it matches any of these:
+
+- Touches more than about 3 files or roughly 100 changed lines.
+- Deletes, renames, or moves files or folders, or changes the folder structure.
+- Changes the database schema (tables, columns, ENUM values) or edits `database.sql` / `migrate.sql`. Any DB write also follows the Database Access Rules below.
+- Changes access control or security behavior: `Auth`, role checks, `Csrf`, sessions, `public/berkas.php`, `.htaccess`, or the Materi / Pelatihan / Prestasi access rules.
+- Edits shared code that every page depends on: `app/core/`, `app/includes/` (bootstrap, header, footer, navbar, sidebar), `Model`, or `CrudConfig`.
+- Refactors across multiple files, or changes the layout or navigation of many pages at once.
+- Changes upload limits, allowed file types, or where files are stored.
+- Adds a dependency, library, CDN, or build step.
+- Goes beyond what the prompt asked for, or is hard to undo.
+
+Small, contained changes (a single-file fix, a typo, copy text, a small CSS tweak) can proceed without asking, but still report what you changed.
+
+If a task turns out to be larger than it first looked, **stop and ask** instead of continuing. Approval for one large change does not carry over to the next. No "while I'm here" cleanups; list them as suggestions instead.
+
 ## Project Shape
 
 - Native PHP 8.3 OOP app using MySQL/MariaDB via PDO. Intentionally no framework, MVC, Composer, or frontend build step. No automated tests exist.
