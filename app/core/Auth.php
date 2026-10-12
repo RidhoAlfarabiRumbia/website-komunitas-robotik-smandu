@@ -41,56 +41,79 @@ class Auth
         return true;
     }
 
-    /* ---------- Rate limit login sederhana (in-memory per server) ---------- */
+    /* ---------- Rate limit login (database-backed) ---------- */
 
     private const MAX_PERCOBAAN = 5;
     private const JEDA_PERCOBAAN = 900; // 15 menit
 
     private static function kunci(string $username): string
     {
-        return 'login_' . sha1(strtolower(trim($username)));
+        return sha1(strtolower(trim($username)));
     }
 
     private static function terlaluPercobaan(string $username): bool
     {
-        $d = $_SESSION['rate_limit'] ?? [];
-        $k = self::kunci($username);
-        if (($d[$k]['jumlah'] ?? 0) >= self::MAX_PERCOBAAN) {
-            return true;
+        $hash = self::kunci($username);
+        $stmt = Database::connect()->prepare(
+            'SELECT attempts, locked_until FROM login_attempts WHERE username_hash = ?'
+        );
+        $stmt->execute([$hash]);
+        $row = $stmt->fetch();
+        if (!$row) return false;
+        if ($row['attempts'] >= self::MAX_PERCOBAAN) {
+            if ($row['locked_until'] && strtotime($row['locked_until']) > time()) {
+                return true;
+            }
+            // Lock expired, reset
+            self::resetPercobaan($username);
         }
         return false;
     }
 
     private static function catatGagal(string $username): void
     {
-        $k = self::kunci($username);
-        $d = $_SESSION['rate_limit'] ?? [];
-        $jumlah = (int) ($d[$k]['jumlah'] ?? 0) + 1;
-        if ($jumlah >= self::MAX_PERCOBAAN) {
-            $d[$k]['jumlah'] = self::MAX_PERCOBAAN;
-            $d[$k]['sampai'] = time() + self::JEDA_PERCOBAAN;
+        $hash = self::kunci($username);
+        $db = Database::connect();
+        $stmt = $db->prepare('SELECT attempts FROM login_attempts WHERE username_hash = ?');
+        $stmt->execute([$hash]);
+        $row = $stmt->fetch();
+        $now = date('Y-m-d H:i:s');
+        if ($row) {
+            $attempts = (int) $row['attempts'] + 1;
+            if ($attempts >= self::MAX_PERCOBAAN) {
+                $locked = date('Y-m-d H:i:s', time() + self::JEDA_PERCOBAAN);
+                $db->prepare('UPDATE login_attempts SET attempts = ?, locked_until = ?, updated_at = ? WHERE username_hash = ?')
+                    ->execute([$attempts, $locked, $now, $hash]);
+            } else {
+                $db->prepare('UPDATE login_attempts SET attempts = ?, updated_at = ? WHERE username_hash = ?')
+                    ->execute([$attempts, $now, $hash]);
+            }
         } else {
-            $d[$k]['jumlah'] = $jumlah;
+            $db->prepare('INSERT INTO login_attempts (username_hash, attempts, created_at, updated_at) VALUES (?, 1, ?, ?)')
+                ->execute([$hash, $now, $now]);
         }
-        $_SESSION['rate_limit'] = $d;
     }
 
     private static function resetPercobaan(string $username): void
     {
-        $d = $_SESSION['rate_limit'] ?? [];
-        unset($d[self::kunci($username)]);
-        $_SESSION['rate_limit'] = $d;
+        $hash = self::kunci($username);
+        Database::connect()->prepare('DELETE FROM login_attempts WHERE username_hash = ?')
+            ->execute([$hash]);
     }
 
     /** Sisa detik sebelum username boleh dicoba lagi; 0 = tidak terkunci. */
     public static function sisaJedaLogin(string $username): int
     {
-        $d = $_SESSION['rate_limit'] ?? [];
-        $k = self::kunci($username);
-        if (($d[$k]['jumlah'] ?? 0) < self::MAX_PERCOBAAN) {
-            return 0;
-        }
-        return max(0, (int) ($d[$k]['sampai'] ?? 0) - time());
+        $hash = self::kunci($username);
+        $stmt = Database::connect()->prepare(
+            'SELECT attempts, locked_until FROM login_attempts WHERE username_hash = ?'
+        );
+        $stmt->execute([$hash]);
+        $row = $stmt->fetch();
+        if (!$row) return 0;
+        if ((int) $row['attempts'] < self::MAX_PERCOBAAN) return 0;
+        if (!$row['locked_until']) return 0;
+        return max(0, strtotime($row['locked_until']) - time());
     }
 
     public static function check(): bool

@@ -20,4 +20,14 @@ class PelatihanPeserta extends Model
         if (!in_array($status, ['Pending', 'Disetujui', 'Ditolak'], true)) return;
         self::update($id, ['status' => $status]);
     }
+
+    public static function find(int $id): ?array
+    {
+        return parent::find($id);
+    }
+
+    public static function delete(int $id): bool
+    {
+        return parent::delete($id);
+    }
 }

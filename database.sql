@@ -242,6 +242,19 @@ CREATE TABLE hero (
 ) ENGINE=InnoDB;
 
 -- ---------------------------------------------------------
+-- LOGIN ATTEMPTS (Rate limiting persistente)
+-- ---------------------------------------------------------
+CREATE TABLE login_attempts (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  username_hash CHAR(40) NOT NULL,
+  attempts INT NOT NULL DEFAULT 1,
+  locked_until DATETIME DEFAULT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_username_hash (username_hash)
+) ENGINE=InnoDB;
+
+-- ---------------------------------------------------------
 -- PENGATURAN (teks & opsi yang bisa dikustomisasi admin)
 -- ---------------------------------------------------------
 CREATE TABLE pengaturan (
