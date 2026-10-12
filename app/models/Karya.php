@@ -10,7 +10,7 @@ class Karya extends Model
 
     public static function approved(int $limit = 0): array
     {
-        $sql = "SELECT k.*, a.nama AS pembuat_nama FROM karya k
+        $sql = "SELECT k.id, k.judul, k.kategori, k.deskripsi, k.progres, k.publikasi, k.pembuat_id, k.teknologi, k.link_demo, k.foto, k.dibuat_pada, a.nama AS pembuat_nama FROM karya k
                 JOIN anggota a ON a.id = k.pembuat_id
                 WHERE k.publikasi = 'Approved' ORDER BY k.dibuat_pada DESC";
         if ($limit > 0) {

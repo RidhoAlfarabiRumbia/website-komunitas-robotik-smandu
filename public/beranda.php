@@ -6,7 +6,9 @@ $isAnggota = Auth::role() === 'anggota';
 // Admin juga melihat konten anggota di beranda (PRD 7: seluruh menu anggota).
 $kontenAnggota = $isAnggota || $isAdmin;
 
-$heroSlides = Hero::tampil();
+$heroData = Hero::getSliderData();
+$heroSlides = $heroData['slides'];
+$heroTunda = $heroData['deferred'];
 
 // Konten publik (PRD 8.3)
 $galeriTerbaru = Galeri::all('tanggal DESC', 3);
@@ -61,102 +63,13 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
     <div class="welcome-media hero-media">
       <?php if ($heroSlides): ?>
         <div class="slider">
-          <?php
-            $nSlides = count($heroSlides);
-
-            // Foto samping dipacak acak (bukan geseran prev/next) dengan prioritas:
-            // 1) tidak mengulang foto di kolom yang sama dengan slide sebelumnya
-            //    — ini yang bikin foto kiri/kanan terasa "macet" saat dua kolom
-            //    lain sudah berganti;
-            // 2) tidak memakai foto tengah slide ini atau tetangganya, supaya satu
-            //    foto tidak berpindah peran tengah<->samping di slide berurutan;
-            // 3) tidak bertukar kolom dengan slide sebelumnya (hindari ilusi geser);
-            // 4) meminimalkan foto yang terbawa dari slide sebelumnya.
-            // Dicoba dari aturan paling ketat ke paling longgar; pengulangan kolom
-            // hanya boleh di tingkat terakhir saat pool memang tidak muat.
-            $fotoPool = [];
-            $pusatList = [];
-            foreach ($heroSlides as $i => $hs) {
-              $f = $hs['foto'] ?? '';
-              $pusatList[$i] = $f !== '' ? $f : 'assets/img/hero-illustration.svg';
-              if ($f !== '' && !in_array($f, $fotoPool, true)) {
-                $fotoPool[] = $f;
-              }
-            }
-
-            $fotoSamping = [];
-            $sampingKiriSebelum = null;
-            $sampingKananSebelum = null;
-            for ($i = 0; $i < $nSlides; $i++) {
-              $pusat = $pusatList[$i];
-              $pusatSebelum = $pusatList[($i - 1 + $nSlides) % $nSlides];
-              $pusatSesudah = $pusatList[($i + 1) % $nSlides];
-              $pasanganSebelum = [$sampingKiriSebelum, $sampingKananSebelum];
-              $tingkat = [
-                ['tolak' => [$pusatSebelum, $pusat, $pusatSesudah, $sampingKiriSebelum, $sampingKananSebelum], 'jagaKolom' => true],
-                ['tolak' => [$pusatSebelum, $pusat, $pusatSesudah, $sampingKiriSebelum, $sampingKananSebelum], 'jagaKolom' => false],
-                ['tolak' => [$pusat, $pusatSesudah, $sampingKiriSebelum, $sampingKananSebelum], 'jagaKolom' => true],
-                ['tolak' => [$pusat, $pusatSesudah, $sampingKiriSebelum, $sampingKananSebelum], 'jagaKolom' => false],
-                ['tolak' => [$pusat, $pusatSesudah], 'jagaKolom' => true],
-                ['tolak' => [$pusat, $pusatSesudah], 'jagaKolom' => false],
-                ['tolak' => [$pusat], 'jagaKolom' => true],
-              ];
-              $pilih = null;
-              foreach ($tingkat as $level) {
-                $tolak = array_values(array_filter($level['tolak'], static fn ($x) => $x !== null));
-                $jagaKolom = $level['jagaKolom'];
-                $kiri = array_values(array_filter($fotoPool, static function ($f) use ($tolak, $jagaKolom, $sampingKananSebelum) {
-                  return !in_array($f, $tolak, true) && !($jagaKolom && $f === $sampingKananSebelum);
-                }));
-                $kanan = array_values(array_filter($fotoPool, static function ($f) use ($tolak, $jagaKolom, $sampingKiriSebelum) {
-                  return !in_array($f, $tolak, true) && !($jagaKolom && $f === $sampingKiriSebelum);
-                }));
-                $pasangan = [];
-                foreach ($kiri as $lk) {
-                  foreach ($kanan as $rk) {
-                    if ($lk !== $rk) {
-                      $pasangan[] = [$lk, $rk];
-                    }
-                  }
-                }
-                if ($pasangan === []) {
-                  continue;
-                }
-                $skor = static function ($p) use ($pasanganSebelum) {
-                  return (in_array($p[0], $pasanganSebelum, true) ? 1 : 0)
-                       + (in_array($p[1], $pasanganSebelum, true) ? 1 : 0);
-                };
-                $terendah = min(array_map($skor, $pasangan));
-                $kandidat = array_values(array_filter($pasangan, static fn ($p) => $skor($p) === $terendah));
-                shuffle($kandidat);
-                $pilih = $kandidat[0];
-                break;
-              }
-              if ($pilih === null) {
-                $pilih = [$pusat, $pusat];
-              }
-              $fotoSamping[$i] = $pilih;
-              $sampingKiriSebelum = $pilih[0];
-              $sampingKananSebelum = $pilih[1];
-            }
-          ?>
-          <?php $heroTunda = []; ?>
+          <?php $nSlides = count($heroSlides); ?>
           <?php foreach ($heroSlides as $i => $h): ?>
             <?php
-              $foto = $h['foto'] ?? 'assets/img/hero-illustration.svg';
-              $fotoKiri = $fotoSamping[$i][0] ?? $foto;
-              $fotoKanan = $fotoSamping[$i][1] ?? $foto;
-              if ($i > 0) {
-                // Slide ke-2 dst tidak dirender di HTML agar tidak ikut diunduh
-                // saat halaman dibuka; datanya dikirim sebagai JSON (lihat bawah)
-                // dan dibangun JS setelah halaman selesai dimuat.
-                $heroTunda[] = [
-                  'img' => base_url($foto),
-                  'kiri' => base_url($fotoKiri),
-                  'kanan' => base_url($fotoKanan),
-                ];
-                continue;
-              }
+              $foto = $h['img'] ?? 'assets/img/hero-illustration.svg';
+              $fotoKiri = $h['kiri'] ?? $foto;
+              $fotoKanan = $h['kanan'] ?? $foto;
+              if ($i > 0) continue;
             ?>
             <div class="slide active" style="--slide-img:url('<?= base_url(e($foto)) ?>')">
                 <span class="slide-photos">

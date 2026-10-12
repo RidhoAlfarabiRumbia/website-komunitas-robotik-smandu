@@ -25,7 +25,7 @@ function redirect(string $path): void
 
 function base_url(string $path = ''): string
 {
-    $root = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
+    $root = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
     // Jika dipanggil dari dalam folder admin/, arahkan relatif ke root proyek.
     if (str_ends_with($root, '/admin')) {
         $root = substr($root, 0, -6);

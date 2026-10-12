@@ -5,7 +5,7 @@ class Pengaturan extends Model
     protected static string $table = 'pengaturan';
     protected static array $fillable = ['kunci', 'nilai'];
 
-    public static function nilai(string $key, string $default = ''): string
+    public static function nilai(string $key, $default = null): ?string
     {
         $stmt = static::db()->prepare('SELECT nilai FROM ' . static::$table . ' WHERE kunci = ?');
         $stmt->execute([$key]);
