@@ -428,7 +428,7 @@ tr:last-child td{border-bottom:none;}
    selalu sejajar walau jumlah isinya berbeda. Section yang lebar penuh
    (class .home-span) membentang 2 kolom; Galeri/Karya/Materi tetap di luar
    grid. Jarak antar section memakai gap grid, bukan margin bawah. */
-.home-cols{display:grid; grid-template-columns:1fr 1fr; gap:34px 26px; align-items:start;}
+.home-cols{display:grid; grid-template-columns:1fr 1fr; gap:34px 26px; align-items:start; margin-bottom:38px;}
 .home-cols > .section{margin-bottom:0;}
 .home-cols > .home-span{grid-column:1 / -1;}
 /* Judul section di dalam kolom rata kiri dengan tautan "lihat semua" di kanan
@@ -438,7 +438,7 @@ tr:last-child td{border-bottom:none;}
 .home-cols .section-head h2{font-size:19px;}
 .home-cols .section-head .see-all{width:auto; text-align:right; white-space:nowrap;}
 @media (max-width:900px){
-  .home-cols{grid-template-columns:1fr; gap:38px;}
+  .home-cols{grid-template-columns:1fr; gap:38px; margin-bottom:38px;}
   .home-cols .section-head{justify-content:center; text-align:center; flex-wrap:wrap;}
   .home-cols .section-head h2{font-size:24px;}
   .home-cols .section-head .see-all{width:100%; text-align:left;}
@@ -818,6 +818,7 @@ a:focus-visible, button:focus-visible {
   .page-head{margin-bottom:18px;}
   .page-head h1{font-size:21px;}
   .section{margin-bottom:28px;}
+  .home-cols{margin-bottom:28px;}
   .section-head{flex-direction:column; align-items:flex-start; gap:4px; margin-bottom:12px;}
   .main .section-head{align-items:center;}
   .section-head h2{font-size:20px;}
