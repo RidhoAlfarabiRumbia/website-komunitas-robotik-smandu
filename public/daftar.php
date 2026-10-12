@@ -13,14 +13,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Csrf::verify();
 
     /* Endpoint publik tanpa login: batasi jumlah kiriman agar tidak bisa
-       dipakai menghabiskan disk (spam/banjiri unggahan). */
-    $kunci = 'daftar_kirim';
-    $jumlah = (int) ($_SESSION[$kunci] ?? 0);
-    if ($jumlah >= 3) {
-        flash_set('error', 'Terlalu banyak pendaftaran terkirim dari sesi ini. Hubungi admin bila kamu butuh mengirim ulang.');
-        redirect('daftar.php');
+       dipakai menghabiskan disk (spam/banjiri unggahan).
+       Gunakan DB-backed rate limit (table login_attempts) dengan prefix 'daftar_'. */
+    $ipHash = sha1($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+    $daftarKey = 'daftar_' . $ipHash;
+    $stmt = Database::connect()->prepare('SELECT attempts, locked_until FROM login_attempts WHERE username_hash = ?');
+    $stmt->execute([$daftarKey]);
+    $row = $stmt->fetch();
+    $maxDaftar = 3;
+    $lockDaftar = 3600; // 1 jam
+    if ($row && (int) $row['attempts'] >= $maxDaftar) {
+        if ($row['locked_until'] && strtotime($row['locked_until']) > time()) {
+            $menit = (int) ceil((strtotime($row['locked_until']) - time()) / 60);
+            flash_set('error', "Terlalu banyak pendaftaran. Coba lagi dalam $menit menit.");
+            redirect('daftar.php');
+        }
+        // Lock expired, reset
+        Database::connect()->prepare('DELETE FROM login_attempts WHERE username_hash = ?')->execute([$daftarKey]);
     }
-    $_SESSION[$kunci] = $jumlah + 1;
 
     $old = [
         'nama' => trim($_POST['nama'] ?? ''),
@@ -89,6 +99,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'nama_berkas' => sanitize_filename($_FILES['pakta_integritas']['name']),
             'status' => 'Baru',
         ]);
+
+        // Catat rate limit untuk pendaftaran (IP-based)
+        $ipHash = sha1($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+        $daftarKey = 'daftar_' . $ipHash;
+        $now = date('Y-m-d H:i:s');
+        $stmt = Database::connect()->prepare('SELECT attempts FROM login_attempts WHERE username_hash = ?');
+        $stmt->execute([$daftarKey]);
+        $row = $stmt->fetch();
+        if ($row) {
+            Database::connect()->prepare('UPDATE login_attempts SET attempts = attempts + 1, updated_at = ? WHERE username_hash = ?')
+                ->execute([$now, $daftarKey]);
+        } else {
+            Database::connect()->prepare('INSERT INTO login_attempts (username_hash, attempts, created_at, updated_at) VALUES (?, 1, ?, ?)')
+                ->execute([$daftarKey, $now, $now]);
+        }
 
         flash_set('success', 'Pendaftaran terkirim. Admin akan memverifikasi Pakta Integritas kamu sebelum akun diaktifkan.');
         redirect('daftar.php?terkirim=1');

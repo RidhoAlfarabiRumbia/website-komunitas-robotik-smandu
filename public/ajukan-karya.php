@@ -39,6 +39,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$errors) {
         $foto = simpan_upload('foto', 'karya', ['jpg', 'jpeg', 'png', 'webp'], 2 * 1024 * 1024, 'JPG, PNG, atau WEBP', '2MB');
 
+        // Jika user mencoba upload tapi gagal (simpan_upload return null + sudah set flash)
+        if ($foto === null && !empty($_FILES['foto']['name'])) {
+            redirect('ajukan-karya.php');
+        }
+
         Karya::create([
             'judul' => $form['judul'],
             'kategori' => $form['kategori'],

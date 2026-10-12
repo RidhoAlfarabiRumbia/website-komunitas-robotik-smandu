@@ -60,6 +60,9 @@ class Karya extends Model
 
     public static function moderasi(int $id, string $status, ?string $alasan = null): void
     {
+        if (!in_array($status, ['Approved', 'Rejected'], true)) {
+            return;
+        }
         self::update($id, [
             'publikasi' => $status,
             'alasan_tolak' => $status === 'Rejected' ? $alasan : null,

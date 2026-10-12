@@ -69,8 +69,8 @@ class User extends Model
             $errors[] = 'Kata sandi saat ini salah.';
         }
 
-        if ($passwordBaru !== '' && strlen($passwordBaru) < 6) {
-            $errors[] = 'Kata sandi baru minimal 6 karakter.';
+        if ($passwordBaru !== '' && strlen($passwordBaru) < 8) {
+            $errors[] = 'Kata sandi baru minimal 8 karakter.';
         }
 
         if ($errors) {
