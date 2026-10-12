@@ -148,15 +148,6 @@ include __DIR__ . '/../../app/includes/header.php';
           </div>
 
           <?php if ($detail['status'] === 'Baru'): ?>
-            <?php $kembar = $detail['anggota_id'] ? null : Anggota::cari($detail['nama'], $detail['kelas']); ?>
-            <?php if ($kembar): ?>
-              <div class="alert alert-warn" style="margin-bottom:16px;">
-                <strong><i class="bi bi-exclamation-triangle"></i> Nama serupa sudah terdaftar.</strong><br>
-                Ada anggotaexisting bernama "<?= e($kembar['nama']) ?>" (<?= e($kembar['kelas']) ?>).
-                Demi keamanan, verifikasi ini akan membuat data anggota BARU â€” bukan menempel pada akun tersebut.
-                Jika memang orang yang sama, hapus akun lama lebih dulu dari menu Ke Anggota.
-              </div>
-            <?php endif; ?>
             <form class="card" method="post">
               <?= Csrf::field() ?>
               <input type="hidden" name="id" value="<?= (int) $detail['id'] ?>">

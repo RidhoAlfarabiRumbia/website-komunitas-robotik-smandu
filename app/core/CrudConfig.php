@@ -35,15 +35,6 @@ function crud_config(): array
             ],
             'list' => ['judul', 'topik'],
         ],
-        'referensi' => [
-            'label' => 'Referensi', 'model' => Referensi::class,
-            'fields' => [
-                'nama' => ['label' => 'Nama', 'type' => 'text', 'required' => true],
-                'url' => ['label' => 'URL', 'type' => 'text', 'required' => true],
-                'deskripsi' => ['label' => 'Deskripsi', 'type' => 'textarea'],
-            ],
-            'list' => ['nama', 'url'],
-        ],
         'karya' => [
             'label' => 'Karya', 'model' => Karya::class,
             'fields' => [

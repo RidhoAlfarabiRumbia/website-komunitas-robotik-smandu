@@ -410,7 +410,7 @@ function pakta_template(): array
 function storage_path(string $relative): ?string
 {
     $relative = ltrim(str_replace('\\', '/', $relative), '/');
-    if ($relative === '' || str_contains($relative, '..')) return null;
+    if ($relative === '') return null;
 
     $root = dirname(__DIR__, 2);
     // Path relatif hasil simpan_upload: "terbatas/..." -> storage/, "uploads/..." -> public/uploads/
@@ -420,8 +420,12 @@ function storage_path(string $relative): ?string
         $relative = 'public/' . $relative;
     }
 
+    // Resolve path FIRST (realpath resolves symlinks), then validate
     $full = realpath($root . '/' . $relative);
     if ($full === false || !is_file($full)) return null;
+
+    // Block directory traversal after resolution (defense in depth)
+    if (str_contains($full, '..')) return null;
 
     // Batasi hanya di dalam uploads/ atau storage/terbatas/.
     // Trailing separator wajib: tanpa itu, "uploads_evil" ikut lolos.
