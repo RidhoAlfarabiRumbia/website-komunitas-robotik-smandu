@@ -48,12 +48,23 @@ class Pelatihan extends Model
         return strcmp((string) $selesai, date('Y-m-d')) >= 0;
     }
 
-    /** Apakah pendaftaran peserta masih dibuka (status Dibuka, kuota, belum daftar)? */
+    /** Apakah pendaftaran peserta masih dibuka (status Dibuka, kuota, belum daftar, tanggal valid)? */
     public static function bisaDaftar(?array $pelatihan, int $terpakai = 0): bool
     {
         if (!$pelatihan) return false;
         if ($pelatihan['status'] !== 'Dibuka') return false;
-        return self::sisaKuota($pelatihan, $terpakai) > 0;
+        if (self::sisaKuota($pelatihan, $terpakai) <= 0) return false;
+
+        $today = date('Y-m-d');
+        $mulai = $pelatihan['tanggal_mulai'] ?? null;
+        $selesai = $pelatihan['tanggal_selesai'] ?? $pelatihan['tanggal_mulai'];
+
+        // Tanggal mulai tidak boleh sudah lewat
+        if ($mulai && $today > $mulai) return false;
+        // Tanggal selesai tidak boleh sudah lewat
+        if ($selesai && $today > $selesai) return false;
+
+        return true;
     }
 
     /** Daftarkan seorang anggota sebagai peserta (menunggu persetujuan admin). */

@@ -169,9 +169,15 @@ class Auth
     public static function requireMember(): void
     {
         self::requireLogin();
-        if (!in_array(self::role(), ['anggota', 'admin'], true)) {
+        if (!in_array(self::role(), self::memberRoles(), true)) {
             redirect('login.php');
         }
+    }
+
+    /** Roles yang boleh akses halaman khusus anggota (extensible). */
+    public static function memberRoles(): array
+    {
+        return ['anggota', 'admin'];
     }
 
     public static function logout(): void
