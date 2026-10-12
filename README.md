@@ -1,74 +1,186 @@
+<div align="center">
+
 # Portal Komunitas Robotik SMA Negeri 2
 
-Source code lengkap (native PHP OOP + MySQL, tanpa framework/MVC, Bootstrap-style layout kustom) sesuai PRD.
+**Website komunitas robotik: tempat belajar, memamerkan karya, mencatat prestasi, dan mengabarkan kegiatan.**
 
-## Cara Menjalankan (XAMPP / Laragon / server PHP+MySQL apa pun)
+![PHP](https://img.shields.io/badge/PHP-8.3-777BB4?logo=php&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL%20%2F%20MariaDB-PDO-4479A1?logo=mysql&logoColor=white)
+![Framework](https://img.shields.io/badge/framework-none-lightgrey)
+![Status](https://img.shields.io/badge/status-fitur%20inti%20selesai-brightgreen)
 
-1. **Import database**
-   - Buka phpMyAdmin → New → Import → pilih file `database.sql`.
-   - Ini akan membuat database `db_robotik` beserta seluruh tabel dan data contoh.
+[Fitur](#fitur) · [Memulai](#memulai) · [Dokumentasi](#dokumentasi) · [Roadmap](#roadmap)
 
-2. **Salin konfigurasi**
-   - Duplikat file `.env.example` menjadi `.env`.
-   - Sesuaikan `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASS` dengan pengaturan MySQL lokal Anda.
+</div>
 
-3. **Letakkan folder project**
-   - Salin seluruh folder ini ke `htdocs` (XAMPP) atau document root server Anda, misalnya `htdocs/portal-robotik`.
+<!-- Tambahkan screenshot di sini, misalnya:
+![Beranda](docs/screenshots/beranda.png)
+-->
 
-4. **Akses di browser**
-   - Buka `http://localhost/portal-robotik/public/`
-   - Anda akan diarahkan ke halaman login.
-   - `public/` adalah document root aplikasi. Untuk produksi, arahkan document root server ke folder `public/` (kode aplikasi di `app/` dan `.env` tidak perlu dapat diakses langsung dari browser).
+## Tentang
 
-5. **Performa (opsional, disarankan untuk XAMPP)**
-   - Di `apache/conf/httpd.conf`, aktifkan (hapus `#`) `deflate_module`, `expires_module`, dan `filter_module`, lalu restart Apache. `public/.htaccess` memakainya untuk gzip + cache aset (CSS/JS 1 tahun dengan cache-bust `?v=filemtime`, gambar upload 1 bulan karena nama file selalu unik). Tanpa modul-modul itu situs tetap jalan, hanya kompresi/header cache yang tidak aktif.
-   - Di `php.ini`, aktifkan OPcache (`zend_extension=opcache` dan `opcache.enable=1`) lalu restart Apache, agar runtime PHP lebih ringan.
-   - Aktifkan juga ekstensi **GD** (`extension=gd`) lalu restart Apache: setiap unggahan foto otomatis dibuat varian ringan (maks 1600px, WebP) agar halaman cepat dimuat — file asli tetap tersimpan sebagai arsip. Tanpa GD, unggahan tetap jalan memakai file asli apa adanya.
+Materi belajar robotik tersebar di banyak platform, karya dan dokumentasi tercecer di media sosial pribadi, dan pihak luar sulit memverifikasi pencapaian komunitas. Website ini mengumpulkan semuanya di satu tempat resmi, supaya pengetahuan komunitas tidak hilang saat pergantian generasi.
 
-## Akun Default
+**Siklus komunitas:** Belajar → Berkarya → Berkompetisi → Berbagi → Regenerasi
 
-Semua akun memakai kata sandi **`demo123`**.
+- **Mobile-first**: dirancang untuk HP Android, responsif di desktop.
+- **Mode terang dan gelap**, mengikuti preferensi sistem.
+- **Akses materi terkontrol**: hanya peserta pelatihan yang disetujui.
+- **Bisa diverifikasi pihak luar**: prestasi dan dokumentasi terbuka untuk umum tanpa akun.
 
-| Peran   | Username         | Keterangan              |
-|---------|------------------|--------------------------|
-| Admin   | `admin`          | Akses penuh area admin  |
-| Anggota | `ahmad.fauzan`   | Ketua Komunitas         |
-| Anggota | `nabila.putri`   | Koordinator IoT         |
-| Anggota | `rafi.ardiansyah`| Anggota baru            |
-| Anggota | `zahra.amelia`   | Anggota                 |
-| Anggota | `bagas.dwi`      | Anggota                 |
-| Anggota | `keisha.ayu`     | Koordinator AI          |
+## Daftar Isi
 
-## Struktur Folder
+- [Fitur](#fitur)
+- [Peran Pengguna](#peran-pengguna)
+- [Teknologi](#teknologi)
+- [Memulai](#memulai)
+- [Struktur Proyek](#struktur-proyek)
+- [Keamanan](#keamanan)
+- [Dokumentasi](#dokumentasi)
+- [Roadmap](#roadmap)
+- [Berkontribusi](#berkontribusi)
+- [Lisensi](#lisensi)
+
+## Fitur
+
+| Tahap | Fitur |
+|---|---|
+| **Belajar** | **Materi** (Arduino, IoT, Python, AI, robotik, elektronika) dengan akses per pelatihan · **Referensi** belajar gratis di halaman Materi · **Pelatihan/Workshop** dengan jadwal, kuota, dan persetujuan peserta |
+| **Berkarya** | **Karya** anggota (Robot, IoT, Programming, AI, Elektronika) dengan status progres · **Ajukan Karya** dengan moderasi admin dan alasan penolakan |
+| **Berkompetisi** | **Lomba** (info, status, hasil, peserta) · **Prestasi** dengan bukti sertifikat, tayang langsung dan bisa ditinjau admin |
+| **Berbagi** | **Galeri** foto dan video · **Kegiatan** dengan video laporan · **Pengumuman** · **Slider Beranda** yang dikelola admin |
+| **Regenerasi** | **Pendaftaran Anggota** dengan Pakta Integritas · **Profil** berisi rekam jejak karya, prestasi, dan pelatihan |
+
+### Aturan akses utama
+
+- **Materi** hanya terbuka bagi peserta pelatihan terkait yang disetujui, selama pelatihan belum berakhir. Admin selalu punya akses penuh.
+- **Karya** ditinjau admin **sebelum** tayang. **Prestasi** tayang langsung dan ditinjau **sesudahnya**.
+- **Persetujuan peserta** pelatihan otomatis ditolak bila kuota penuh.
+- **Dokumen Pakta Integritas** bersifat privat dan hanya bisa dibuka admin.
+
+## Peran Pengguna
+
+| Peran | Siapa | Bisa apa |
+|---|---|---|
+| **Pengunjung** | Guru, kepala sekolah, siswa luar, mitra (tanpa login) | Melihat prestasi, galeri, pengumuman, pelatihan terbuka; mendaftar anggota; mengunduh template Pakta Integritas |
+| **Anggota** | Anggota terverifikasi | Mengakses materi pelatihan yang diikuti, mendaftar pelatihan, mengajukan karya, mengunggah prestasi, mengelola profil |
+| **Admin** | Pembina komunitas dan satu murid yang ditugaskan | Mengelola semua konten, memoderasi karya, memverifikasi pendaftaran, menyetujui peserta pelatihan |
+
+## Teknologi
+
+| Lapisan | Pilihan |
+|---|---|
+| Bahasa | PHP 8.3 (OOP), tanpa framework dan tanpa Composer |
+| Database | MySQL / MariaDB lewat PDO |
+| Tampilan | CSS kustom, JavaScript vanilla, [Bootstrap Icons](https://icons.getbootstrap.com/), Google Fonts (Poppins, Inter) |
+| Server | Apache (XAMPP / Laragon / hosting PHP + MySQL) |
+
+## Memulai
+
+### Prasyarat
+
+- PHP 8.3
+- MySQL atau MariaDB
+- Apache (XAMPP atau Laragon memudahkan di lokal)
+
+### Instalasi
+
+```bash
+# 1. Salin proyek ke document root server lokal
+#    contoh XAMPP: C:\xampp\htdocs\portal-robotik
+
+# 2. Buat konfigurasi
+cp .env.example .env
+```
+
+3. Impor `database.sql` lewat phpMyAdmin (membuat database `db_robotik`, tabel, dan data contoh).
+4. Sesuaikan `.env`:
+
+   ```env
+   APP_NAME="Portal Komunitas Robotik SMA Negeri 2"
+   DB_HOST=localhost
+   DB_NAME=db_robotik
+   DB_USER=isi_username_database
+   DB_PASS=isi_password_database
+   ```
+
+5. Buka `http://localhost/portal-robotik/public/`.
+
+> Data contoh dan akun awal ada di `database.sql`. Ganti atau hapus akun bawaan sebelum dipakai di produksi.
+
+> **Produksi:** arahkan document root server ke folder `public/`. Kode di `app/`, berkas privat di `storage/`, dan `.env` tidak boleh bisa diakses langsung dari browser.
+
+> **Upgrade dari versi lama:** jalankan `migrate.sql` pada database yang sudah ada (cadangkan dulu).
+
+### Opsional: performa
+
+- Aktifkan ekstensi **GD** (`extension=gd`) agar foto yang diunggah otomatis dibuatkan versi ringan (WebP, maks 1600 px). Tanpa GD, unggahan tetap jalan memakai file asli.
+- Aktifkan modul Apache `deflate_module`, `expires_module`, `filter_module` untuk kompresi dan cache aset, serta **OPcache** di `php.ini`.
+
+## Struktur Proyek
+
+<details>
+<summary>Lihat struktur folder</summary>
 
 ```
-public/      -> document root — seluruh file yang diakses browser
-  *.php      -> halaman anggota (beranda, karya, galeri, materi, profil, dst.)
-admin/     -> halaman area admin (dashboard, moderasi, CRUD generik)
-  assets/    -> CSS, ilustrasi SVG ( buatan sendiri, bukan foto berhak cipta)
-  uploads/   -> tujuan upload foto karya/galeri/anggota + template Pakta Integritas
-app/         -> kode aplikasi (tidak diakses langsung dari browser)
-  config/    -> loader .env, autoload kelas, koneksi database (PDO)
-  core/      -> kelas dasar: Model, Auth, Csrf, helpers, konfigurasi CRUD
-  models/    -> kelas entitas (Anggota, Karya, Galeri, Kegiatan, Lomba, Pengumuman, Materi, Referensi, Pengaturan)
-  includes/  -> bootstrap, header/footer/navbar & partial tampilan yang dipakai berulang
-storage/     -> berkas privat yang hanya dilayani lewat kode PHP (mis. scan Pakta Integritas anggota)
-database.sql -> skema + data contoh
-.env         -> konfigurasi lokal (jangan masuk repository)
+portal-robotik/
+├── public/                 # document root (satu-satunya folder yang diakses browser)
+│   ├── *.php               # halaman anggota dan publik
+│   ├── berkas.php          # pelayan berkas privat dengan cek hak akses
+│   ├── admin/              # halaman admin
+│   ├── assets/             # CSS kustom, ilustrasi SVG
+│   └── uploads/            # unggahan publik (foto, video, sertifikat, template Pakta)
+├── app/                    # kode aplikasi (tidak diakses langsung dari browser)
+│   ├── config/             # loader .env, autoloader, koneksi PDO
+│   ├── core/               # Model, Auth, Csrf, helpers, konfigurasi CRUD
+│   ├── models/             # kelas entitas
+│   └── includes/           # bootstrap, header/footer/navbar, partial
+├── storage/terbatas/       # berkas privat (materi, Pakta Integritas)
+├── database.sql            # instalasi baru: skema + data contoh
+├── migrate.sql             # migrasi dari versi sebelumnya
+└── .env                    # konfigurasi lokal (tidak masuk repository)
 ```
 
-## Catatan Implementasi
+</details>
 
-- **Tanpa framework/MVC** sesuai PRD — tiap halaman adalah skrip PHP mandiri yang memakai kelas-kelas OOP di `core/` dan `models/`.
-- **CRUD admin generik**: satu file `public/admin/crud.php` melayani 8 entitas (anggota, materi, referensi, karya, galeri, kegiatan, lomba, pengumuman) lewat parameter `?entity=`, dikonfigurasi di `app/core/CrudConfig.php` — supaya kode tidak berulang untuk tiap entitas. Sejak fitur Referensi digabung ke Materi, menu Referensi dihapus: pengelolaannya lewat panel di halaman `crud.php?entity=materi`, dan `?entity=referensi` otomatis dialihkan ke sana.
-- **Referensi di dalam Materi**: di sisi anggota, daftar Referensi Belajar tampil sebagai bagian di `public/materi.php#referensi` (tautan beranda juga mengarah ke sana); tidak ada lagi halaman `public/referensi.php` maupun menu Referensi di navbar.
-- **Menu admin = menu anggota**: halaman Karya, Lomba, dan Materi memakai `Auth::requireMember()` (anggota + admin), dan navbar hanya menyembunyikan menu tersebut untuk pengunjung yang belum login — sehingga admin melihat seluruh menu anggota sesuai PRD tanpa dead link. Tamu tetap hanya melihat Beranda, Galeri, Pelatihan, Prestasi, dan Pengumuman.
-- **Keamanan dasar**: password di-hash (bcrypt via `password_hash`), proteksi CSRF token di setiap form POST, query database memakai prepared statement (PDO), validasi tipe & ukuran file upload.
-- **Moderasi Karya**: alur Pending → Approved/Rejected ada di `public/admin/moderasi.php`, termasuk catatan alasan penolakan yang akan tampil ke anggota di halaman Profil Saya.
-- **Gambar/ilustrasi**: karena ini data contoh, foto anggota/karya/galeri memakai ilustrasi SVG flat buatan sendiri (folder `assets/img/`) — bukan foto asli — agar bebas hak cipta dan mudah diganti nanti dengan foto sungguhan.
-- **Template Pakta Integritas**: formulir kosong diunggah admin lewat `public/admin/pakta-template.php` (PDF/DOC/DOCX, maks 5MB) dan path-nya disimpan di tabel `pengaturan` (kunci `pakta_template`). Halaman publik `public/pakta-template.php` men-stream berkas tersebut tanpa login, jadi bisa ditaruh sebagai tombol unduh di `public/daftar.php`. Selama template belum diunggah, halaman unduhan menampilkan pemberitahuan "template belum tersedia". Mengganti atau menghapus template juga menghapus berkas lama di `public/uploads/pakta-integritas/`.
-- Sudah diuji end-to-end di lingkungan PHP 8.3 + MariaDB: login, seluruh halaman anggota & admin, ajukan karya → moderasi approve/reject → tampil di portal, serta CRUD (tambah/ubah/hapus).
+## Keamanan
 
-## Mengganti Gambar dengan Foto Asli
+- Kata sandi di-hash dengan bcrypt; setiap form POST dilindungi token CSRF.
+- Semua query memakai prepared statement (PDO); semua keluaran HTML di-escape.
+- Validasi tipe dan ukuran berkas unggahan dilakukan di server.
+- Materi dan dokumen Pakta Integritas disimpan **di luar document root** dan hanya dilayani setelah pemeriksaan hak akses.
+- Konfigurasi sensitif ada di `.env` dan **tidak boleh di-commit**.
 
-Cukup unggah foto lewat form admin (field "Foto") pada tiap entitas, atau ganti manual file di `assets/img/` dan `uploads/` lalu perbarui kolom `foto` di database.
+Menemukan celah keamanan? Mohon laporkan secara privat kepada pengelola, jangan lewat issue publik.
+
+## Dokumentasi
+
+| Dokumen | Isi |
+|---|---|
+| [`PRD.md`](./PRD.md) | Kebutuhan produk: fitur, alur, hak akses, model data |
+| [`AGENTS.md`](./AGENTS.md) | Panduan untuk AI agent yang mengerjakan kode proyek ini |
+
+## Roadmap
+
+- [x] Fitur inti: login, pendaftaran + Pakta Integritas, materi dengan akses pelatihan, pelatihan, karya, prestasi, galeri, kegiatan, lomba, pengumuman, profil
+- [x] Slider Beranda, mode gelap/terang, upload foto dan video
+- [ ] Perbaikan keamanan: batasi percobaan login, hapus lewat POST + CSRF, cek status di halaman detail karya
+- [ ] Statistik komunitas di beranda
+- [ ] Pengujian otomatis dan linter
+- [ ] Header keamanan tambahan (CSP, X-Frame-Options, HSTS) di produksi
+- [ ] Ditunda: komentar, like, notifikasi, chat, forum, pencarian global, tag
+
+Rincian lengkap ada di [`PRD.md`](./PRD.md).
+
+## Berkontribusi
+
+Kontribusi dan saran sangat disambut.
+
+1. Fork repo ini dan buat branch: `git checkout -b feat/nama-fitur`
+2. Baca [`AGENTS.md`](./AGENTS.md) dan [`PRD.md`](./PRD.md) agar perubahan sesuai aturan proyek
+3. Jalankan `php -l` pada setiap file PHP yang diubah, lalu uji alurnya di browser
+4. Commit dengan format [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `docs:`) dan buka Pull Request
+
+## Lisensi
+
+Belum ditentukan. Tambahkan file `LICENSE` sebelum repo dibuka untuk umum.
