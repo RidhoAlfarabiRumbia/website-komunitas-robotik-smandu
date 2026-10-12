@@ -8,6 +8,9 @@ class Auth
             return false;
         }
 
+        // Anti session fixation: regenerate ID SEBELUM set session data
+        session_regenerate_id(true);
+
         $stmt = Database::connect()->prepare('SELECT * FROM users WHERE username = ?');
         $stmt->execute([$username]);
         $user = $stmt->fetch();
@@ -22,9 +25,6 @@ class Auth
             return false;
         }
         self::resetPercobaan($username);
-
-        // Anti session fixation: ID sesi baru setiap kali hak akses berubah.
-        session_regenerate_id(true);
 
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['role'] = $user['role'];

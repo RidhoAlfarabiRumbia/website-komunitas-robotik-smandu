@@ -13,7 +13,9 @@ class Karya extends Model
         $sql = "SELECT k.*, a.nama AS pembuat_nama FROM karya k
                 JOIN anggota a ON a.id = k.pembuat_id
                 WHERE k.publikasi = 'Approved' ORDER BY k.dibuat_pada DESC";
-        if ($limit) $sql .= " LIMIT $limit";
+        if ($limit > 0) {
+            $sql .= ' LIMIT ' . (int) $limit;
+        }
         return self::db()->query($sql)->fetchAll();
     }
 
