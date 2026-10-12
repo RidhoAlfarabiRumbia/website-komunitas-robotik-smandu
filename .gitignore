@@ -1,0 +1,32 @@
+# ===== SECRET & CONFIG =====
+.env
+.env.local
+.env.*.local
+
+# ===== USER UPLOADS (public) =====
+public/uploads/
+
+# ===== PRIVATE STORAGE (outside document root) =====
+storage/terbatas/
+
+# ===== DEPENDENCIES =====
+vendor/
+
+# ===== LOGS & CACHE =====
+*.log
+*.cache
+
+# ===== IDE & EDITOR =====
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+
+# ===== TESTING (future) =====
+.phpunit.result.cache
+coverage/

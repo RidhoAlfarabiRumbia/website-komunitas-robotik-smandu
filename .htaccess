@@ -1,0 +1,21 @@
+# =====================================================================
+# PORTAL KOMUNITAS ROBOTIK - proteksi document root
+# ---------------------------------------------------------------------
+# Project ini berada DI DALAM DocumentRoot XAMPP ("C:/xampp/htdocs"),
+# bukan sama dengan document root aplikasinya. Karena itu semua berkas di
+# luar folder public/ (app/, storage/, .env, *.sql, *.md) ikut terjangkau
+# Apache unless ditolak di sini.
+#
+# Aturan: hanya public/ yang boleh diakses lewat web.
+# Berkas privat tetap dilayani lewat public/berkas.php yang memeriksa hak akses.
+#
+# Halaman publik  : http://localhost/portal-robotik/public/beranda.php
+# =====================================================================
+
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order deny,allow
+    Deny from all
+</IfModule>

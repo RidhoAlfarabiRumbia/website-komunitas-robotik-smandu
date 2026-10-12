@@ -1,0 +1,98 @@
+<?php
+require_once __DIR__ . '/../app/includes/bootstrap.php';
+Auth::requireRole('anggota');
+$anggota = Auth::anggota();
+
+$errors = [];
+$form = [
+    'judul' => '',
+    'kategori' => 'Robot',
+    'deskripsi' => '',
+    'progres' => 'Idea',
+    'teknologi' => '',
+    'link_demo' => '',
+];
+
+$kategoriOpsi = ['Robot', 'IoT', 'Programming', 'AI', 'Elektronika', 'Lainnya'];
+$progresOpsi = ['Idea', 'In Progress', 'Completed', 'Showcased'];
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    Csrf::verify();
+
+    $form = [
+        'judul' => trim($_POST['judul'] ?? ''),
+        'kategori' => $_POST['kategori'] ?? '',
+        'deskripsi' => trim($_POST['deskripsi'] ?? ''),
+        'progres' => $_POST['progres'] ?? '',
+        'teknologi' => trim($_POST['teknologi'] ?? ''),
+        'link_demo' => trim($_POST['link_demo'] ?? ''),
+    ];
+
+    if ($form['judul'] === '') $errors[] = 'Judul karya wajib diisi.';
+    if ($form['deskripsi'] === '') $errors[] = 'Deskripsi wajib diisi.';
+    if (!in_array($form['kategori'], $kategoriOpsi, true)) $errors[] = 'Kategori tidak valid.';
+    if (!in_array($form['progres'], $progresOpsi, true)) $errors[] = 'Status progres tidak valid.';
+    if ($form['link_demo'] !== '' && !filter_var($form['link_demo'], FILTER_VALIDATE_URL)) {
+        $errors[] = 'Tautan proyek tidak valid.';
+    }
+
+    if (!$errors) {
+        $foto = simpan_upload('foto', 'karya', ['jpg', 'jpeg', 'png', 'webp'], 2 * 1024 * 1024, 'JPG, PNG, atau WEBP', '2MB');
+
+        Karya::create([
+            'judul' => $form['judul'],
+            'kategori' => $form['kategori'],
+            'deskripsi' => $form['deskripsi'],
+            'progres' => $form['progres'],
+            'publikasi' => 'Pending',
+            'pembuat_id' => $anggota['id'],
+            'teknologi' => $form['teknologi'],
+            'link_demo' => $form['link_demo'] ?: null,
+            'foto' => $foto ?: 'assets/img/karya-robot.svg',
+        ]);
+
+        flash_set('success', 'Karya berhasil diajukan dan menunggu review admin.');
+        redirect('profil.php');
+    }
+
+    flash_set('error', 'Periksa kembali isian yang ditandai.');
+}
+
+$pageTitle = 'Ajukan Karya';
+include __DIR__ . '/../app/includes/header.php';
+include __DIR__ . '/../app/includes/navbar_anggota.php';
+?>
+<div class="main">
+  <div class="breadcrumb"><a href="profil.php">Profil Saya</a> / Ajukan Karya</div>
+  <div class="page-head">
+    <div><div class="eyebrow">BERKARYA</div><h1>Ajukan Karya Baru</h1><p class="desc">Karya yang diajukan akan berstatus Pending hingga direview oleh admin.</p></div>
+  </div>
+  <?php if ($errors): foreach ($errors as $err): ?><div class="alert alert-error"><?= e($err) ?></div><?php endforeach; endif; ?>
+  <form class="card" style="max-width:640px;" method="post" enctype="multipart/form-data">
+    <?= Csrf::field() ?>
+    <div class="form-grid">
+      <div class="field field-full"><label>Judul karya</label><input name="judul" required maxlength="150" value="<?= e($form['judul']) ?>" placeholder="Contoh: Robot Penyiram Tanaman Otomatis"></div>
+      <div class="field">
+        <label>Kategori</label>
+        <select name="kategori">
+          <?php foreach ($kategoriOpsi as $c): ?><option <?= $form['kategori'] === $c ? 'selected' : '' ?>><?= e($c) ?></option><?php endforeach; ?>
+        </select>
+      </div>
+      <div class="field">
+        <label>Status progres</label>
+        <select name="progres">
+          <?php foreach ($progresOpsi as $p): ?><option <?= $form['progres'] === $p ? 'selected' : '' ?>><?= e($p) ?></option><?php endforeach; ?>
+        </select>
+      </div>
+      <div class="field field-full"><label>Deskripsi</label><textarea name="deskripsi" rows="4" required placeholder="Jelaskan singkat karya dan cara kerjanya"><?= e($form['deskripsi']) ?></textarea></div>
+      <div class="field"><label>Teknologi yang digunakan</label><input name="teknologi" maxlength="255" value="<?= e($form['teknologi']) ?>" placeholder="Contoh: Arduino, Sensor Ultrasonik"></div>
+      <div class="field"><label>Tautan proyek (opsional)</label><input name="link_demo" maxlength="191" value="<?= e($form['link_demo']) ?>" placeholder="https://..."></div>
+      <div class="field field-full"><label>Foto/dokumentasi (JPG/PNG/WEBP, maks 2MB)</label><input type="file" name="foto" accept=".jpg,.jpeg,.png,.webp"></div>
+    </div>
+    <div style="display:flex; gap:10px; margin-top:16px;">
+      <button class="btn btn-primary" type="submit">Kirim untuk direview</button>
+      <a class="btn btn-outline" href="profil.php">Batal</a>
+    </div>
+  </form>
+</div>
+<?php include __DIR__ . '/../app/includes/footer.php'; ?>
