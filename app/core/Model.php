@@ -9,20 +9,44 @@ abstract class Model
     protected static string $table;
     protected static string $primaryKey = 'id';
     protected static array $fillable = [];
+    protected static array $orderableColumns = [];
 
     protected static function db(): PDO
     {
         return Database::connect();
     }
 
+    protected static function validateOrderBy(string $orderBy): string
+    {
+        if ($orderBy === '') {
+            return '';
+        }
+        $allowed = static::$orderableColumns ?: array_merge(static::$fillable, [static::$primaryKey, 'dibuat_pada', 'diperbarui_pada']);
+        $parts = preg_split('/\s*,\s*/', trim($orderBy));
+        $validated = [];
+        foreach ($parts as $part) {
+            $part = trim($part);
+            if (!preg_match('/^([a-zA-Z_][a-zA-Z0-9_]*)\s+(ASC|DESC)$/i', $part, $m)) {
+                continue;
+            }
+            $col = $m[1];
+            $dir = strtoupper($m[2]);
+            if (in_array($col, $allowed, true)) {
+                $validated[] = $col . ' ' . $dir;
+            }
+        }
+        return $validated ? implode(', ', $validated) : '';
+    }
+
     public static function all(string $orderBy = '', ?int $limit = null): array
     {
         $sql = 'SELECT * FROM ' . static::$table;
+        $orderBy = static::validateOrderBy($orderBy);
         if ($orderBy) {
             $sql .= ' ORDER BY ' . $orderBy;
         }
         if ($limit !== null && $limit > 0) {
-            $sql .= ' LIMIT ' . $limit;
+            $sql .= ' LIMIT ' . (int) $limit;
         }
         return static::db()->query($sql)->fetchAll();
     }
@@ -44,6 +68,7 @@ abstract class Model
     public static function where(string $column, $value, string $orderBy = ''): array
     {
         $sql = 'SELECT * FROM ' . static::$table . ' WHERE ' . $column . ' = ?';
+        $orderBy = static::validateOrderBy($orderBy);
         if ($orderBy) {
             $sql .= ' ORDER BY ' . $orderBy;
         }
