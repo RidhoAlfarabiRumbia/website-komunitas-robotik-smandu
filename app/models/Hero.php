@@ -14,14 +14,16 @@ class Hero extends Model
 
     /**
      * Get slider data with side photos shuffled for variety.
-     * Returns array with 'slides' (first slide data) and 'deferred' (remaining slides for lazy load).
+     * Returns array with:
+     * - 'slides': all slides data (first slide + deferred)
+     * - 'total': total number of slides
      */
     public static function getSliderData(): array
     {
         $slides = static::tampil();
         $nSlides = count($slides);
         if ($nSlides === 0) {
-            return ['slides' => [], 'deferred' => []];
+            return ['slides' => [], 'deferred' => [], 'total' => 0];
         }
 
         // Build pool of unique photos
@@ -95,26 +97,27 @@ class Hero extends Model
             $sampingKananSebelum = $pilih[1];
         }
 
-        // Build result
-        $result = ['slides' => [], 'deferred' => []];
+        // Build result - ALL slides in 'slides' for JSON
+        $allSlides = [];
         foreach ($slides as $i => $h) {
             $foto = $h['foto'] ?? 'assets/img/hero-illustration.svg';
             $fotoKiri = $fotoSamping[$i][0] ?? $foto;
             $fotoKanan = $fotoSamping[$i][1] ?? $foto;
 
-            $slideData = [
+            $allSlides[] = [
                 'img' => $foto,
                 'kiri' => $fotoKiri,
                 'kanan' => $fotoKanan,
             ];
-
-            if ($i === 0) {
-                $result['slides'][] = $slideData;
-            } else {
-                $result['deferred'][] = $slideData;
-            }
         }
 
-        return $result;
+        // First slide for immediate render
+        $firstSlide = array_shift($allSlides);
+
+        return [
+            'slides' => [$firstSlide],  // only first slide for initial HTML render
+            'deferred' => $allSlides,   // remaining slides for lazy load via JS
+            'total' => $nSlides,
+        ];
     }
 }

@@ -7,8 +7,9 @@ $isAnggota = Auth::role() === 'anggota';
 $kontenAnggota = $isAnggota || $isAdmin;
 
 $heroData = Hero::getSliderData();
-$heroSlides = $heroData['slides'];
-$heroTunda = $heroData['deferred'];
+$heroSlides = $heroData['slides'];      // first slide for initial render
+$heroTunda = $heroData['deferred'];     // remaining slides for lazy load
+$nSlides = $heroData['total'] ?? 0;
 
 // Konten publik (PRD 8.3)
 $galeriTerbaru = Galeri::all('tanggal DESC', 3);
@@ -63,7 +64,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
     <div class="welcome-media hero-media">
       <?php if ($heroSlides): ?>
         <div class="slider">
-          <?php $nSlides = count($heroSlides); ?>
+          <?php $nSlides = $heroData['total'] ?? count($heroSlides); ?>
           <?php foreach ($heroSlides as $i => $h): ?>
             <?php
               $foto = $h['img'] ?? 'assets/img/hero-illustration.svg';
@@ -79,13 +80,13 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
                 </span>
             </div>
           <?php endforeach; ?>
-          <?php if ($isAdmin || count($heroSlides) > 1): ?>
+          <?php if ($isAdmin || $nSlides > 1): ?>
             <div class="dots">
               <?php if ($isAdmin): ?>
                 <a class="chip-admin" href="<?= base_url('admin/crud.php?entity=hero') ?>" title="Kelola gambar slider"><i class="bi bi-gear"></i> Kelola Slider</a>
               <?php endif; ?>
-              <?php if (count($heroSlides) > 1): ?>
-                <?php foreach ($heroSlides as $i => $h): ?><button type="button" class="<?= $i === 0 ? 'active' : '' ?>" aria-label="Ke slide <?= $i + 1 ?>"></button><?php endforeach; ?>
+              <?php if ($nSlides > 1): ?>
+                <?php for ($i = 0; $i < $nSlides; $i++): ?><button type="button" class="<?= $i === 0 ? 'active' : '' ?>" aria-label="Ke slide <?= $i + 1 ?>"></button><?php endfor; ?>
               <?php endif; ?>
             </div>
           <?php endif; ?>
