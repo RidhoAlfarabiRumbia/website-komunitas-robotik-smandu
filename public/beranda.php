@@ -21,8 +21,10 @@ $prestasiTerbaru = Prestasi::tayang(3);
 // Karya yang sudah tayang (Approved) sengaja ditampilkan juga untuk tamu:
 // showcase karya komunitas tidak perlu login, halaman karya.php yang butuh member.
 $karyaTerbaru = Karya::approved(3);
-$kegiatanTerbaru = $kontenAnggota ? Kegiatan::all('tanggal DESC', 3) : [];
-$lombaTerbaru = $kontenAnggota ? Lomba::all('tanggal DESC', 3) : [];
+// Lomba & agenda kegiatan ditampilkan juga untuk tamu di beranda (ringkasan
+// 3 terbaru); halaman penuhnya (lomba.php, kegiatan.php) kini juga publik.
+$kegiatanTerbaru = Kegiatan::all('tanggal DESC', 3);
+$lombaTerbaru = Lomba::all('tanggal DESC', 3);
 $materiTerbaru = $kontenAnggota
     ? ($isAdmin
         ? Materi::semuaWithPelatihan('topik ASC, judul ASC', 3)
@@ -60,6 +62,7 @@ include __DIR__ . '/../app/includes/header.php';
 include __DIR__ . '/../app/includes/navbar_anggota.php';
 ?>
 <div class="main">
+  <div class="hero-frame">
   <section class="welcome-hero">
     <div class="welcome-media hero-media">
       <?php if ($heroSlides): ?>
@@ -127,8 +130,9 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
         <a class="btn btn-outline" href="<?= base_url('ajukan-karya.php') ?>"><i class="bi bi-plus-circle"></i> Ajukan Karya</a>
       <?php endif; ?>
       </div>
-    </div>
-  </section>
+      </div>
+    </section>
+  </div>
 
   <?php if (!$isAnggota): ?>
   <section class="section reveal">
@@ -224,11 +228,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
   <section class="section reveal">
     <div class="section-head">
       <h2>Lomba terdekat</h2>
-      <?php if ($kontenAnggota): ?>
-        <a class="see-all" href="<?= base_url('lomba.php') ?>">Lihat semua lomba <i class="bi bi-arrow-right"></i></a>
-      <?php else: ?>
-        <a class="see-all" href="<?= base_url('login.php') ?>"><i class="bi bi-lock"></i> Masuk untuk melihat</a>
-      <?php endif; ?>
+      <a class="see-all" href="<?= base_url('lomba.php') ?>">Lihat semua lomba <i class="bi bi-arrow-right"></i></a>
     </div>
     <?php if ($lombaTerbaru): ?>
       <div class="table-wrap">
@@ -244,16 +244,8 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
           </div>
         <?php endforeach; ?>
       </div>
-    <?php elseif ($kontenAnggota): ?>
-      <div class="card"><div class="empty">Belum ada lomba tercatat.</div></div>
     <?php else: ?>
-      <div class="card" style="display:flex; align-items:center; gap:14px;">
-        <div class="list-thumb"><i class="bi bi-lock" style="font-size:18px; color:var(--teal);"></i></div>
-        <div class="grow">
-          <div class="ttl">Lomba &amp; kompetisi</div>
-          <div class="meta">Informasi lomba hanya tersedia untuk anggota yang masuk ke portal robotik.</div>
-        </div>
-      </div>
+      <div class="card"><div class="empty">Belum ada lomba tercatat.</div></div>
     <?php endif; ?>
   </section>
 
@@ -283,13 +275,9 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
   <section class="section reveal">
     <div class="section-head">
       <h2>Agenda kegiatan terdekat</h2>
-      <?php if ($kontenAnggota): ?>
-        <a class="see-all" href="<?= base_url('kegiatan.php') ?>">Lihat semua agenda <i class="bi bi-arrow-right"></i></a>
-      <?php else: ?>
-        <a class="see-all" href="<?= base_url('login.php') ?>"><i class="bi bi-lock"></i> Masuk untuk melihat</a>
-      <?php endif; ?>
+      <a class="see-all" href="<?= base_url('kegiatan.php') ?>">Lihat semua agenda <i class="bi bi-arrow-right"></i></a>
     </div>
-    <?php if ($kontenAnggota && $kegiatanTerbaru): ?>
+    <?php if ($kegiatanTerbaru): ?>
       <div class="table-wrap">
         <?php foreach ($kegiatanTerbaru as $k): ?>
           <div class="list-item list-item-pad">
@@ -302,16 +290,8 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
           </div>
         <?php endforeach; ?>
       </div>
-    <?php elseif ($kontenAnggota): ?>
-      <div class="card"><div class="empty">Belum ada agenda terjadwal.</div></div>
     <?php else: ?>
-      <div class="card" style="display:flex; align-items:center; gap:14px;">
-        <div class="list-thumb"><i class="bi bi-lock" style="font-size:18px; color:var(--teal);"></i></div>
-        <div class="grow">
-          <div class="ttl">Agenda kegiatan</div>
-          <div class="meta">Konten agenda hanya tersedia untuk anggota yang masuk ke portal robotik.</div>
-        </div>
-      </div>
+      <div class="card"><div class="empty">Belum ada agenda terjadwal.</div></div>
     <?php endif; ?>
   </section>
 

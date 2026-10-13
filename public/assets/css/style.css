@@ -40,10 +40,10 @@
 
   /* Fokus, bayangan, gradasi */
   --ring:rgba(22,104,179,.26);
-  --shadow-1:none;
-  --shadow-2:none;
-  --shadow-3:none;
-  --card-shadow:none;
+  --shadow-1:0 1px 2px rgba(22,32,48,.06);
+  --shadow-2:0 6px 18px rgba(22,32,48,.10);
+  --shadow-3:0 16px 40px rgba(22,32,48,.14);
+  --card-shadow:0 1px 2px rgba(22,32,48,.05), 0 4px 14px rgba(22,32,48,.06);
   --scrim:linear-gradient(transparent, rgba(10,18,30,.72));
 
   /* Radius & font */
@@ -54,10 +54,10 @@
   --wrap:1320px;
 
   /* Latar halaman: lapisan gradasi glow (pola titik sudah dihapus) */
-  --glow-top:rgba(22,104,179,.12);
-  --glow-corner-tl:rgba(22,104,179,.10);
-  --glow-corner-tr:rgba(154,91,6,.08);
-  --glow-bottom:rgba(79,70,201,.07);
+  --glow-top:rgba(22,104,179,.17);
+  --glow-corner-tl:rgba(22,104,179,.13);
+  --glow-corner-tr:rgba(154,91,6,.11);
+  --glow-bottom:rgba(79,70,201,.10);
   --bg-scene:
     radial-gradient(1100px 520px at 50% -160px, var(--glow-top), transparent 70%),
     radial-gradient(900px 460px at -8% 16%, var(--glow-corner-tl), transparent 66%),
@@ -98,17 +98,17 @@
   --on-red:#2a0f0c;
 
   --ring:rgba(99,184,245,.32);
-  --shadow-1:none;
-  --shadow-2:none;
-  --shadow-3:none;
-  --card-shadow:none;
+  --shadow-1:0 1px 2px rgba(0,0,0,.45);
+  --shadow-2:0 6px 18px rgba(0,0,0,.42);
+  --shadow-3:0 16px 40px rgba(0,0,0,.5);
+  --card-shadow:0 1px 2px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.32);
   --scrim:linear-gradient(transparent, rgba(0,0,0,.78));
 
   /* Latar halaman gelap: glow atas + aksen pojok */
-  --glow-top:rgba(99,184,245,.10);
-  --glow-corner-tl:rgba(63,124,190,.08);
-  --glow-corner-tr:rgba(165,162,245,.08);
-  --glow-bottom:rgba(63,124,190,.08);
+  --glow-top:rgba(99,184,245,.14);
+  --glow-corner-tl:rgba(63,124,190,.11);
+  --glow-corner-tr:rgba(165,162,245,.11);
+  --glow-bottom:rgba(63,124,190,.11);
   --bg-scene:
     radial-gradient(1100px 520px at 50% -160px, var(--glow-top), transparent 70%),
     radial-gradient(900px 460px at -8% 16%, var(--glow-corner-tl), transparent 66%),
@@ -348,7 +348,7 @@ tr:last-child td{border-bottom:none;}
 
 .hero{display:grid; grid-template-columns:1.1fr 0.9fr; gap:18px; margin-bottom:42px;}
 @media (max-width:900px){ .hero{grid-template-columns:1fr;} }
-.hero-left{background:linear-gradient(120deg, var(--surface) 55%, var(--surface-2)); border:1px solid var(--border); border-left:3px solid var(--teal); border-radius:var(--radius-lg); padding:18px 28px; display:flex; flex-direction:column; justify-content:space-between; position:relative; box-shadow:var(--card-shadow);}
+.hero-left{background:linear-gradient(120deg, var(--surface) 42%, var(--teal-dim)); border:1px solid var(--border); border-left:3px solid var(--teal); border-radius:var(--radius-lg); padding:18px 28px; display:flex; flex-direction:column; justify-content:space-between; position:relative; box-shadow:var(--card-shadow);}
 .hero h1{font-size:28px; max-width:17ch; margin-bottom:12px;}
 .hero-left p{color:var(--text-muted); font-size:14px; max-width:46ch; margin-bottom:0; flex:1; display:flex; align-items:center;}
 .hero-left > div{flex:1; display:flex; flex-direction:column;}
@@ -361,7 +361,7 @@ tr:last-child td{border-bottom:none;}
 .chip-admin:hover{border-color:var(--teal);}
 .hero-left .chip-admin{top:12px; right:12px;}
 .hero-media .chip-admin{top:10px; left:12px;}
-.slider{position:relative; border-radius:var(--radius-md); border:0; overflow:hidden; background:var(--surface-2); flex:1; min-height:200px; box-shadow:var(--card-shadow);}
+.slider{position:relative; border-radius:var(--radius-md); border:0; overflow:hidden; background:var(--surface-2); flex:1; min-height:200px; box-shadow:var(--shadow-2);}
 .slider .slide{position:absolute; inset:0; opacity:0; transition:opacity 1.1s cubic-bezier(.45,0,.2,1); pointer-events:none;}
 .slider .slide.active{opacity:1; pointer-events:auto;}
 .slider .slide img{width:100%; height:100%; object-fit:cover;}
@@ -482,6 +482,9 @@ tr:last-child td{border-bottom:none;}
    keempat sisinya; slider jadi background, teks di tengah. Anak-anaknya
    (::after, ::before, .welcome-media, .slider, .hero-illustration) memakai
    border-radius:inherit sehingga ikut terpotong rapi di sudut. */
+/* Bingkai luar pembawa bayangan: .welcome-hero memakai mask-image yang
+   memotong box-shadow sendiri, jadi bayangan dipasang di div pembungkus. */
+.hero-frame{border-radius:28px; box-shadow:var(--shadow-3);}
 .welcome-hero{position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; text-align:center;
   margin:0 0 96px; padding:84px 24px 100px; min-height:clamp(520px,70vh,760px);
   background:var(--surface-3); border-radius:28px;
@@ -563,7 +566,7 @@ tr:last-child td{border-bottom:none;}
 @media (max-width:800px){ .steps{grid-template-columns:1fr;} }
 .step{position:relative; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:20px; box-shadow:var(--card-shadow); transition:transform .3s cubic-bezier(.22,.61,.36,1), border-color .3s ease;}
 .step:hover{border-color:var(--teal); transform:translateY(-4px);}
-.step .n{width:32px; height:32px; border-radius:50%; background:var(--teal); color:var(--on-teal); font-weight:700; font-size:13px; display:flex; align-items:center; justify-content:center; margin-bottom:12px; box-shadow:var(--shadow-1);}
+.step .n{width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg, var(--teal), var(--blue)); color:var(--on-teal); font-weight:700; font-size:13px; display:flex; align-items:center; justify-content:center; margin-bottom:12px; box-shadow:var(--shadow-1);}
 .step .f-ttl{font-family:var(--font-head); font-size:15px; font-weight:600; margin-bottom:5px;}
 .step .f-desc{font-size:13px; color:var(--text-muted); margin:0;}
 
@@ -623,7 +626,7 @@ h1, h2, h3, h4, p, span, a, div {
    .welcome-hero sengaja TIDAK ikut dianimasikan: opacity pada induk membuat
    seluruh isi hero (termasuk dots & chip "Kelola Slider") ikut pudar/gelap
    saat refresh sebelum akhirnya terang. */
-.main > :not(.welcome-hero), .admin-body, .login-wrap {
+.main > :not(.welcome-hero):not(.hero-frame), .admin-body, .login-wrap {
   animation: fadeIn .55s cubic-bezier(.22,.61,.36,1) backwards;
 }
 @keyframes fadeIn {
