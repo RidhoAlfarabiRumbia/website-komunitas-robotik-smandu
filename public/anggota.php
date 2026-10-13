@@ -1,6 +1,5 @@
 <?php
 require_once __DIR__ . '/../app/includes/bootstrap.php';
-Auth::requireLogin();
 $daftarAnggota = Anggota::all('nama ASC');
 $pageTitle = 'Anggota';
 include __DIR__ . '/../app/includes/header.php';

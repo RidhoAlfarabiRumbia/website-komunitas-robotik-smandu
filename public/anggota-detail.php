@@ -1,6 +1,5 @@
 <?php
 require_once __DIR__ . '/../app/includes/bootstrap.php';
-Auth::requireLogin();
 $id = (int) ($_GET['id'] ?? 0);
 $a = Anggota::find($id);
 $pageTitle = 'Profil Anggota';

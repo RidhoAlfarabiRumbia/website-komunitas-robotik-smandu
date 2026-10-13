@@ -1,6 +1,5 @@
 <?php
 require_once __DIR__ . '/../app/includes/bootstrap.php';
-Auth::requireMember();
 
 $lomba = Lomba::all('tanggal DESC');
 $pageTitle = 'Lomba';
