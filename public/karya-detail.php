@@ -3,9 +3,9 @@ require_once __DIR__ . '/../app/includes/bootstrap.php';
 
 $id = (int) ($_GET['id'] ?? 0);
 $k = Karya::detail($id);
-// Karya yang belum tayang hanya untuk anggota/admin (mis. saat anggota membuka
-// daftar karyanya sendiri di profil); pengunjung umum hanya boleh melihat Approved.
-if ($k && !Auth::check() && $k['publikasi'] !== 'Approved') {
+// Karya yang belum tayang hanya boleh dilihat admin atau pembuatnya sendiri
+// (Karya::bolehDilihat); pengunjung umum dan anggota lain hanya Approved.
+if (!Karya::bolehDilihat($k, Auth::anggotaId(), Auth::isAdmin())) {
     $k = null;
 }
 $pageTitle = 'Detail Karya';

@@ -17,6 +17,12 @@ $pengumumanTerbaru = Pengumuman::all('tanggal DESC', 3);
 $pelatihanTerbaru = Pelatihan::untukPengunjung(3);
 $prestasiTerbaru = Prestasi::tayang(3);
 
+// Statistik komunitas (PRD 8.1) — agregat DB, tampil untuk semua pengunjung.
+$statAnggota = Anggota::jumlah();
+$statKaryaTayang = Karya::jumlahByStatus('Approved');
+$statPrestasi = Prestasi::jumlahTayang();
+$statPelatihan = Pelatihan::jumlah();
+
 // Konten khusus anggota & admin
 // Karya yang sudah tayang (Approved) sengaja ditampilkan juga untuk tamu:
 // showcase karya komunitas tidak perlu login, halaman karya.php yang butuh member.
@@ -127,6 +133,16 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
         <a class="btn btn-outline" href="<?= base_url('ajukan-karya.php') ?>"><i class="bi bi-plus-circle"></i> Ajukan Karya</a>
       <?php endif; ?>
       </div>
+    </div>
+  </section>
+
+  <section class="section reveal">
+    <div class="section-head"><h2>Statistik Komunitas</h2></div>
+    <div class="grid grid-4 grid-stagger">
+      <div class="stat"><div class="num"><?= $statAnggota ?></div><div class="lbl">Anggota terdaftar</div></div>
+      <div class="stat"><div class="num"><?= $statKaryaTayang ?></div><div class="lbl">Karya tayang</div></div>
+      <div class="stat"><div class="num"><?= $statPrestasi ?></div><div class="lbl">Prestasi diraih</div></div>
+      <div class="stat"><div class="num"><?= $statPelatihan ?></div><div class="lbl">Pelatihan / Workshop</div></div>
     </div>
   </section>
 

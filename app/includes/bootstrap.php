@@ -39,6 +39,19 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
         header('X-Frame-Options: DENY');
         header('Referrer-Policy: strict-origin-when-cross-origin');
         header('Permissions-Policy: geolocation=(), microphone=(), camera=()');
+        /* Content-Security-Policy konservatif (diperlukan 'unsafe-inline'
+         * karena halaman masih memakai <script> inline & atribut style/onclick).
+         * Larang resource dari domain tak dikenal; future hardening: pindahkan
+         * inline script ke file eksternal lalu hapus 'unsafe-inline'. */
+        header("Content-Security-Policy: default-src 'self'; "
+            . "script-src 'self' 'unsafe-inline'; "
+            . "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+            . "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; "
+            . "img-src 'self' data:; "
+            . "object-src 'none'; "
+            . "base-uri 'self'; "
+            . "frame-ancestors 'none'; "
+            . "form-action 'self'");
         header_remove('X-Powered-By');
         if ($https) {
             header('Strict-Transport-Security: max-age=31536000; includeSubDomains');

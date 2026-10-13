@@ -9,13 +9,14 @@ $navItems = [
     'materi.php' => 'Materi',
     'prestasi.php' => 'Prestasi',
     'pengumuman.php' => 'Pengumuman',
+    'anggota.php' => 'Anggota',
 ];
 
 // Menu ini hanya untuk pengguna terdaftar; pengunjung umum hanya melihat
 // Beranda, Galeri, Pelatihan, Prestasi, Pengumuman (PRD 7).
-// Admin ikut melihat semuanya â€” PRD 7: "Seluruh menu anggota".
+// Admin ikut melihat semuanya — PRD 7: "Seluruh menu anggota".
 // Referensi kini menempel di dalam Materi.
-$anggotaOnly = ['karya.php', 'kegiatan.php', 'lomba.php', 'materi.php'];
+$anggotaOnly = ['karya.php', 'kegiatan.php', 'lomba.php', 'materi.php', 'anggota.php'];
 
 if (!Auth::check()) {
     foreach ($anggotaOnly as $f) unset($navItems[$f]);

@@ -46,6 +46,28 @@ class Karya extends Model
         return $row ?: null;
     }
 
+    /**
+     * Aturan visibilitas karya (PRD 8.7 + keamanan): Approved terlihat semua
+     * orang; Pending/Rejected hanya admin atau pembuatnya sendiri.
+     * Anggota login lain TIDAK boleh membuka karya yang belum tayang lewat URL.
+     */
+    public static function bolehDilihat(?array $k, ?int $anggotaId, bool $isAdmin): bool
+    {
+        if (!$k) {
+            return false;
+        }
+        if (($k['publikasi'] ?? '') === 'Approved') {
+            return true;
+        }
+        if ($isAdmin) {
+            return true;
+        }
+        if ($anggotaId === null || !isset($k['pembuat_id'])) {
+            return false;
+        }
+        return $anggotaId === (int) $k['pembuat_id'];
+    }
+
     public static function jumlahByStatus(string $status): int
     {
         $stmt = self::db()->prepare('SELECT COUNT(*) FROM karya WHERE publikasi = ?');
