@@ -45,7 +45,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
          * inline script ke file eksternal lalu hapus 'unsafe-inline'. */
         header("Content-Security-Policy: default-src 'self'; "
             . "script-src 'self' 'unsafe-inline'; "
-            . "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+            . "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; "
             . "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; "
             . "img-src 'self' data:; "
             . "object-src 'none'; "
