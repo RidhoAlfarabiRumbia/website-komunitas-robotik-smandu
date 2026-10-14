@@ -1,7 +1,43 @@
 <footer class="footer">
-  <div class="footer-inner">
-    <span class="footer-brand"><span class="brand-dot"></span> Portal Komunitas Robotik · SMA Negeri 2</span>
-    <span>&copy; <?= date('Y') ?> Komunitas Robotik Smandu</span>
+  <div class="footer-main">
+    <div class="footer-col footer-about">
+      <a href="<?= base_url('beranda.php') ?>" class="footer-brand"><span class="brand-dot"></span> Robotik Smandu</a>
+      <p class="footer-desc">Komunitas robotik SMA Negeri 2 Kota Ternate. Wadah belajar, berkarya, dan berkompetisi.</p>
+    </div>
+    <div class="footer-col">
+      <h3>Jelajahi</h3>
+      <ul>
+        <li><a href="<?= base_url('beranda.php') ?>">Beranda</a></li>
+        <li><a href="<?= base_url('karya.php') ?>">Karya</a></li>
+        <li><a href="<?= base_url('galeri.php') ?>">Galeri</a></li>
+        <li><a href="<?= base_url('prestasi.php') ?>">Prestasi</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h3>Komunitas</h3>
+      <ul>
+        <li><a href="<?= base_url('pelatihan.php') ?>">Pelatihan</a></li>
+        <li><a href="<?= base_url('lomba.php') ?>">Lomba</a></li>
+        <li><a href="<?= base_url('kegiatan.php') ?>">Kegiatan</a></li>
+        <li><a href="<?= base_url('anggota.php') ?>">Anggota</a></li>
+        <li><a href="<?= base_url('pengumuman.php') ?>">Pengumuman</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h3>Terhubung</h3>
+      <ul>
+        <li><a href="<?= base_url('daftar.php') ?>">Daftar Anggota</a></li>
+        <li><a href="<?= base_url('login.php') ?>">Masuk Portal</a></li>
+      </ul>
+      <div class="footer-social">
+        <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+        <a href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
+        <a href="https://www.tiktok.com/" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><i class="bi bi-tiktok"></i></a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>&copy; <?= date('Y') ?> Komunitas Robotik SMA Negeri 2 Kota Ternate. Hak cipta dilindungi.</span>
   </div>
 </footer>
 <script>
