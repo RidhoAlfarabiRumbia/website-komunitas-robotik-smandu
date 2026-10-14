@@ -82,7 +82,7 @@ include __DIR__ . '/../../app/includes/header.php';
       <i class="bi bi-sun-fill" id="themeIconLight" style="display:none;"></i>
     </button>
     <a class="profile-icon" href="<?= base_url('admin/profil.php') ?>" title="Profil &amp; Kata Sandi"><i class="bi bi-person-circle"></i></a>
-    <form method="post" action="<?= base_url('logout.php') ?>" style="display:flex;"><input type="hidden" name="csrf_token" value="<?= e(Csrf::token()) ?>"><button type="submit" class="logout-link" title="Keluar" style="border:0; background:none; cursor:pointer;"><i class="bi bi-box-arrow-right"></i></button></form>
+    <form method="post" action="<?= base_url('logout.php') ?>" style="display:flex;"><input type="hidden" name="csrf_token" value="<?= e(Csrf::token()) ?>"><button type="submit" class="logout-link" title="Keluar"><i class="bi bi-box-arrow-right"></i></button></form>
   </div>
 </div></div>
 <div class="admin-body">

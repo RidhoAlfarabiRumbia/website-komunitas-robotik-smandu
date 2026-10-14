@@ -50,10 +50,10 @@ $current = basename($_SERVER['SCRIPT_NAME']);
         <?php endif; ?>
       <?php elseif (Auth::role() === 'admin'): ?>
         <a class="btn btn-primary btn-sm" href="<?= base_url('admin/dashboard.php') ?>" title="Panel Admin"><i class="bi bi-speedometer2"></i> Admin</a>
-        <form method="post" action="<?= base_url('logout.php') ?>" style="display:flex;"><input type="hidden" name="csrf_token" value="<?= e(Csrf::token()) ?>"><button type="submit" class="logout-link" title="Keluar" style="border:0; background:none; cursor:pointer;"><i class="bi bi-box-arrow-right"></i></button></form>
+        <form method="post" action="<?= base_url('logout.php') ?>" style="display:flex;"><input type="hidden" name="csrf_token" value="<?= e(Csrf::token()) ?>"><button type="submit" class="logout-link" title="Keluar"><i class="bi bi-box-arrow-right"></i></button></form>
       <?php else: ?>
         <a class="profile-icon" href="<?= base_url('profil.php') ?>" title="Profil"><i class="bi bi-person-circle"></i></a>
-        <form method="post" action="<?= base_url('logout.php') ?>" style="display:flex;"><input type="hidden" name="csrf_token" value="<?= e(Csrf::token()) ?>"><button type="submit" class="logout-link" title="Keluar" style="border:0; background:none; cursor:pointer;"><i class="bi bi-box-arrow-right"></i></button></form>
+        <form method="post" action="<?= base_url('logout.php') ?>" style="display:flex;"><input type="hidden" name="csrf_token" value="<?= e(Csrf::token()) ?>"><button type="submit" class="logout-link" title="Keluar"><i class="bi bi-box-arrow-right"></i></button></form>
       <?php endif; ?>
     </div>
   </div>
