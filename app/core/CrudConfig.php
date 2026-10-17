@@ -35,13 +35,22 @@ function crud_config(): array
             ],
             'list' => ['judul', 'topik'],
         ],
+        'referensi' => [
+            'label' => 'Referensi', 'model' => Referensi::class,
+            'fields' => [
+                'nama' => ['label' => 'Nama Referensi', 'type' => 'text', 'required' => true],
+                'url' => ['label' => 'URL', 'type' => 'text', 'required' => true],
+                'deskripsi' => ['label' => 'Deskripsi', 'type' => 'textarea'],
+            ],
+            'list' => ['nama', 'url', 'deskripsi'],
+        ],
         'karya' => [
             'label' => 'Karya', 'model' => Karya::class,
             'fields' => [
                 'judul' => ['label' => 'Judul', 'type' => 'text', 'required' => true],
                 'kategori' => ['label' => 'Kategori', 'type' => 'select', 'options' => ['Robot','IoT','Programming','AI','Elektronika','Lainnya']],
                 'deskripsi' => ['label' => 'Deskripsi', 'type' => 'textarea'],
-                'progres' => ['label' => 'Progres', 'type' => 'select', 'options' => ['Idea','In Progress','Completed','Showcased']],
+                'progres' => ['label' => 'Progres', 'type' => 'select', 'options' => ['Sedang Dikerjakan','Selesai']],
                 'publikasi' => ['label' => 'Publikasi', 'type' => 'select', 'options' => ['Pending','Approved','Rejected']],
                 'pembuat_id' => ['label' => 'Pembuat', 'type' => 'anggota_select', 'required' => true],
                 'teknologi' => ['label' => 'Teknologi (pisahkan koma)', 'type' => 'text'],
@@ -61,6 +70,9 @@ function crud_config(): array
                 'video' => ['label' => 'Link Video', 'type' => 'video'],
             ],
             'list' => ['judul', 'kategori', 'tanggal'],
+            // Foto dirender di dalam kartu form utama (lebar penuh), bukan
+            // panel terpisah di kanan — lihat crud.php.
+            'foto_inline' => true,
         ],
         'hero' => [
             'label' => 'Slider', 'model' => Hero::class,
@@ -86,7 +98,7 @@ function crud_config(): array
                 'waktu' => ['label' => 'Waktu', 'type' => 'text'],
                 'lokasi' => ['label' => 'Lokasi', 'type' => 'text'],
                 'status' => ['label' => 'Status', 'type' => 'select', 'options' => ['Akan Datang','Selesai']],
-                'video' => ['label' => 'Link Video', 'type' => 'video'],
+                'video' => ['label' => 'Link Video', 'type' => 'video', 'show_when' => ['status' => 'Selesai']],
             ],
             'list' => ['nama', 'tanggal', 'lokasi', 'status'],
         ],
@@ -98,7 +110,7 @@ function crud_config(): array
                 'tanggal' => ['label' => 'Tanggal', 'type' => 'date', 'required' => true],
                 'lokasi' => ['label' => 'Lokasi', 'type' => 'text'],
                 'kategori' => ['label' => 'Kategori', 'type' => 'text'],
-                'status' => ['label' => 'Status', 'type' => 'select', 'options' => ['Pendaftaran Dibuka','Akan Datang','Selesai']],
+                'status' => ['label' => 'Status', 'type' => 'select', 'options' => ['Akan Datang','Selesai']],
                 'hasil' => ['label' => 'Hasil', 'type' => 'text'],
             ],
             'list' => ['nama', 'tanggal', 'status', 'hasil'],
@@ -108,10 +120,9 @@ function crud_config(): array
             'fields' => [
                 'judul' => ['label' => 'Judul', 'type' => 'text', 'required' => true],
                 'isi' => ['label' => 'Isi', 'type' => 'textarea', 'required' => true],
-                'tipe' => ['label' => 'Tipe', 'type' => 'select', 'options' => ['Pendaftaran','Jadwal','Deadline','Kegiatan','Umum']],
                 'tanggal' => ['label' => 'Tanggal', 'type' => 'date', 'required' => true],
             ],
-            'list' => ['judul', 'tipe', 'tanggal'],
+            'list' => ['judul', 'tanggal'],
         ],
         'pelatihan' => [
             'label' => 'Pelatihan', 'model' => Pelatihan::class,
@@ -132,7 +143,7 @@ function crud_config(): array
             'label' => 'Prestasi', 'model' => Prestasi::class,
             'fields' => [
                 'nama' => ['label' => 'Nama Prestasi', 'type' => 'text', 'required' => true],
-                'lomba_id' => ['label' => 'Lomba', 'type' => 'lomba_select'],
+                'lomba_teks' => ['label' => 'Nama Lomba', 'type' => 'text'],
                 'tanggal' => ['label' => 'Tanggal', 'type' => 'date', 'required' => true],
                 'tingkat' => ['label' => 'Tingkat', 'type' => 'select', 'options' => ['Sekolah','Kota','Provinsi','Nasional','Internasional']],
                 'hasil' => ['label' => 'Hasil', 'type' => 'text'],
@@ -140,7 +151,7 @@ function crud_config(): array
                 'foto' => ['label' => 'Foto', 'type' => 'file', 'subfolder' => 'content'],
                 'sertifikat' => ['label' => 'Sertifikat', 'type' => 'doc_file', 'subfolder' => 'sertifikat'],
                 'status' => ['label' => 'Status', 'type' => 'select', 'options' => ['Tayang','Disembunyikan']],
-                'anggota_ids' => ['label' => 'Peraih Prestasi', 'type' => 'anggota_multi'],
+                'peraih' => ['label' => 'Peraih Prestasi', 'type' => 'peraih'],
             ],
             'list' => ['nama', 'lomba_nama', 'tingkat', 'hasil', 'tanggal', 'status'],
             'column_labels' => ['lomba_nama' => 'Lomba'],

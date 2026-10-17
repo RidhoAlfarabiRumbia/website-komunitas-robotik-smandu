@@ -1,6 +1,5 @@
 <?php
 require_once __DIR__ . '/../app/includes/bootstrap.php';
-Auth::requireMember();
 $karya = Karya::approved();
 $pageTitle = 'Karya';
 include __DIR__ . '/../app/includes/header.php';

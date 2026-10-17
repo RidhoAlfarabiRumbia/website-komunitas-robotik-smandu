@@ -20,7 +20,6 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
           <div class="meta"><?= tanggal_indo($p['tanggal']) ?></div>
           <div style="font-size:13px; color:var(--text-muted); margin-top:6px;"><?= e($p['isi']) ?></div>
         </div>
-        <span class="badge badge-blue"><?= e($p['tipe']) ?></span>
       </div>
     <?php endforeach; ?>
     </div>

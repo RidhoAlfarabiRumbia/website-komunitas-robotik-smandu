@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['sub_form'] ?? '') === 'ref
         Referensi::create($refData);
         flash_set('success', 'Referensi berhasil ditambahkan.');
     }
-    redirect('admin/crud.php?entity=materi#referensi');
+    redirect('admin/crud.php?entity=materi&sub=referensi');
 }
 
 // ---- Toggle status (slider hero): POST + CSRF, sebelum blok simpan biasa ----
@@ -70,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'delete' && $id) {
     if ($refPanel) {
         Referensi::delete($id);
         flash_set('success', 'Referensi berhasil dihapus.');
-        redirect('admin/crud.php?entity=materi#referensi');
+        redirect('admin/crud.php?entity=materi&sub=referensi');
     }
     $model::delete($id);
     flash_set($cfg['label'] . ' berhasil dihapus.');
@@ -104,6 +104,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Tautan video harus http/https (anti javascript: dll).
     foreach ($cfg['fields'] as $key => $f) {
         if ($f['type'] !== 'video') continue;
+        if (!empty($f['show_when'])) {
+            $ck = array_key_first($f['show_when']);
+            if ((string) ($_POST[$ck] ?? '') !== $f['show_when'][$ck]) continue;
+        }
         $url = trim($_POST[$key] ?? '');
         if ($url !== '' && !preg_match('#^https?://#i', $url)) {
             $errors[] = $f['label'] . ' harus berupa tautan http/https.';
@@ -131,6 +135,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $data = [];
     foreach ($cfg['fields'] as $key => $f) {
+        if (!empty($f['show_when'])) {
+            $ck = array_key_first($f['show_when']);
+            if ((string) ($_POST[$ck] ?? '') !== $f['show_when'][$ck]) {
+                $data[$key] = null;
+                continue;
+            }
+        }
         if ($f['type'] === 'file') {
             $path = handle_upload($key, $f['subfolder'] ?? $entity);
             if ($path) $data[$key] = $path;
@@ -147,13 +158,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ? handle_restricted_upload($key, $sub, ['pdf', 'ppt', 'pptx', 'doc', 'docx', 'xls', 'xlsx', 'txt', 'zip'], 10 * 1024 * 1024, 'PDF, PPT, DOC, XLS, TXT, atau ZIP', '10MB')
                 : handle_doc_upload($key, $sub);
             if ($path) $data[$key] = $path;
-        } elseif (in_array($f['type'], ['pelatihan_multi', 'anggota_multi'], true)) {
+        } elseif (in_array($f['type'], ['pelatihan_multi', 'anggota_multi', 'peraih'], true)) {
+            // 'peraih' bukan kolom tabel — diproses khusus saat simpanTim prestasi.
             continue;
-        } elseif ($f['type'] === 'lomba_select') {
-            // "Tidak terkait lomba" = value kosong â†’ simpan NULL (kolom INT nullable),
-            // jangan string kosong yang bikin error SQL strict.
-            $val = trim($_POST[$key] ?? '');
-            $data[$key] = $val === '' ? null : (int) $val;
         } elseif (!in_array($f['type'], $akunTypes)) {
             $data[$key] = trim($_POST[$key] ?? '');
         }
@@ -182,7 +189,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         Materi::simpanPelatihan((int) $savedId, $relasiMulti['pelatihan']);
     }
     if ($entity === 'prestasi') {
-        Prestasi::simpanTim((int) $savedId, $relasiMulti['anggota']);
+        // Mode peraih: 'anggota' (checkbox) atau 'manual' (teks pisah koma).
+        if (($_POST['peraih_mode'] ?? 'anggota') === 'manual') {
+            $manualNames = array_values(array_filter(array_map('trim', explode(',', (string) ($_POST['peraih_manual'] ?? '')))));
+            Prestasi::simpanTim((int) $savedId, [], $manualNames);
+        } else {
+            $anggotaIds = array_values(array_filter(array_map('intval', (array) ($_POST['anggota_ids'] ?? []))));
+            Prestasi::simpanTim((int) $savedId, $anggotaIds);
+        }
     }
     if ($isAkun) {
         $akun = User::findByAnggota($savedId);
@@ -198,24 +212,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $editing = (!$refPanel && $action === 'edit' && $id) ? $model::find($id) : null;
+// Prestasi lama: isi awal nama lomba dari relasi lomba_id bila lomba_teks masih kosong.
+if ($editing && $entity === 'prestasi' && ($editing['lomba_teks'] ?? '') === '' && !empty($editing['lomba_id'])) {
+    $editing['lomba_teks'] = Lomba::find((int) $editing['lomba_id'])['nama'] ?? '';
+}
 $showForm = (!$refPanel && $action === 'create') || $editing;
 $rows = $entity === 'pelatihan'
     ? Pelatihan::semua()
     : ($entity === 'prestasi' ? Prestasi::semua() : $model::all());
 
-$anggotaOptions = in_array($entity, ['karya', 'anggota'], true) ? Anggota::all('nama ASC') : [];
+$anggotaOptions = in_array($entity, ['karya', 'anggota', 'prestasi'], true) ? Anggota::all('nama ASC') : [];
 $pelatihanOptions = $entity === 'materi' ? Pelatihan::semua() : [];
-$lombaOptions = $entity === 'prestasi' ? Lomba::all('nama ASC') : [];
 
 // Nilai terpilih untuk field multi-pilihan saat mode edit
 $terpilihPelatihan = [];
 $terpilihAnggota = [];
+$peraihMode = 'anggota';
+$peraihManualTeks = '';
 if ($editing) {
     if ($entity === 'materi') {
         $terpilihPelatihan = array_map('intval', array_column(Materi::pelatihanTerkait((int) $editing['id']), 'id'));
     }
     if ($entity === 'prestasi') {
-        $terpilihAnggota = array_map('intval', array_column(Prestasi::tim((int) $editing['id']), 'anggota_id'));
+        $tim = Prestasi::tim((int) $editing['id']);
+        $terpilihAnggota = array_values(array_filter(array_map('intval', array_column($tim, 'anggota_id'))));
+        $manualNames = array_column(array_filter($tim, fn($t) => empty($t['anggota_id'])), 'nama');
+        $peraihManualTeks = implode(', ', $manualNames);
+        if (!$terpilihAnggota && $manualNames) $peraihMode = 'manual';
     }
 }
 $akunUsername = '';
@@ -249,15 +272,22 @@ include __DIR__ . '/../../app/includes/header.php';
   <?php include __DIR__ . '/_sidebar.php'; ?>
   <div class="admin-main">
     <div class="page-head">
-      <div><div class="eyebrow">KELOLA</div><h1>Kelola <?= e($cfg['label']) ?></h1><p class="desc">Tambah, ubah, atau hapus data <?= strtolower(e($cfg['label'])) ?> pada portal.</p></div>
-      <?php if (!$showForm): ?>
-        <a class="btn btn-primary" href="?entity=<?= $entity ?>&action=create"><i class="bi bi-plus-circle"></i> Tambah</a>
+      <?php if ($refPanel): ?>
+        <div><div class="eyebrow">MATERI</div><h1>Kelola Referensi Belajar</h1><p class="desc">Tautan sumber belajar yang tampil di halaman Materi untuk seluruh anggota.</p></div>
+        <a class="btn btn-outline" href="?entity=materi"><i class="bi bi-arrow-left"></i> Kembali ke Materi</a>
+      <?php else: ?>
+        <div><div class="eyebrow">KELOLA</div><h1>Kelola <?= e($cfg['label']) ?></h1><p class="desc">Tambah, ubah, atau hapus data <?= strtolower(e($cfg['label'])) ?> pada portal.</p></div>
+        <?php if (!$showForm): ?>
+          <a class="btn btn-primary" href="?entity=<?= $entity ?>&action=create"><i class="bi bi-plus-circle"></i> Tambah</a>
+        <?php endif; ?>
       <?php endif; ?>
     </div>
 
     <?php if ($msg = flash_get()): ?><div class="alert <?= flash_alert_class($msg['type']) ?>"><?= e($msg['text']) ?></div><?php endif; ?>
 
-    <?php if ($showForm): ?>
+    <?php if ($refPanel): ?>
+      <?php include __DIR__ . '/_referensi_panel.php'; ?>
+    <?php elseif ($showForm): $hasWhen = false; ?>
       <form class="crud-form" method="post" enctype="multipart/form-data">
         <?= Csrf::field() ?>
         <?php if ($editing): ?><input type="hidden" name="id" value="<?= $editing['id'] ?>"><?php endif; ?>
@@ -267,10 +297,18 @@ include __DIR__ . '/../../app/includes/header.php';
             if ($key === 'foto' && !($cfg['foto_inline'] ?? false)) continue; // panel kanan, di luar kartu
             $val = $editing[$key] ?? '';
             if ($key === 'username') $val = $akunUsername;
-            $full = in_array($f['type'], ['textarea', 'pelatihan_multi', 'anggota_multi']) ? ' field-full' : '';
+            $full = in_array($f['type'], ['textarea', 'pelatihan_multi', 'anggota_multi', 'peraih']) ? ' field-full' : '';
             if ($key === 'foto' && ($cfg['foto_inline'] ?? false)) $full = ' field-full';
+            $whenAttr = '';
+            if (!empty($f['show_when'])) {
+                $hasWhen = true;
+                $wKey = array_key_first($f['show_when']);
+                $whenAttr = ' data-when-show="' . e($wKey . ':' . $f['show_when'][$wKey]) . '"';
+                $wCur = (string) ($editing[$wKey] ?? ($cfg['fields'][$wKey]['options'][0] ?? ''));
+                if ($wCur !== $f['show_when'][$wKey]) $whenAttr .= ' style="display:none;"';
+            }
           ?>
-            <div class="field<?= $full ?>">
+            <div class="field<?= $full ?>"<?= $whenAttr ?>>
               <label><?= e($f['label']) ?><?= !empty($f['required']) ? ' *' : '' ?></label>
               <?php if ($f['type'] === 'textarea'): ?>
                 <textarea name="<?= $key ?>" rows="4" <?= !empty($f['required']) ? 'required' : '' ?>><?= e($val) ?></textarea>
@@ -287,18 +325,45 @@ include __DIR__ . '/../../app/includes/header.php';
                   <?php endforeach; ?>
                 </select>
               <?php elseif ($f['type'] === 'video'): ?>
-                <input name="<?= $key ?>" value="<?= e($val) ?>" placeholder="https://youtube.com/... atau https://youtu.be/...">
+                <input name="<?= $key ?>" value="<?= e($val) ?>" placeholder="https://youtube.com/">
                 <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Kosongkan bila tidak ada video. Bisa juga mengunggah berkas video.</div>
                 <input type="file" name="<?= $key ?>_file" accept=".mp4,.webm,.mov,.m4v" style="margin-top:6px;">
-                <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Unggahan: MP4/WEBM/MOV/M4V, maks 40MB. Kalau diisi, berkas mengungguli tautan.</div>
+                <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Unggahan: MP4/WEBM/MOV/M4V, maks 40MB.</div>
                 <?php if ($val): ?><div style="font-size:12px; color:var(--teal); margin-top:4px;">Saat ini: <?= e($val) ?></div><?php endif; ?>
-              <?php elseif ($f['type'] === 'lomba_select'): ?>
-                <select name="<?= $key ?>">
-                  <option value="">Tidak terkait lomba</option>
-                  <?php foreach ($lombaOptions as $l): ?>
-                    <option value="<?= (int) $l['id'] ?>" <?= (int) $val === (int) $l['id'] ? 'selected' : '' ?>><?= e($l['nama']) ?></option>
-                  <?php endforeach; ?>
-                </select>
+              <?php elseif ($f['type'] === 'peraih'): ?>
+                <div class="peraih-mode-row" style="display:flex; gap:18px; margin-bottom:8px;">
+                  <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;">
+                    <input type="radio" name="peraih_mode" value="anggota" <?= $peraihMode === 'anggota' ? 'checked' : '' ?> onchange="peraihModeChange(this.value)"> Pilih dari anggota
+                  </label>
+                  <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer;">
+                    <input type="radio" name="peraih_mode" value="manual" <?= $peraihMode === 'manual' ? 'checked' : '' ?> onchange="peraihModeChange(this.value)"> Manual
+                  </label>
+                </div>
+                <div id="peraihAnggotaWrap"<?= $peraihMode === 'anggota' ? '' : ' style="display:none;"' ?>>
+                  <?php if ($anggotaOptions): ?>
+                    <div class="peraih-check-list">
+                      <?php foreach ($anggotaOptions as $a): ?>
+                        <label class="peraih-check-item">
+                          <input type="checkbox" name="anggota_ids[]" value="<?= (int) $a['id'] ?>" <?= in_array((int) $a['id'], $terpilihAnggota, true) ? 'checked' : '' ?>>
+                          <span><?= e($a['nama']) ?></span>
+                        </label>
+                      <?php endforeach; ?>
+                    </div>
+                    <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Centang satu atau lebih anggota.</div>
+                  <?php else: ?>
+                    <div style="font-size:12px; color:var(--text-muted);">Belum ada data anggota.</div>
+                  <?php endif; ?>
+                </div>
+                <div id="peraihManualWrap"<?= $peraihMode === 'manual' ? '' : ' style="display:none;"' ?>>
+                  <textarea name="peraih_manual" rows="3" placeholder="Budi Santoso, Siti Aminah"><?= e($peraihManualTeks) ?></textarea>
+                  <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Pisahkan beberapa nama dengan koma.</div>
+                </div>
+                <script>
+                function peraihModeChange(m){
+                  document.getElementById('peraihAnggotaWrap').style.display = m === 'anggota' ? '' : 'none';
+                  document.getElementById('peraihManualWrap').style.display = m === 'manual' ? '' : 'none';
+                }
+                </script>
               <?php elseif ($f['type'] === 'pelatihan_multi'): ?>
                 <select name="<?= $key ?>[]" multiple size="5">
                   <?php foreach ($pelatihanOptions as $pl): ?>
@@ -321,7 +386,7 @@ include __DIR__ . '/../../app/includes/header.php';
                 <input type="date" name="<?= $key ?>" value="<?= e($val ? date('Y-m-d', strtotime($val)) : '') ?>" <?= !empty($f['required']) ? 'required' : '' ?>>
               <?php elseif ($f['type'] === 'file'): ?>
                 <input type="file" name="<?= $key ?>" accept=".jpg,.jpeg,.png,.webp">
-                <span class="hint">Format JPG, JPEG, PNG, atau WEBP. Ukuran maksimal 2MB â€” file yang melebihi batas akan ditolak.</span>
+                <span class="hint">Format JPG, JPEG, PNG, atau WEBP. Ukuran maksimal 2MB file yang melebihi batas akan ditolak.</span>
                 <?php if ($val): ?>
                   <div style="margin-top:8px;"><img src="<?= base_url(e($val)) ?>" alt="Preview" style="display:block; width:100%; max-width:260px; height:auto; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface-2);"></div>
                   <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Saat ini: <?= e($val) ?></div>
@@ -338,6 +403,18 @@ include __DIR__ . '/../../app/includes/header.php';
             </div>
           <?php endforeach; ?>
           </div>
+          <?php if ($hasWhen): ?>
+          <script>
+          document.querySelectorAll('.crud-form [data-when-show]').forEach(function (wrap) {
+            var parts = wrap.getAttribute('data-when-show').split(':');
+            var ctrl = document.querySelector('.crud-form [name="' + parts[0] + '"]');
+            if (!ctrl) return;
+            var sync = function () { wrap.style.display = ctrl.value === parts[1] ? '' : 'none'; };
+            ctrl.addEventListener('change', sync);
+            sync();
+          });
+          </script>
+          <?php endif; ?>
           <div style="display:flex; gap:10px; margin-top:10px;">
             <button class="btn btn-primary" type="submit"><?= $editing ? 'Simpan Perubahan' : 'Tambah Data' ?></button>
             <a class="btn btn-outline" href="?entity=<?= $entity ?>">Batal</a>
@@ -348,7 +425,7 @@ include __DIR__ . '/../../app/includes/header.php';
             <div class="field" style="margin-bottom:0;">
               <label><?= e($cfg['fields']['foto']['label']) ?></label>
               <input type="file" name="foto" accept=".jpg,.jpeg,.png,.webp">
-              <span class="hint">Format JPG, JPEG, PNG, atau WEBP. Ukuran maksimal 2MB â€” file yang melebihi batas akan ditolak.</span>
+              <span class="hint">Format JPG, JPEG, PNG, atau WEBP. Ukuran maksimal 2MB file yang melebihi batas akan ditolak.</span>
               <?php if ($valFoto): ?>
                 <div style="margin-top:10px;"><img src="<?= base_url(e($valFoto)) ?>" alt="Preview" style="display:block; width:100%; height:170px; object-fit:cover; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface-2);"></div>
                 <span class="hint">Saat ini: <?= e($valFoto) ?></span>
@@ -399,8 +476,10 @@ include __DIR__ . '/../../app/includes/header.php';
         </table>
       </div>
     <?php endif; ?>
-    <?php if ($entity === 'materi' && !$showForm): ?>
-      <?php include __DIR__ . '/_referensi_panel.php'; ?>
+    <?php if ($entity === 'materi' && !$showForm && !$refPanel): ?>
+      <div style="margin-top:18px;">
+        <a class="btn btn-outline" href="?entity=materi&amp;sub=referensi"><i class="bi bi-link-45deg"></i> Kelola Referensi Belajar</a>
+      </div>
     <?php endif; ?>
   </div>
 </div>

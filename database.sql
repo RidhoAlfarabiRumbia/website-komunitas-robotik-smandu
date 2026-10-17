@@ -109,7 +109,7 @@ CREATE TABLE karya (
   judul VARCHAR(150) NOT NULL,
   kategori VARCHAR(50) NOT NULL,
   deskripsi TEXT,
-  progres ENUM('Idea','In Progress','Completed','Showcased') NOT NULL DEFAULT 'Idea',
+  progres ENUM('Sedang Dikerjakan','Selesai') NOT NULL DEFAULT 'Sedang Dikerjakan',
   publikasi ENUM('Pending','Approved','Rejected') NOT NULL DEFAULT 'Pending',
   pembuat_id INT NOT NULL,
   teknologi VARCHAR(255) DEFAULT NULL,
@@ -150,6 +150,7 @@ CREATE TABLE prestasi (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nama VARCHAR(180) NOT NULL,
   lomba_id INT DEFAULT NULL,
+  lomba_teks VARCHAR(150) DEFAULT NULL,
   tanggal DATE NOT NULL,
   tingkat ENUM('Sekolah','Kota','Provinsi','Nasional','Internasional') NOT NULL DEFAULT 'Sekolah',
   hasil VARCHAR(120) DEFAULT NULL,
@@ -227,7 +228,6 @@ CREATE TABLE pengumuman (
   id INT AUTO_INCREMENT PRIMARY KEY,
   judul VARCHAR(150) NOT NULL,
   isi TEXT NOT NULL,
-  tipe VARCHAR(50) DEFAULT 'Umum',
   tanggal DATE NOT NULL
 ) ENGINE=InnoDB;
 
@@ -328,14 +328,14 @@ INSERT INTO referensi (nama, url, deskripsi) VALUES
 ('Python.org','https://python.org','Situs resmi bahasa pemrograman Python beserta dokumentasinya.');
 
 INSERT INTO karya (judul, kategori, deskripsi, progres, publikasi, pembuat_id, teknologi, link_demo, foto, alasan_tolak, dibuat_pada) VALUES
-('RoboLine V2 - Line Follower Cerdas','Robot','Robot line follower generasi kedua dengan sensor array 8 kanal dan algoritma PID untuk belokan tajam.','Showcased','Approved',1,'Arduino Uno, Sensor IR Array, Motor DC',NULL,'assets/img/karya-robot.svg',NULL,'2026-03-14'),
-('SmartFarm IoT - Monitor Kelembapan Tanah','IoT','Sistem pemantauan kelembapan tanah otomatis dengan notifikasi ke dashboard web sederhana untuk lahan sekolah.','Completed','Approved',2,'ESP32, Sensor Soil Moisture, Firebase','demo.smartfarm.local','assets/img/karya-iot.svg',NULL,'2026-01-22'),
-('Deteksi Sampah Otomatis dengan AI','AI','Model klasifikasi gambar untuk memilah sampah organik dan anorganik menggunakan kamera mini.','In Progress','Approved',6,'Python, TensorFlow Lite, Raspberry Pi',NULL,'assets/img/karya-ai.svg',NULL,'2026-05-02'),
-('Lengan Robot Sortir Warna','Robot','Lengan robot 4 DOF yang menyortir objek berdasarkan warna menggunakan sensor warna TCS3200.','Completed','Approved',5,'Arduino Mega, Servo, Sensor TCS3200',NULL,'assets/img/karya-robot.svg',NULL,'2025-11-10'),
-('Aplikasi Absensi Wajah dengan Python','Programming','Aplikasi absensi anggota komunitas menggunakan pengenalan wajah sederhana berbasis OpenCV.','In Progress','Pending',4,'Python, OpenCV',NULL,'assets/img/karya-programming.svg',NULL,'2026-08-20'),
-('Sistem Keamanan Rumah berbasis Arduino','Elektronika','Rancangan sistem keamanan dengan sensor gerak dan notifikasi buzzer, masih tahap perencanaan komponen.','Idea','Pending',3,'Arduino Uno, PIR Sensor',NULL,'assets/img/karya-elektronika.svg',NULL,'2026-09-01'),
-('Robot Pemadam Api Mini','Robot','Robot pemadam api skala kecil dengan sensor api dan kipas pemadam, tampil di pameran STEM sekolah.','Showcased','Approved',1,'Arduino Uno, Sensor Api, Kipas DC',NULL,'assets/img/karya-robot.svg',NULL,'2025-09-18'),
-('Charger Otomatis untuk Robot Line Follower','Elektronika','Dudukan pengisian daya otomatis untuk robot line follower.','In Progress','Rejected',5,'Modul Charging, Relay',NULL,'assets/img/karya-elektronika.svg','Dokumentasi skema rangkaian belum lengkap, mohon dilengkapi dan diajukan kembali.','2026-06-30');
+('RoboLine V2 - Line Follower Cerdas','Robot','Robot line follower generasi kedua dengan sensor array 8 kanal dan algoritma PID untuk belokan tajam.','Selesai','Approved',1,'Arduino Uno, Sensor IR Array, Motor DC',NULL,'assets/img/karya-robot.svg',NULL,'2026-03-14'),
+('SmartFarm IoT - Monitor Kelembapan Tanah','IoT','Sistem pemantauan kelembapan tanah otomatis dengan notifikasi ke dashboard web sederhana untuk lahan sekolah.','Selesai','Approved',2,'ESP32, Sensor Soil Moisture, Firebase','demo.smartfarm.local','assets/img/karya-iot.svg',NULL,'2026-01-22'),
+('Deteksi Sampah Otomatis dengan AI','AI','Model klasifikasi gambar untuk memilah sampah organik dan anorganik menggunakan kamera mini.','Sedang Dikerjakan','Approved',6,'Python, TensorFlow Lite, Raspberry Pi',NULL,'assets/img/karya-ai.svg',NULL,'2026-05-02'),
+('Lengan Robot Sortir Warna','Robot','Lengan robot 4 DOF yang menyortir objek berdasarkan warna menggunakan sensor warna TCS3200.','Selesai','Approved',5,'Arduino Mega, Servo, Sensor TCS3200',NULL,'assets/img/karya-robot.svg',NULL,'2025-11-10'),
+('Aplikasi Absensi Wajah dengan Python','Programming','Aplikasi absensi anggota komunitas menggunakan pengenalan wajah sederhana berbasis OpenCV.','Sedang Dikerjakan','Pending',4,'Python, OpenCV',NULL,'assets/img/karya-programming.svg',NULL,'2026-08-20'),
+('Sistem Keamanan Rumah berbasis Arduino','Elektronika','Rancangan sistem keamanan dengan sensor gerak dan notifikasi buzzer, masih tahap perencanaan komponen.','Sedang Dikerjakan','Pending',3,'Arduino Uno, PIR Sensor',NULL,'assets/img/karya-elektronika.svg',NULL,'2026-09-01'),
+('Robot Pemadam Api Mini','Robot','Robot pemadam api skala kecil dengan sensor api dan kipas pemadam, tampil di pameran STEM sekolah.','Selesai','Approved',1,'Arduino Uno, Sensor Api, Kipas DC',NULL,'assets/img/karya-robot.svg',NULL,'2025-09-18'),
+('Charger Otomatis untuk Robot Line Follower','Elektronika','Dudukan pengisian daya otomatis untuk robot line follower.','Sedang Dikerjakan','Rejected',5,'Modul Charging, Relay',NULL,'assets/img/karya-elektronika.svg','Dokumentasi skema rangkaian belum lengkap, mohon dilengkapi dan diajukan kembali.','2026-06-30');
 
 INSERT INTO lomba (id, nama, penyelenggara, tanggal, lokasi, kategori, status, hasil) VALUES
 (1,'KRPAI 2025 Regional Sulut-Malut','Kemendikbudristek','2025-10-05','Manado','Robot Pemadam Api','Selesai','Juara 2'),
@@ -373,11 +373,11 @@ INSERT INTO kegiatan (nama, deskripsi, tanggal, waktu, lokasi, status, video) VA
 ('Rapat Persiapan KRPAI 2027','Pembagian tugas tim dan evaluasi desain robot untuk KRPAI 2027.','2026-10-03','15.30 - 17.00','Ruang Robotika','Akan Datang',NULL),
 ('Demo Karya untuk Kepala Sekolah','Presentasi karya unggulan komunitas kepada kepala sekolah dan guru.','2026-08-28','09.00 - 10.00','Aula Sekolah','Selesai',NULL);
 
-INSERT INTO pengumuman (judul, isi, tipe, tanggal) VALUES
-('Pendaftaran Anggota Baru Tahun Ajaran 2026/2027','Komunitas Robotik membuka pendaftaran anggota baru untuk siswa kelas X dan XI melalui halaman Pendaftaran. Lengkapi formulir dan Pakta Integritas, lalu tunggu verifikasi admin.','Pendaftaran','2026-09-08'),
-('Workshop Mini Arduino untuk Pemula Dibuka','Pendaftaran peserta Workshop Mini Arduino untuk Pemula telah dibuka. Kuota 30 peserta dan terbuka untuk umum termasuk siswa di luar sekolah.','Kegiatan','2026-09-20'),
-('Perubahan Jadwal Latihan Rutin','Latihan rutin yang semula hari Rabu dipindahkan menjadi setiap hari Jumat pukul 15.00 WIT di Lab Komputer 2.','Jadwal','2026-09-05'),
-('Deadline Proposal Karya untuk Pameran STEM','Anggota yang ingin karyanya ditampilkan pada Pameran STEM sekolah wajib mengumpulkan proposal singkat paling lambat 30 September 2026.','Deadline','2026-09-01');
+INSERT INTO pengumuman (judul, isi, tanggal) VALUES
+('Pendaftaran Anggota Baru Tahun Ajaran 2026/2027','Komunitas Robotik membuka pendaftaran anggota baru untuk siswa kelas X dan XI melalui halaman Pendaftaran. Lengkapi formulir dan Pakta Integritas, lalu tunggu verifikasi admin.','2026-09-08'),
+('Workshop Mini Arduino untuk Pemula Dibuka','Pendaftaran peserta Workshop Mini Arduino untuk Pemula telah dibuka. Kuota 30 peserta dan terbuka untuk umum termasuk siswa di luar sekolah.','2026-09-20'),
+('Perubahan Jadwal Latihan Rutin','Latihan rutin yang semula hari Rabu dipindahkan menjadi setiap hari Jumat pukul 15.00 WIT di Lab Komputer 2.','2026-09-05'),
+('Deadline Proposal Karya untuk Pameran STEM','Anggota yang ingin karyanya ditampilkan pada Pameran STEM sekolah wajib mengumpulkan proposal singkat paling lambat 30 September 2026.','2026-09-01');
 
 INSERT INTO hero (foto, status) VALUES
 ('assets/img/hero-illustration.svg','Tampil'),

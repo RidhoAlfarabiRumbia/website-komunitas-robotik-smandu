@@ -160,7 +160,7 @@ img{max-width:100%; display:block;}
 .cycle-step:last-child .line{display:none;}
 .login-form{padding:40px; display:flex; flex-direction:column;}
 .role-tabs{display:flex; background:var(--surface-3); border-radius:var(--radius-sm); padding:3px; margin-bottom:20px;}
-.role-tab{flex:1; text-align:center; padding:8px; font-size:13px; border-radius:999px; color:var(--text-muted); background:transparent; border:none;}
+.role-tab{flex:1; text-align:center; padding:8px; font-size:13px; border-radius:6px; color:var(--text-muted); background:transparent; border:none;}
 .role-tab.active{background:var(--teal); color:var(--on-teal); font-weight:600;}
 @media (max-width:720px){ .login-card{grid-template-columns:1fr;} }
 
@@ -187,18 +187,15 @@ img{max-width:100%; display:block;}
 .nav-main a.active{color:var(--teal); background:var(--teal-dim); font-weight:600; border-radius:999px;}
 .nav-main a{transition:color .18s ease, background-color .18s ease, box-shadow .18s ease, border-radius .18s ease;}
 .user-chip{display:flex; align-items:center; gap:9px; flex:1; justify-content:flex-end; margin-right:-14px; padding-left:14px;}
-.theme-toggle{width:34px; height:34px; flex:0 0 auto; padding:0; line-height:1; background:var(--surface-2); border:1px solid var(--border); cursor:pointer; font-size:15px; color:var(--text-muted); border-radius:50%; display:flex; align-items:center; justify-content:center; transition:transform .2s ease, color .18s ease, background-color .18s ease, border-color .18s ease;}
+.theme-toggle{width:34px; height:34px; flex:0 0 auto; padding:0; line-height:1; background:var(--amber-dim); border:1px solid transparent; cursor:pointer; font-size:15px; color:var(--amber); border-radius:50%; display:flex; align-items:center; justify-content:center; transition:color .15s ease, background-color .15s ease, border-color .15s ease;}
 .theme-toggle i{font-size:15px; line-height:1; display:block;}
-.theme-toggle:hover{color:var(--amber); border-color:var(--amber); background:var(--amber-dim); transform:translateY(-2px);}
-.theme-toggle:active{transform:translateY(0) scale(.9);}
+.theme-toggle:hover{color:var(--on-amber); border-color:var(--amber); background:var(--amber);}
 .avatar{width:34px; height:34px; border-radius:50%; background:var(--teal-dim); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:600; color:var(--teal); overflow:hidden;}
 .avatar img{width:100%; height:100%; object-fit:cover;}
-.logout-link{width:34px; height:34px; flex:0 0 auto; margin-left:2px; display:flex; align-items:center; justify-content:center; font-size:17px; color:var(--text); background:var(--surface-2); border:1px solid var(--border); border-radius:50%; transition:transform .2s ease, color .18s ease, background-color .18s ease, border-color .18s ease;}
-.logout-link:hover{color:var(--red); border-color:var(--red); background:var(--red-dim); transform:translateY(-2px);}
-.logout-link:active{transform:translateY(0) scale(.94);}
-.profile-icon{width:34px; height:34px; flex:0 0 auto; margin-left:2px; display:flex; align-items:center; justify-content:center; font-size:17px; color:var(--text); background:var(--surface-2); border:1px solid var(--border); border-radius:50%; transition:transform .2s ease, color .18s ease, background-color .18s ease, border-color .18s ease;}
-.profile-icon:hover{color:var(--teal); border-color:var(--teal); background:var(--teal-dim); transform:translateY(-2px);}
-.profile-icon:active{transform:translateY(0) scale(.94);}
+.logout-link{width:34px; height:34px; flex:0 0 auto; margin-left:2px; display:flex; align-items:center; justify-content:center; font-size:17px; color:var(--red); background:var(--red-dim); border:1px solid transparent; border-radius:50%; transition:color .15s ease, background-color .15s ease, border-color .15s ease;}
+.logout-link:hover{color:var(--on-red); border-color:var(--red); background:var(--red);}
+.profile-icon{width:34px; height:34px; flex:0 0 auto; margin-left:2px; display:flex; align-items:center; justify-content:center; font-size:17px; color:var(--teal); background:var(--teal-dim); border:1px solid transparent; border-radius:50%; transition:color .15s ease, background-color .15s ease, border-color .15s ease;}
+.profile-icon:hover{color:var(--on-teal); border-color:var(--teal); background:var(--teal);}
 .main{max-width:var(--wrap); margin:0 auto; padding:30px 24px 72px;}
 
 .admin-body{display:flex; width:100%; align-items:stretch;}
@@ -312,6 +309,12 @@ body.sidebar-open .sidebar-backdrop, body.nav-open .sidebar-backdrop{opacity:1; 
 .list-item:last-child{border-bottom:none;}
 .list-thumb{width:52px; height:52px; border-radius:var(--radius-sm); background:var(--surface-2); display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden; box-shadow:var(--shadow-1);}
 .list-thumb img{width:100%; height:100%; object-fit:cover;}
+.keg-video{margin-top:8px; max-width:480px;}
+.keg-video video{display:block; width:100%; border-radius:var(--radius-sm); background:#000;}
+.list-item > .badge{align-self:center;}
+.peraih-check-list{display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:6px 14px; max-height:220px; overflow:auto; padding:10px 12px; background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-sm);}
+.peraih-check-item{display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer; padding:4px 0;}
+.peraih-check-item input{accent-color:var(--teal); flex-shrink:0;}
 .list-item .grow{flex:1;}
 .grow{flex:1;}
 .ttl{font-weight:600; font-size:14px; margin-bottom:2px;}
@@ -393,6 +396,9 @@ tr:last-child td{border-bottom:none;}
 .field input::placeholder, .field textarea::placeholder{color:var(--text-dim);}
 .field select:focus, .field input:focus, .field textarea:focus{border-color:var(--teal); box-shadow:0 0 0 3px var(--ring); outline:none;}
 .field :focus-visible{outline:none;}
+.field input[type=checkbox], .field input[type=radio]{width:auto; padding:0; border:0; box-shadow:none; background:none;}
+.field label.peraih-check-item{display:flex; align-items:center; gap:8px; font-size:13px; font-weight:400; color:var(--text); margin-bottom:0; cursor:pointer;}
+.peraih-mode-row label{margin-bottom:0;}
 /* Form CRUD: kartu isian di kiri, panel gambar di luar kartu (sebelah kanan) */
 .crud-form{display:flex; gap:18px; align-items:flex-start; flex-wrap:wrap; max-width:978px;}
 .crud-form-main{flex:1 1 440px; min-width:0; max-width:680px;}

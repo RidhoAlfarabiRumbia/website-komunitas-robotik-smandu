@@ -18,6 +18,20 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
           <div class="ttl"><?= e($k['nama']) ?></div>
           <div class="meta"><?= tanggal_indo($k['tanggal']) ?> · <?= e($k['waktu']) ?> · <?= e($k['lokasi']) ?></div>
           <div style="font-size:13px; color:var(--text-muted); margin-top:4px;"><?= e($k['deskripsi']) ?></div>
+          <?php if ($k['status'] === 'Selesai'):
+            $vid = trim((string) ($k['video'] ?? ''));
+            if ($vid !== '' && preg_match('#^https?://#i', $vid)): ?>
+            <div class="keg-video">
+              <a class="btn btn-outline btn-sm" href="<?= e($vid) ?>" target="_blank" rel="noopener noreferrer">
+                <i class="bi bi-play-circle"></i> Tonton Video Laporan
+              </a>
+            </div>
+          <?php
+            elseif ($vid !== '' && preg_match('#^uploads/kegiatan/[A-Za-z0-9._-]+\.(mp4|webm|mov|m4v)$#i', $vid)): ?>
+            <div class="keg-video">
+              <video controls preload="metadata" src="<?= base_url(e($vid)) ?>"></video>
+            </div>
+          <?php endif; endif; ?>
         </div>
         <span class="badge <?= $k['status'] === 'Selesai' ? 'badge-muted' : 'badge-teal' ?>"><?= e($k['status']) ?></span>
       </div>

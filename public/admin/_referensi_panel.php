@@ -43,7 +43,7 @@ $refBack = '?entity=materi&sub=referensi&action=' . ($refEditing ? 'edit&id=' . 
     </div>
     <div style="display:flex; gap:10px; margin-top:10px;">
       <button class="btn btn-primary" type="submit"><?= $refEditing ? 'Simpan Perubahan' : 'Tambah Referensi' ?></button>
-      <?php if ($refEditing): ?><a class="btn btn-outline" href="?entity=materi#referensi">Batal</a><?php endif; ?>
+      <?php if ($refEditing): ?><a class="btn btn-outline" href="?entity=materi">Batal</a><?php endif; ?>
     </div>
   </form>
 

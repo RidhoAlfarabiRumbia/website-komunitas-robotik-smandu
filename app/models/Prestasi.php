@@ -10,14 +10,14 @@ class Prestasi extends Model
 {
     protected static string $table = 'prestasi';
     protected static array $fillable = [
-        'nama', 'lomba_id', 'tanggal', 'tingkat', 'hasil',
+        'nama', 'lomba_id', 'lomba_teks', 'tanggal', 'tingkat', 'hasil',
         'deskripsi', 'foto', 'sertifikat', 'status',
     ];
 
     /** Prestasi yang tayang di portal (tanpa moderasi pra-publikasi). */
     public static function tayang(int $limit = 0): array
     {
-        $sql = 'SELECT p.*, l.nama AS lomba_nama FROM prestasi p
+        $sql = 'SELECT p.*, COALESCE(p.lomba_teks, l.nama) AS lomba_nama FROM prestasi p
                 LEFT JOIN lomba l ON l.id = p.lomba_id
                 WHERE p.status = "Tayang" ORDER BY p.tanggal DESC';
         if ($limit > 0) $sql .= ' LIMIT ' . (int) $limit;
@@ -28,7 +28,7 @@ class Prestasi extends Model
     public static function semua(): array
     {
         return self::db()->query(
-            'SELECT p.*, l.nama AS lomba_nama FROM prestasi p
+            'SELECT p.*, COALESCE(p.lomba_teks, l.nama) AS lomba_nama FROM prestasi p
              LEFT JOIN lomba l ON l.id = p.lomba_id
              ORDER BY p.tanggal DESC'
         )->fetchAll();
@@ -37,7 +37,7 @@ class Prestasi extends Model
     public static function detail(int $id): ?array
     {
         $stmt = self::db()->prepare(
-            'SELECT p.*, l.nama AS lomba_nama FROM prestasi p
+            'SELECT p.*, COALESCE(p.lomba_teks, l.nama) AS lomba_nama FROM prestasi p
              LEFT JOIN lomba l ON l.id = p.lomba_id WHERE p.id = ?'
         );
         $stmt->execute([$id]);
@@ -65,7 +65,7 @@ class Prestasi extends Model
     /** Prestasi yang dicapai seorang anggota (untuk halaman profil). */
     public static function byAnggota(int $anggotaId, bool $hanyaTayang = true): array
     {
-        $sql = 'SELECT p.*, l.nama AS lomba_nama FROM prestasi p
+        $sql = 'SELECT p.*, COALESCE(p.lomba_teks, l.nama) AS lomba_nama FROM prestasi p
                 LEFT JOIN lomba l ON l.id = p.lomba_id
                 JOIN prestasi_peserta pp ON pp.prestasi_id = p.id
                 WHERE pp.anggota_id = ?';
@@ -76,8 +76,8 @@ class Prestasi extends Model
         return $stmt->fetchAll();
     }
 
-/** Simpan anggota terpilih sebagai penerima prestasi (pada create/update). */
-    public static function simpanTim(int $prestasiId, array $anggotaIds): void
+/** Simpan anggota terpilih + nama peraih manual sebagai penerima prestasi. */
+    public static function simpanTim(int $prestasiId, array $anggotaIds, array $manualNames = []): void
     {
         self::db()->prepare('DELETE FROM prestasi_peserta WHERE prestasi_id = ?')->execute([$prestasiId]);
         $stmt = self::db()->prepare('INSERT INTO prestasi_peserta (prestasi_id, anggota_id, nama) VALUES (?, ?, ?)');
@@ -86,6 +86,11 @@ class Prestasi extends Model
             if ($id <= 0) continue;
             $nama = Anggota::find($id)['nama'] ?? 'Anggota';
             $stmt->execute([$prestasiId, $id, $nama]);
+        }
+        foreach ($manualNames as $nama) {
+            $nama = trim((string) $nama);
+            if ($nama === '') continue;
+            $stmt->execute([$prestasiId, null, mb_substr($nama, 0, 120)]);
         }
     }
 

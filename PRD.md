@@ -111,7 +111,7 @@ Modul baru untuk mengelola kegiatan belajar terjadwal (mis. "Workshop Mini") yan
 8.5 Karya
 •	Karya individu maupun tim.
 •	Informasi: judul, deskripsi, pembuat, tanggal, status progres, foto, dokumentasi, dan tautan proyek/demo bila ada.
-•	Status progres: Idea, In Progress, Completed, Showcased.
+•	Status progres: Sedang Dikerjakan, Selesai.
 •	Pengajuan anggota harus melalui moderasi (pra-publikasi).
 8.6 Pengajuan Karya
 •	Anggota mengisi informasi karya.

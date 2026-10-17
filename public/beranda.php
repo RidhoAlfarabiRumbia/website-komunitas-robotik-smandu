@@ -18,8 +18,8 @@ $pelatihanTerbaru = Pelatihan::untukPengunjung(3);
 $prestasiTerbaru = Prestasi::tayang(3);
 
 // Konten khusus anggota & admin
-// Karya yang sudah tayang (Approved) sengaja ditampilkan juga untuk tamu:
-// showcase karya komunitas tidak perlu login, halaman karya.php yang butuh member.
+// Karya yang sudah tayang (Approved) ditampilkan juga untuk tamu —
+// halaman karya.php kini juga publik.
 $karyaTerbaru = Karya::approved(3);
 // Lomba & agenda kegiatan ditampilkan juga untuk tamu di beranda (ringkasan
 // 3 terbaru); halaman penuhnya (lomba.php, kegiatan.php) kini juga publik.
@@ -151,80 +151,37 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
   <?php endif; ?>
 
   <?php
-    /* Galeri & Karya hanya ditulis sekali tapi dicetak di dua posisi berbeda:
-       tamu dan admin mendapatkannya tepat di bawah "Yang bisa kamu temukan
-       di sini" sebagai showcase, sedangkan anggota tetap melihatnya di bawah
-       blok daftar. */
+    /* Tiap section dirender sekali ke variabel, lalu dicetak dengan urutan
+       berbeda: tamu mendapat urutan Prestasi → Lomba → Karya → Galeri →
+       Agenda → Pelatihan → Pengumuman (tanpa Materi); anggota tetap struktur
+       lama (grid 2 kolom + Galeri/Karya di bawah). */
     ob_start();
   ?>
   <section class="section reveal">
     <div class="section-head">
-      <h2>Galeri terbaru</h2>
-      <a class="see-all" href="<?= base_url('galeri.php') ?>">Lihat semua galeri <i class="bi bi-arrow-right"></i></a>
+      <h2>Prestasi terbaru</h2>
+      <a class="see-all" href="<?= base_url('prestasi.php') ?>">Lihat semua prestasi <i class="bi bi-arrow-right"></i></a>
     </div>
-    <?php if ($galeriTerbaru): ?>
+    <?php if ($prestasiTerbaru): ?>
       <div class="grid grid-3 grid-stagger">
-        <?php foreach ($galeriTerbaru as $g): ?>
-          <?php include __DIR__ . '/../app/includes/partial_galeri_card.php'; ?>
-        <?php endforeach; ?>
-      </div>
-    <?php else: ?>
-      <div class="card"><div class="empty">Belum ada dokumentasi galeri.</div></div>
-    <?php endif; ?>
-  </section>
-
-  <section class="section reveal">
-    <div class="section-head">
-      <h2>Karya terbaru</h2>
-      <?php if ($kontenAnggota): ?>
-        <a class="see-all" href="<?= base_url('karya.php') ?>">Lihat semua karya <i class="bi bi-arrow-right"></i></a>
-      <?php else: ?>
-        <a class="see-all" href="<?= base_url('login.php') ?>">Masuk untuk melihat semua karya <i class="bi bi-arrow-right"></i></a>
-      <?php endif; ?>
-    </div>
-    <?php if ($karyaTerbaru): ?>
-      <div class="grid grid-3 grid-stagger">
-        <?php foreach ($karyaTerbaru as $k): ?>
-          <?php include __DIR__ . '/../app/includes/partial_karya_card.php'; ?>
-        <?php endforeach; ?>
-      </div>
-    <?php else: ?>
-      <div class="card"><div class="empty">Belum ada karya yang tayang. Jadilah yang pertama!</div></div>
-    <?php endif; ?>
-  </section>
-  <?php $galeriKarya = ob_get_clean(); ?>
-  <?= $isAnggota ? '' : $galeriKarya ?>
-
-  <?php if ($isAnggota): ?>
-  <!-- Beranda anggota: section daftar ditata grid 2 kolom. Tiap baris = 1 section
-   kiri + 1 section kanan, jadi puncak kedua kolom selalu sejajar walau tinggi
-   isi section berbeda. Section lebar penuh tetap berada di luar grid. -->
-  <div class="home-cols">
-  <?php endif; ?>
-
-  <section class="section reveal">
-    <div class="section-head">
-      <h2>Pelatihan &amp; Workshop mendatang</h2>
-      <a class="see-all" href="<?= base_url('pelatihan.php') ?>">Lihat semua pelatihan <i class="bi bi-arrow-right"></i></a>
-    </div>
-    <?php if ($pelatihanTerbaru): ?>
-      <div class="table-wrap">
-        <?php foreach ($pelatihanTerbaru as $p): ?>
-          <div class="list-item list-item-pad">
-            <div class="list-thumb"><i class="bi bi-mortarboard" style="font-size:18px; color:var(--teal);"></i></div>
-            <div class="grow">
-              <a href="<?= base_url('pelatihan-detail.php?id=' . (int) $p['id']) ?>" class="ttl"><?= e($p['nama']) ?></a>
-              <div class="meta"><?= e(tanggal_rentang($p['tanggal_mulai'], $p['tanggal_selesai'])) ?> · <?= e($p['lokasi'] ?: '-') ?></div>
+        <?php foreach ($prestasiTerbaru as $p): ?>
+          <a href="prestasi-detail.php?id=<?= (int) $p['id'] ?>" class="work-card">
+            <div class="work-thumb"><img src="<?= base_url(e($p['foto'] ?? 'assets/img/galeri-prestasi.svg')) ?>" alt="<?= e($p['nama']) ?>" loading="lazy" decoding="async"></div>
+            <div class="work-body">
+              <span class="badge badge-amber"><i class="bi bi-trophy"></i> <?= e($p['hasil']) ?></span>
+              <div class="work-title" style="font-size:14px;"><?= e($p['nama']) ?></div>
+              <div class="work-meta"><?= e($p['lomba_nama'] ?? '-') ?> · <?= tanggal_indo($p['tanggal']) ?></div>
             </div>
-            <span class="badge <?= $p['akses'] === 'Umum' ? 'badge-blue' : 'badge-amber' ?>"><?= $p['akses'] === 'Umum' ? 'Terbuka Umum' : 'Khusus Anggota' ?></span>
-          </div>
+          </a>
         <?php endforeach; ?>
       </div>
     <?php else: ?>
-      <div class="card"><div class="empty">Belum ada pelatihan yang dijadwalkan.</div></div>
+      <div class="card"><div class="empty">Belum ada prestasi tercatat.</div></div>
     <?php endif; ?>
   </section>
+  <?php $secPrestasi = ob_get_clean(); ?>
 
+  <?php ob_start(); ?>
   <section class="section reveal">
     <div class="section-head">
       <h2>Lomba terdekat</h2>
@@ -248,30 +205,45 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
       <div class="card"><div class="empty">Belum ada lomba tercatat.</div></div>
     <?php endif; ?>
   </section>
+  <?php $secLomba = ob_get_clean(); ?>
 
+  <?php ob_start(); ?>
   <section class="section reveal">
     <div class="section-head">
-      <h2>Prestasi terbaru</h2>
-      <a class="see-all" href="<?= base_url('prestasi.php') ?>">Lihat semua prestasi <i class="bi bi-arrow-right"></i></a>
+      <h2>Karya terbaru</h2>
+      <a class="see-all" href="<?= base_url('karya.php') ?>">Lihat semua karya <i class="bi bi-arrow-right"></i></a>
     </div>
-    <?php if ($prestasiTerbaru): ?>
-      <div class="table-wrap">
-        <?php foreach ($prestasiTerbaru as $p): ?>
-          <div class="list-item list-item-pad">
-            <div class="list-thumb"><i class="bi bi-trophy" style="font-size:18px; color:var(--amber);"></i></div>
-            <div class="grow">
-              <a href="<?= base_url('prestasi-detail.php?id=' . (int) $p['id']) ?>" class="ttl"><?= e($p['nama']) ?></a>
-              <div class="meta"><?= e($p['lomba_nama'] ?? '-') ?> · <?= tanggal_indo($p['tanggal']) ?></div>
-            </div>
-            <span class="badge badge-amber"><?= e($p['hasil']) ?></span>
-          </div>
+    <?php if ($karyaTerbaru): ?>
+      <div class="grid grid-3 grid-stagger">
+        <?php foreach ($karyaTerbaru as $k): ?>
+          <?php include __DIR__ . '/../app/includes/partial_karya_card.php'; ?>
         <?php endforeach; ?>
       </div>
     <?php else: ?>
-      <div class="card"><div class="empty">Belum ada prestasi tercatat.</div></div>
+      <div class="card"><div class="empty">Belum ada karya yang tayang. Jadilah yang pertama!</div></div>
     <?php endif; ?>
   </section>
+  <?php $secKarya = ob_get_clean(); ?>
 
+  <?php ob_start(); ?>
+  <section class="section reveal">
+    <div class="section-head">
+      <h2>Galeri terbaru</h2>
+      <a class="see-all" href="<?= base_url('galeri.php') ?>">Lihat semua galeri <i class="bi bi-arrow-right"></i></a>
+    </div>
+    <?php if ($galeriTerbaru): ?>
+      <div class="grid grid-3 grid-stagger">
+        <?php foreach ($galeriTerbaru as $g): ?>
+          <?php include __DIR__ . '/../app/includes/partial_galeri_card.php'; ?>
+        <?php endforeach; ?>
+      </div>
+    <?php else: ?>
+      <div class="card"><div class="empty">Belum ada dokumentasi galeri.</div></div>
+    <?php endif; ?>
+  </section>
+  <?php $secGaleri = ob_get_clean(); ?>
+
+  <?php ob_start(); ?>
   <section class="section reveal">
     <div class="section-head">
       <h2>Agenda kegiatan terdekat</h2>
@@ -294,7 +266,34 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
       <div class="card"><div class="empty">Belum ada agenda terjadwal.</div></div>
     <?php endif; ?>
   </section>
+  <?php $secAgenda = ob_get_clean(); ?>
 
+  <?php ob_start(); ?>
+  <section class="section reveal">
+    <div class="section-head">
+      <h2>Pelatihan &amp; Workshop mendatang</h2>
+      <a class="see-all" href="<?= base_url('pelatihan.php') ?>">Lihat semua pelatihan <i class="bi bi-arrow-right"></i></a>
+    </div>
+    <?php if ($pelatihanTerbaru): ?>
+      <div class="table-wrap">
+        <?php foreach ($pelatihanTerbaru as $p): ?>
+          <div class="list-item list-item-pad">
+            <div class="list-thumb"><i class="bi bi-mortarboard" style="font-size:18px; color:var(--teal);"></i></div>
+            <div class="grow">
+              <a href="<?= base_url('pelatihan-detail.php?id=' . (int) $p['id']) ?>" class="ttl"><?= e($p['nama']) ?></a>
+              <div class="meta"><?= e(tanggal_rentang($p['tanggal_mulai'], $p['tanggal_selesai'])) ?> · <?= e($p['lokasi'] ?: '-') ?></div>
+            </div>
+            <span class="badge <?= $p['akses'] === 'Umum' ? 'badge-blue' : 'badge-amber' ?>"><?= $p['akses'] === 'Umum' ? 'Terbuka Umum' : 'Khusus Anggota' ?></span>
+          </div>
+        <?php endforeach; ?>
+      </div>
+    <?php else: ?>
+      <div class="card"><div class="empty">Belum ada pelatihan yang dijadwalkan.</div></div>
+    <?php endif; ?>
+  </section>
+  <?php $secPelatihan = ob_get_clean(); ?>
+
+  <?php ob_start(); ?>
   <section class="section reveal home-span">
     <div class="section-head">
       <h2>Pengumuman terbaru</h2>
@@ -310,7 +309,6 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
               <div class="meta"><?= tanggal_indo($p['tanggal']) ?></div>
               <div style="font-size:13px; color:var(--text-muted); margin-top:6px;"><?= e(trunc($p['isi'], 90)) ?></div>
             </div>
-            <span class="badge badge-blue"><?= e($p['tipe']) ?></span>
           </div>
         <?php endforeach; ?>
       </div>
@@ -318,21 +316,37 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
       <div class="card"><div class="empty">Belum ada pengumuman.</div></div>
     <?php endif; ?>
   </section>
+  <?php $secPengumuman = ob_get_clean(); ?>
 
   <?php if ($isAnggota): ?>
+  <!-- Beranda anggota: section daftar ditata grid 2 kolom. Tiap baris = 1 section
+   kiri + 1 section kanan, jadi puncak kedua kolom selalu sejajar walau tinggi
+   isi section berbeda. Section lebar penuh tetap berada di luar grid. -->
+  <div class="home-cols">
+    <?= $secPelatihan ?>
+    <?= $secLomba ?>
+    <?= $secPrestasi ?>
+    <?= $secAgenda ?>
+    <?= $secPengumuman ?>
   </div>
+  <?= $secGaleri ?>
+  <?= $secKarya ?>
+  <?php else: ?>
+  <!-- Urutan beranda tamu -->
+  <?= $secPrestasi ?>
+  <?= $secLomba ?>
+  <?= $secKarya ?>
+  <?= $secGaleri ?>
+  <?= $secAgenda ?>
+  <?= $secPelatihan ?>
+  <?= $secPengumuman ?>
   <?php endif; ?>
 
-  <?= $isAnggota ? $galeriKarya : '' ?>
-
+  <?php if ($kontenAnggota): ?>
   <section class="section reveal">
     <div class="section-head">
       <h2>Materi untukmu</h2>
-      <?php if ($kontenAnggota): ?>
-        <a class="see-all" href="<?= base_url('materi.php') ?>">Lihat semua materi <i class="bi bi-arrow-right"></i></a>
-      <?php else: ?>
-        <a class="see-all" href="<?= base_url('login.php') ?>"><i class="bi bi-lock"></i> Masuk untuk melihat</a>
-      <?php endif; ?>
+      <a class="see-all" href="<?= base_url('materi.php') ?>">Lihat semua materi <i class="bi bi-arrow-right"></i></a>
     </div>
     <?php if ($materiTerbaru): ?>
       <div class="table-wrap">
@@ -347,18 +361,11 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
           </div>
         <?php endforeach; ?>
       </div>
-    <?php elseif ($kontenAnggota): ?>
-      <div class="card"><div class="empty"><?= $isAdmin ? 'Belum ada materi pelatihan.' : 'Materi tersedia setelah kamu disetujui pada pelatihan terkait.' ?></div></div>
     <?php else: ?>
-      <div class="card" style="display:flex; align-items:center; gap:14px;">
-        <div class="list-thumb"><i class="bi bi-lock" style="font-size:18px; color:var(--teal);"></i></div>
-        <div class="grow">
-          <div class="ttl">Materi pelatihan</div>
-          <div class="meta">Materi hanya terbuka bagi peserta pelatihan yang telah disetujui admin.</div>
-        </div>
-      </div>
+      <div class="card"><div class="empty"><?= $isAdmin ? 'Belum ada materi pelatihan.' : 'Materi tersedia setelah kamu disetujui pada pelatihan terkait.' ?></div></div>
     <?php endif; ?>
   </section>
+  <?php endif; ?>
 
   <section class="section reveal">
     <div class="section-head">

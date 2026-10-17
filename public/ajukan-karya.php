@@ -8,13 +8,13 @@ $form = [
     'judul' => '',
     'kategori' => 'Robot',
     'deskripsi' => '',
-    'progres' => 'Idea',
+    'progres' => 'Sedang Dikerjakan',
     'teknologi' => '',
     'link_demo' => '',
 ];
 
 $kategoriOpsi = ['Robot', 'IoT', 'Programming', 'AI', 'Elektronika', 'Lainnya'];
-$progresOpsi = ['Idea', 'In Progress', 'Completed', 'Showcased'];
+$progresOpsi = ['Sedang Dikerjakan', 'Selesai'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Csrf::verify();

@@ -54,10 +54,8 @@ function tanggal_rentang(?string $mulai, ?string $selesai): string
 function badge_progres(string $progres): string
 {
     $map = [
-        'Idea' => 'badge-muted',
-        'In Progress' => 'badge-blue',
-        'Completed' => 'badge-teal',
-        'Showcased' => 'badge-amber',
+        'Sedang Dikerjakan' => 'badge-blue',
+        'Selesai' => 'badge-teal',
     ];
     $cls = $map[$progres] ?? 'badge-muted';
     return '<span class="badge ' . $cls . '">' . e($progres) . '</span>';

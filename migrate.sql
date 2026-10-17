@@ -233,3 +233,13 @@ INSERT INTO pendaftaran (nama, kelas, kontak, email, alasan, status, dibuat_pada
 ('Dewi Lestari','XI IPS 1','0813-9911-2233','dewi.lestari@email.com','Tertarik pada bidang AI dan deteksi objek.','Baru','2026-10-02 09:40:00'),
 ('Fajar Nugroho','X TKJ 3','0857-6677-8899','fajar.n@email.com','Meminat pada robotika dan elektronik dasar.','Diverifikasi','2026-09-12 10:05:00')
 ON DUPLICATE KEY UPDATE nama = VALUES(nama);
+
+-- ---------------------------------------------------------
+-- PRESTASI: kolom nama lomba bebas (diisi manual lewat form admin)
+-- lomba_id tetap dipakai untuk data lama; tampilan memakai
+-- COALESCE(lomba_teks, lomba.nama).
+-- ---------------------------------------------------------
+SET @exist := (SELECT COUNT(*) FROM information_schema.COLUMNS
+               WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'prestasi' AND COLUMN_NAME = 'lomba_teks');
+SET @sql := IF(@exist = 0, 'ALTER TABLE prestasi ADD COLUMN lomba_teks VARCHAR(150) DEFAULT NULL AFTER lomba_id', 'DO 0');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
