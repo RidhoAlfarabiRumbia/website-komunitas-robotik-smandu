@@ -399,6 +399,20 @@ tr:last-child td{border-bottom:none;}
 .field input[type=checkbox], .field input[type=radio]{width:auto; padding:0; border:0; box-shadow:none; background:none;}
 .field label.peraih-check-item{display:flex; align-items:center; gap:8px; font-size:13px; font-weight:400; color:var(--text); margin-bottom:0; cursor:pointer;}
 .peraih-mode-row label{margin-bottom:0;}
+/* Pencarian daftar admin: kotak kata kunci + ringkasan jumlah data */
+.cari-bar{display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; margin-bottom:14px;}
+.cari-bar .field{margin:0; flex:1 1 240px; min-width:220px; max-width:280px;}
+/* Varian ringkas: di baris judul, tepat di sebelah kiri tombol Tambah */
+.cari-inline{display:flex; gap:6px; align-items:center;}
+.cari-inline .field{margin:0;}
+.cari-inline input[type=search]{width:180px;}
+/* Tombol <button> di browser memakai line-height UA sendiri sehingga lebih
+   pendek dari <a class="btn"> (Tambah) yang memakai line-height body.
+   Di samakan agar tinggi keduanya identik. */
+.cari-inline button.btn{line-height:inherit;}
+.cari-meta{margin-left:auto; font-size:12.5px; color:var(--text-muted); padding-bottom:9px;}
+.cari-info{font-size:12.5px; color:var(--text-muted); text-align:right; margin-bottom:10px;}
+@media (max-width:560px){ .cari-meta{margin-left:0; padding-bottom:0; width:100%;} }
 /* Form CRUD: kartu isian di kiri, panel gambar di luar kartu (sebelah kanan) */
 .crud-form{display:flex; gap:18px; align-items:flex-start; flex-wrap:wrap; max-width:978px;}
 .crud-form-main{flex:1 1 440px; min-width:0; max-width:680px;}

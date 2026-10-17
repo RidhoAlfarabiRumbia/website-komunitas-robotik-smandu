@@ -2,6 +2,10 @@
 require_once __DIR__ . '/../../app/includes/bootstrap.php';
 Auth::requireRole('admin');
 
+// Pencarian daftar; kata kunci ikut dibawa ke tab status & redirect.
+$q = cari_kunci($_GET['q'] ?? $_POST['q'] ?? '');
+$qs = cari_qs($q);
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Csrf::verify();
     $id = (int) $_POST['id'];
@@ -13,12 +17,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         Karya::moderasi($id, 'Rejected', trim($_POST['alasan'] ?? '') ?: 'Perlu perbaikan sebelum diajukan kembali.');
         flash_set('Karya ditolak dan anggota dapat melihat catatannya.');
     }
-    redirect('admin/moderasi.php?status=' . urlencode($_POST['status_kembali'] ?? 'Pending'));
+    redirect('admin/moderasi.php?status=' . urlencode($_POST['status_kembali'] ?? 'Pending') . $qs);
 }
 
 $status = $_GET['status'] ?? 'Pending';
 if (!in_array($status, ['Pending', 'Approved', 'Rejected'], true)) $status = 'Pending';
 $list = Karya::byStatus($status);
+$totalList = count($list);
+if ($q !== '') {
+    $list = cari_filter($list, ['judul', 'deskripsi', 'teknologi', 'kategori', 'pembuat_nama', 'alasan_tolak'], $q);
+}
 
 $pageTitle = 'Moderasi Karya';
 include __DIR__ . '/../../app/includes/header.php';
@@ -44,11 +52,15 @@ include __DIR__ . '/../../app/includes/header.php';
       <div><div class="eyebrow">MODERASI</div><h1>Pengajuan Karya</h1><p class="desc">Tinjau karya yang diajukan anggota, lalu setujui atau tolak sebelum tampil di portal.</p></div>
     </div>
     <?php if ($msg = flash_get()): ?><div class="alert <?= flash_alert_class($msg['type']) ?>"><?= e($msg['text']) ?></div><?php endif; ?>
-    <div class="role-tabs" style="max-width:360px; margin-bottom:20px;">
-      <?php foreach (['Pending','Approved','Rejected'] as $s): ?>
-        <a href="?status=<?= $s ?>" class="role-tab <?= $status === $s ? 'active' : '' ?>" style="display:block; text-align:center;"><?= $s ?></a>
-      <?php endforeach; ?>
+    <div style="display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap; margin-bottom:16px;">
+      <div class="role-tabs" style="max-width:360px; margin-bottom:0;">
+        <?php foreach (['Pending','Approved','Rejected'] as $s): ?>
+          <a href="?status=<?= $s ?><?= e($qs) ?>" class="role-tab <?= $status === $s ? 'active' : '' ?>" style="display:block; text-align:center;"><?= $s ?></a>
+        <?php endforeach; ?>
+      </div>
+      <?= cari_form(['status' => $status], $q, 'Cari karya...', null, null, 'cari-inline') ?>
     </div>
+    <div class="cari-info"><?= $q === '' ? e($totalList . ' pengajuan') : e('Menampilkan ' . count($list) . ' dari ' . $totalList . ' pengajuan') ?></div>
     <div class="grid grid-2">
       <?php if ($list): foreach ($list as $k):
         $teknologi = array_filter(array_map('trim', explode(',', $k['teknologi'] ?? '')));
@@ -88,7 +100,7 @@ include __DIR__ . '/../../app/includes/header.php';
           <?php endif; ?>
         </div>
       <?php endforeach; else: ?>
-        <div class="empty" style="grid-column:1/-1;">Tidak ada karya berstatus <?= e($status) ?>.</div>
+        <div class="empty" style="grid-column:1/-1;"><?= $q !== '' ? 'Data tidak ditemukan.' : 'Tidak ada karya berstatus ' . e($status) . '.' ?></div>
       <?php endif; ?>
     </div>
   </div>

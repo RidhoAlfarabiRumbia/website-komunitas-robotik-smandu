@@ -1,3 +1,10 @@
+<?php
+// Footer hanya untuk halaman member/publik. Halaman admin (public/admin/)
+// tidak menampilkan footer; script di bawah & penutup dokumen tetap ikut.
+$scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
+$sedangAdmin = str_ends_with($scriptDir, '/admin');
+if (!$sedangAdmin):
+?>
 <footer class="footer">
   <div class="footer-main">
     <div class="footer-col footer-about">
@@ -41,6 +48,7 @@
     <span>&copy; <?= date('Y') ?> Komunitas Robotik SMA Negeri 2 Kota Ternate. Hak cipta dilindungi.</span>
   </div>
 </footer>
+<?php endif; ?>
 <script>
 function toggleTheme(){
   var html=document.documentElement;

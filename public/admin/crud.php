@@ -13,6 +13,11 @@ $model = $cfg['model'];
 $action = $_GET['action'] ?? 'list';
 $id = (int) ($_GET['id'] ?? 0);
 
+// Pencarian daftar: kata kunci ikut dibawa ke link aksi, form, dan redirect
+// supaya admin tidak perlu mengetiknya lagi setelah simpan/batal.
+$q = cari_kunci($_GET['q'] ?? $_POST['q'] ?? '');
+$qs = cari_qs($q);
+
 // Referensi tidak lagi punya halaman sendiri: dikelola lewat panel di halaman Materi.
 if ($entity === 'referensi') {
     redirect('admin/crud.php?entity=materi');
@@ -23,7 +28,7 @@ $refPanel = ($entity === 'materi') && (($_GET['sub'] ?? '') === 'referensi');
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['sub_form'] ?? '') === 'referensi') {
     Csrf::verify();
     $refId = (int) ($_POST['id'] ?? 0);
-    $refBack = 'admin/crud.php?entity=materi&sub=referensi&action=' . ($refId ? 'edit&id=' . $refId : 'create');
+    $refBack = 'admin/crud.php?entity=materi&sub=referensi&action=' . ($refId ? 'edit&id=' . $refId : 'create') . $qs;
     $refData = [
         'nama' => trim($_POST['nama'] ?? ''),
         'url' => trim($_POST['url'] ?? ''),
@@ -44,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['sub_form'] ?? '') === 'ref
         Referensi::create($refData);
         flash_set('success', 'Referensi berhasil ditambahkan.');
     }
-    redirect('admin/crud.php?entity=materi&sub=referensi');
+    redirect('admin/crud.php?entity=materi&sub=referensi' . $qs);
 }
 
 // ---- Toggle status (slider hero): POST + CSRF, sebelum blok simpan biasa ----
@@ -58,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'toggle_status' && $id)
             flash_set('success', 'Status slider diubah jadi ' . $baru . '.');
         }
     }
-    redirect('admin/crud.php?entity=' . $entity);
+    redirect('admin/crud.php?entity=' . $entity . $qs);
 }
 
 // ---- Hapus ----
@@ -70,11 +75,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'delete' && $id) {
     if ($refPanel) {
         Referensi::delete($id);
         flash_set('success', 'Referensi berhasil dihapus.');
-        redirect('admin/crud.php?entity=materi&sub=referensi');
+        redirect('admin/crud.php?entity=materi&sub=referensi' . $qs);
     }
     $model::delete($id);
     flash_set($cfg['label'] . ' berhasil dihapus.');
-    redirect('admin/crud.php?entity=' . $entity);
+    redirect('admin/crud.php?entity=' . $entity . $qs);
 }
 
 // ---- Simpan (create/update) ----
@@ -117,7 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($errors) {
         flash_set('error', implode(' ', $errors));
         $backAction = $postId ? 'edit&id=' . $postId : 'create';
-        redirect('admin/crud.php?entity=' . $entity . '&action=' . $backAction);
+        redirect('admin/crud.php?entity=' . $entity . '&action=' . $backAction . $qs);
     }
 
     // Field relasi multi-pilihan tidak disimpan di tabel utama.
@@ -171,7 +176,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($f['type'] !== 'select' || !isset($data[$key])) continue;
         if (!in_array($data[$key], $f['options'], true)) {
             flash_set('error', e($f['label']) . ' tidak valid.');
-            redirect('admin/crud.php?entity=' . $entity);
+            redirect('admin/crud.php?entity=' . $entity . $qs);
         }
     }
 
@@ -208,7 +213,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             User::createForAnggota($savedId, $username, $password);
         }
     }
-    redirect('admin/crud.php?entity=' . $entity);
+    redirect('admin/crud.php?entity=' . $entity . $qs);
 }
 
 $editing = (!$refPanel && $action === 'edit' && $id) ? $model::find($id) : null;
@@ -252,6 +257,28 @@ if ($entity === 'anggota') {
 
 $pageTitle = 'Kelola ' . $cfg['label'];
 $listHasFoto = isset($cfg['fields']['foto']);
+
+// ---- Pencarian daftar (filter di PHP, bukan query SQL) ----
+// Kolom '_cari_*' tidak ada di tabel: diisi di sini dari data yang sudah
+// dimuat (username anggota, nama pembuat karya) supaya ikut bisa dicari.
+$searchCols = $cfg['search'] ?? [];
+$totalRows = count($rows);
+if (!$refPanel && $searchCols && $q !== '') {
+    if ($entity === 'anggota') {
+        foreach ($rows as &$row) {
+            $row['_cari_username'] = $akunList[(int) $row['id']] ?? '';
+        }
+        unset($row);
+    }
+    if ($entity === 'karya') {
+        $namaAnggota = array_column($anggotaOptions, 'nama', 'id');
+        foreach ($rows as &$row) {
+            $row['_cari_pembuat'] = $namaAnggota[(int) ($row['pembuat_id'] ?? 0)] ?? '';
+        }
+        unset($row);
+    }
+    $rows = cari_filter($rows, $searchCols, $q);
+}
 include __DIR__ . '/../../app/includes/header.php';
 ?>
 <div class="topbar"><div class="topbar-inner admin-topbar">
@@ -278,7 +305,10 @@ include __DIR__ . '/../../app/includes/header.php';
       <?php else: ?>
         <div><div class="eyebrow">KELOLA</div><h1>Kelola <?= e($cfg['label']) ?></h1><p class="desc">Tambah, ubah, atau hapus data <?= strtolower(e($cfg['label'])) ?> pada portal.</p></div>
         <?php if (!$showForm): ?>
-          <a class="btn btn-primary" href="?entity=<?= $entity ?>&action=create"><i class="bi bi-plus-circle"></i> Tambah</a>
+          <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
+            <?php if ($searchCols): ?><?= cari_form(['entity' => $entity], $q, 'Cari ' . strtolower($cfg['label']) . '...', null, null, 'cari-inline') ?><?php endif; ?>
+            <a class="btn btn-primary" href="?entity=<?= $entity ?>&action=create<?= e($qs) ?>"><i class="bi bi-plus-circle"></i> Tambah</a>
+          </div>
         <?php endif; ?>
       <?php endif; ?>
     </div>
@@ -291,6 +321,7 @@ include __DIR__ . '/../../app/includes/header.php';
       <form class="crud-form" method="post" enctype="multipart/form-data">
         <?= Csrf::field() ?>
         <?php if ($editing): ?><input type="hidden" name="id" value="<?= $editing['id'] ?>"><?php endif; ?>
+        <?php if ($q !== ''): ?><input type="hidden" name="q" value="<?= e($q) ?>"><?php endif; ?>
         <div class="card crud-form-main">
           <div class="form-grid">
           <?php foreach ($cfg['fields'] as $key => $f):
@@ -417,7 +448,7 @@ include __DIR__ . '/../../app/includes/header.php';
           <?php endif; ?>
           <div style="display:flex; gap:10px; margin-top:10px;">
             <button class="btn btn-primary" type="submit"><?= $editing ? 'Simpan Perubahan' : 'Tambah Data' ?></button>
-            <a class="btn btn-outline" href="?entity=<?= $entity ?>">Batal</a>
+            <a class="btn btn-outline" href="?entity=<?= $entity ?><?= e($qs) ?>">Batal</a>
           </div>
         </div>
         <?php if (isset($cfg['fields']['foto']) && !($cfg['foto_inline'] ?? false)): $valFoto = $editing['foto'] ?? ''; ?>
@@ -435,6 +466,9 @@ include __DIR__ . '/../../app/includes/header.php';
         <?php endif; ?>
       </form>
     <?php else: ?>
+      <?php if ($searchCols): ?>
+        <div class="cari-info"><?= $q === '' ? e($totalRows . ' data') : e('Menampilkan ' . count($rows) . ' dari ' . $totalRows . ' data') ?></div>
+      <?php endif; ?>
       <div class="table-wrap">
         <table>
           <thead><tr><?php if ($listHasFoto): ?><th style="width:112px;">Foto</th><?php endif; ?><?php foreach ($cfg['list'] as $col): ?><th><?= e(($cfg['column_labels'] ?? [])[$col] ?? $cfg['fields'][$col]['label'] ?? ucfirst($col)) ?></th><?php endforeach; ?><th style="width:120px;">Aksi</th></tr></thead>
@@ -452,7 +486,7 @@ include __DIR__ . '/../../app/includes/header.php';
                 <td>
                   <div class="row-actions">
                     <?php if (!empty($cfg['toggle_status'])): $tampil = ($row['status'] ?? '') === 'Tampil'; ?>
-                      <form method="post" action="?entity=<?= $entity ?>&action=toggle_status&id=<?= (int) $row['id'] ?>" style="display:flex;">
+                      <form method="post" action="?entity=<?= $entity ?>&action=toggle_status&id=<?= (int) $row['id'] ?><?= e($qs) ?>" style="display:flex;">
                         <?= Csrf::field() ?>
                         <button type="submit" class="icon-btn<?= $tampil ? ' is-on' : '' ?>"
                                 title="<?= $tampil ? 'Sembunyikan dari slider' : 'Tampilkan di slider' ?>"
@@ -461,8 +495,8 @@ include __DIR__ . '/../../app/includes/header.php';
                         </button>
                       </form>
                     <?php endif; ?>
-                    <a class="icon-btn" href="?entity=<?= $entity ?>&action=edit&id=<?= (int) $row['id'] ?>"><i class="bi bi-pencil"></i></a>
-                    <form method="post" action="?entity=<?= $entity ?>&action=delete&id=<?= (int) $row['id'] ?>" style="display:flex;"
+                    <a class="icon-btn" href="?entity=<?= $entity ?>&action=edit&id=<?= (int) $row['id'] ?><?= e($qs) ?>"><i class="bi bi-pencil"></i></a>
+                    <form method="post" action="?entity=<?= $entity ?>&action=delete&id=<?= (int) $row['id'] ?><?= e($qs) ?>" style="display:flex;"
                           onsubmit="return confirm('Hapus data ini?')">
                       <?= Csrf::field() ?>
                       <button type="submit" class="icon-btn" title="Hapus"><i class="bi bi-trash"></i></button>
@@ -471,7 +505,7 @@ include __DIR__ . '/../../app/includes/header.php';
                 </td>
               </tr>
             <?php endforeach; ?>
-            <?php if (!$rows): ?><tr><td colspan="<?= count($cfg['list']) + ($listHasFoto ? 2 : 1) ?>"><div class="empty">Belum ada data.</div></td></tr><?php endif; ?>
+            <?php if (!$rows): ?><tr><td colspan="<?= count($cfg['list']) + ($listHasFoto ? 2 : 1) ?>"><div class="empty"><?= $q !== '' ? 'Data tidak ditemukan.' : 'Belum ada data.' ?></div></td></tr><?php endif; ?>
           </tbody>
         </table>
       </div>

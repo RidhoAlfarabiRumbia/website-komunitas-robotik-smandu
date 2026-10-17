@@ -131,6 +131,95 @@ function flash_alert_class(string $type): string
 }
 
 /**
+ * Pencarian daftar di halaman admin.
+ * Kata kunci diambil dari GET/POST "q" lalu difilter di PHP terhadap baris yang
+ * sudah dimuat — bukan lewat query SQL — sehingga input admin tidak pernah
+ * masuk ke SQL.
+ */
+
+/** Bersihkan kata kunci: trim, rapatkan spasi, potong 100 karakter. */
+function cari_kunci($raw): string
+{
+    if (!is_scalar($raw)) return ''; // mis. ?q[]=x — abaikan, jangan jadi warning
+    $raw = (string) $raw;
+    $q = preg_replace('/\s+/u', ' ', trim($raw));
+    if ($q === null) $q = trim($raw); // input bukan UTF-8 valid
+    if (function_exists('mb_substr')) {
+        return mb_substr($q, 0, 100);
+    }
+    return strlen($q) > 100 ? substr($q, 0, 100) : $q;
+}
+
+/**
+ * Filter baris berdasarkan kata kunci pada beberapa kolom (case-insensitive).
+ * Kolom yang tidak ada pada baris dilewati diam-diam, jadi pemanggil boleh
+ * menulis daftar kolom lebih lengkap daripada yang dikembalikan query.
+ */
+function cari_filter(array $rows, array $kolom, string $q): array
+{
+    if ($q === '' || !$kolom) {
+        return $rows;
+    }
+    $multi = function_exists('mb_strtolower');
+    $needle = $multi ? mb_strtolower($q, 'UTF-8') : strtolower($q);
+    $hasil = [];
+    foreach ($rows as $row) {
+        if (!is_array($row)) continue;
+        foreach ($kolom as $col) {
+            $val = $row[$col] ?? null;
+            if ($val === null || $val === '') continue;
+            $hay = $multi ? mb_strtolower((string) $val, 'UTF-8') : strtolower((string) $val);
+            if ($hay !== '' && str_contains($hay, $needle)) {
+                $hasil[] = $row;
+                break;
+            }
+        }
+    }
+    return $hasil;
+}
+
+/**
+ * Query string untuk mempertahankan kata kunci pada link / redirect.
+ * Pemanggil menentukan karakter pemisah ('?' atau '&').
+ */
+function cari_qs(string $q, string $lead = '&'): string
+{
+    return $q === '' ? '' : $lead . 'q=' . rawurlencode($q);
+}
+
+/**
+ * Kotak pencarian untuk daftar admin. Kata kunci, tombol Cari, dan Reset.
+ * Ringkasan jumlah data hanya ditampilkan bila $tampil/$total diisi.
+ *
+ * @param array       $params      query string lain yang harus ikut (entity, sub, ...)
+ * @param string      $q           kata kunci aktif (hasil dari cari_kunci)
+ * @param string      $kelas       'cari-bar' (baris penuh di atas tabel) atau
+ *                                 'cari-inline' (baris judul, di kiri tombol Tambah)
+ * @param int|null    $tampil      jumlah baris yang lolos filter
+ * @param int|null    $total       jumlah baris sebelum filter
+ */
+function cari_form(array $params, string $q, string $placeholder, ?int $tampil = null, ?int $total = null, string $kelas = 'cari-bar'): string
+{
+    $html = '<form class="' . e($kelas) . '" method="get" action="">';
+    foreach ($params as $k => $v) {
+        if ($v === '' || $v === null) continue;
+        $html .= '<input type="hidden" name="' . e((string) $k) . '" value="' . e((string) $v) . '">';
+    }
+    $html .= '<div class="field">'
+        . '<input type="search" name="q" value="' . e($q) . '" placeholder="' . e($placeholder) . '" aria-label="' . e($placeholder) . '">'
+        . '</div>';
+    $html .= '<button class="btn btn-primary" type="submit"><i class="bi bi-search"></i> Cari</button>';
+    if ($q !== '') {
+        $html .= '<a class="btn btn-outline" href="?' . e(http_build_query($params)) . '">Reset</a>';
+    }
+    if ($tampil !== null && $total !== null) {
+        $ringkasan = $q === '' ? $total . ' data' : 'Menampilkan ' . $tampil . ' dari ' . $total . ' data';
+        $html .= '<span class="cari-meta">' . e($ringkasan) . '</span>';
+    }
+    return $html . '</form>';
+}
+
+/**
  * Validasi & simpan file upload gambar (foto karya, galeri, prestasi, dsb).
  * Mengembalikan path relatif tersimpan, atau null jika tidak ada file baru.
  */

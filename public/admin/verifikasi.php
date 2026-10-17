@@ -8,6 +8,10 @@ require_once __DIR__ . '/../../app/includes/bootstrap.php';
 Auth::requireRole('admin');
 
 $filter = $_GET['status'] ?? '';
+// Pencarian daftar; kata kunci ikut dibawa ke link detail & redirect.
+$q = cari_kunci($_GET['q'] ?? $_POST['q'] ?? '');
+$qs = cari_qs($q);            // untuk URL yang sudah punya query string
+$qsBase = cari_qs($q, '?');   // untuk URL tanpa query string
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Csrf::verify();
@@ -17,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $p = Pendaftaran::find($id);
     if (!$p) {
         flash_set('error', 'Data pendaftaran tidak ditemukan.');
-        redirect('admin/verifikasi.php');
+        redirect('admin/verifikasi.php' . $qsBase);
     }
 
     $catatan = trim($_POST['catatan'] ?? '');
@@ -29,15 +33,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($username === '') {
             flash_set('error', 'Username wajib diisi untuk mengaktifkan akun.');
-            redirect('admin/verifikasi.php?id=' . $id);
+            redirect('admin/verifikasi.php?id=' . $id . $qs);
         }
         if (User::usernameTaken($username)) {
             flash_set('error', 'Username sudah dipakai akun lain.');
-            redirect('admin/verifikasi.php?id=' . $id);
+            redirect('admin/verifikasi.php?id=' . $id . $qs);
         }
         if (strlen($password) < 8) {
             flash_set('error', 'Kata sandi minimal 8 karakter.');
-            redirect('admin/verifikasi.php?id=' . $id);
+            redirect('admin/verifikasi.php?id=' . $id . $qs);
         }
 
         // Keamanan: JANGAN pernah otomatis menempelkan akun ini ke anggota
@@ -71,10 +75,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         flash_set('success', 'Data pendaftaran dihapus.');
     }
 
-    redirect('admin/verifikasi.php');
+    redirect('admin/verifikasi.php' . $qsBase);
 }
 
 $daftar = Pendaftaran::semua($filter);
+$totalDaftar = count($daftar);
+if ($q !== '') {
+    $daftar = cari_filter($daftar, ['nama', 'kelas', 'kontak', 'email', 'alasan', 'catatan', 'nama_berkas'], $q);
+}
 $detail = (int) ($_GET['id'] ?? 0) ? Pendaftaran::detail((int) $_GET['id']) : null;
 
 $pageTitle = 'Verifikasi Pendaftaran';
@@ -108,7 +116,7 @@ include __DIR__ . '/../../app/includes/header.php';
     <?php if ($msg = flash_get()): ?><div class="alert <?= flash_alert_class($msg['type']) ?>"><?= e($msg['text']) ?></div><?php endif; ?>
 
     <?php if ($detail): ?>
-      <a class="btn btn-outline btn-sm" href="verifikasi.php?status=<?= e($filter) ?>" style="margin-bottom:14px;"><i class="bi bi-arrow-left"></i> Kembali</a>
+      <a class="btn btn-outline btn-sm" href="verifikasi.php?status=<?= e($filter) ?><?= e($qs) ?>" style="margin-bottom:14px;"><i class="bi bi-arrow-left"></i> Kembali</a>
 
       <div class="two-col">
         <div class="card">
@@ -186,14 +194,23 @@ include __DIR__ . '/../../app/includes/header.php';
       </div>
     <?php else: ?>
       <form method="get" style="margin-bottom:16px;">
-        <div class="field" style="max-width:220px; margin:0;">
-          <label>Status</label>
-          <select name="status" onchange="this.form.submit()">
-            <option value="">Semua status</option>
-            <?php foreach (['Baru', 'Diverifikasi', 'Ditolak'] as $s): ?>
-              <option value="<?= $s ?>" <?= $filter === $s ? 'selected' : '' ?>><?= e($s) ?> (<?= Pendaftaran::hitungStatus($s) ?>)</option>
-            <?php endforeach; ?>
-          </select>
+        <div style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
+          <div class="field" style="max-width:220px; margin:0;">
+            <label>Status</label>
+            <select name="status" onchange="this.form.submit()">
+              <option value="">Semua status</option>
+              <?php foreach (['Baru', 'Diverifikasi', 'Ditolak'] as $s): ?>
+                <option value="<?= $s ?>" <?= $filter === $s ? 'selected' : '' ?>><?= e($s) ?> (<?= Pendaftaran::hitungStatus($s) ?>)</option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <div class="field" style="flex:1 1 240px; min-width:220px; margin:0;">
+            <label>Cari</label>
+            <input type="search" name="q" value="<?= e($q) ?>" placeholder="Nama, kelas, kontak, atau email">
+          </div>
+          <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i> Cari</button>
+          <?php if ($q !== ''): ?><a class="btn btn-outline" href="?status=<?= e($filter) ?>">Reset</a><?php endif; ?>
+          <span class="cari-meta"><?= $q === '' ? e($totalDaftar . ' data') : e('Menampilkan ' . count($daftar) . ' dari ' . $totalDaftar . ' data') ?></span>
         </div>
       </form>
 
@@ -208,10 +225,10 @@ include __DIR__ . '/../../app/includes/header.php';
                 <td><?= e($r['kontak']) ?></td>
                 <td><?= badge_status_pendaftaran($r['status']) ?></td>
                 <td style="font-size:12.5px; color:var(--text-muted);"><?= e(tanggal_indo($r['dibuat_pada'])) ?></td>
-                <td><a class="btn btn-outline btn-sm" href="?id=<?= (int) $r['id'] ?><?= $filter ? '&status=' . e($filter) : '' ?>">Periksa</a></td>
+                <td><a class="btn btn-outline btn-sm" href="?id=<?= (int) $r['id'] ?><?= $filter ? '&status=' . e($filter) : '' ?><?= e($qs) ?>">Periksa</a></td>
               </tr>
             <?php endforeach; ?>
-            <?php if (!$daftar): ?><tr><td colspan="6"><div class="empty">Belum ada pendaftaran.</div></td></tr><?php endif; ?>
+            <?php if (!$daftar): ?><tr><td colspan="6"><div class="empty"><?= $q !== '' ? 'Data tidak ditemukan.' : 'Belum ada pendaftaran.' ?></div></td></tr><?php endif; ?>
           </tbody>
         </table>
       </div>

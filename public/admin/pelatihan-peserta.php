@@ -10,6 +10,10 @@ Auth::requireRole('admin');
 $id = (int) ($_GET['id'] ?? 0);
 $filterPelatihan = $id;
 $filterStatus = $_GET['status'] ?? '';
+// Pencarian daftar; kata kunci ikut dibawa ke filter & redirect.
+$q = cari_kunci($_GET['q'] ?? $_POST['q'] ?? '');
+$qs = cari_qs($q);            // untuk URL yang sudah punya query string
+$qsBase = cari_qs($q, '?');   // untuk URL tanpa query string
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Csrf::verify();
@@ -19,10 +23,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $row = PelatihanPeserta::find($pesertaId);
     if (!$row) {
         flash_set('error', 'Data peserta tidak ditemukan.');
-        redirect('admin/pelatihan-peserta.php' . ($id ? '?id=' . $id : ''));
+        redirect('admin/pelatihan-peserta.php' . ($id ? '?id=' . $id . $qs : $qsBase));
     }
 
-    $redirectKe = 'admin/pelatihan-peserta.php?id=' . (int) $row['pelatihan_id'];
+    $redirectKe = 'admin/pelatihan-peserta.php?id=' . (int) $row['pelatihan_id'] . $qs;
 
     if ($aksi === 'setuju') {
         $p = Pelatihan::find((int) $row['pelatihan_id']);
@@ -47,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $pelatihan = $id ? Pelatihan::detail($id) : null;
 if ($id && !$pelatihan) {
     flash_set('error', 'Pelatihan tidak ditemukan.');
-    redirect('admin/pelatihan-peserta.php');
+    redirect('admin/pelatihan-peserta.php' . $qsBase);
 }
 
 $semuaPelatihan = Pelatihan::semua();
@@ -57,6 +61,11 @@ if ($pelatihan) {
     $peserta = Pelatihan::peserta($id, $filterStatus);
 } else {
     $peserta = $filterStatus ? Pelatihan::semuaPeserta($filterStatus) : Pelatihan::semuaPeserta();
+}
+$totalPeserta = count($peserta);
+if ($q !== '') {
+    // Kolom 'pelatihan_nama' hanya ada pada daftar lintas pelatihan.
+    $peserta = cari_filter($peserta, ['nama', 'kontak', 'kelas', 'asal', 'pelatihan_nama', 'catatan'], $q);
 }
 
 $pageTitle = 'Peserta Pelatihan';
@@ -111,6 +120,13 @@ include __DIR__ . '/../../app/includes/header.php';
           <?php endforeach; ?>
         </select>
       </div>
+      <div class="field" style="margin:0; flex:1 1 240px; min-width:220px;">
+        <label>Cari</label>
+        <input type="search" name="q" value="<?= e($q) ?>" placeholder="Nama, kontak, asal, atau catatan">
+      </div>
+      <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i> Cari</button>
+      <?php if ($q !== ''): ?><a class="btn btn-outline" href="?id=<?= (int) $id ?>&status=<?= e($filterStatus) ?>">Reset</a><?php endif; ?>
+      <span class="cari-meta"><?= $q === '' ? e($totalPeserta . ' data') : e('Menampilkan ' . count($peserta) . ' dari ' . $totalPeserta . ' data') ?></span>
     </form>
 
     <?php if ($pelatihan): ?>
@@ -168,7 +184,7 @@ include __DIR__ . '/../../app/includes/header.php';
               </td>
             </tr>
           <?php endforeach; ?>
-          <?php if (!$peserta): ?><tr><td colspan="7"><div class="empty">Belum ada peserta.</div></td></tr><?php endif; ?>
+          <?php if (!$peserta): ?><tr><td colspan="7"><div class="empty"><?= $q !== '' ? 'Data tidak ditemukan.' : 'Belum ada peserta.' ?></div></td></tr><?php endif; ?>
         </tbody>
       </table>
     </div>

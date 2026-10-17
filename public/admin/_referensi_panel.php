@@ -10,9 +10,15 @@ if (session_status() !== PHP_SESSION_ACTIVE || !Auth::isAdmin()) {
 }
 $refCfg = $config['referensi'];
 $refRows = Referensi::all('nama ASC');
+$refTotal = count($refRows);
+$refQ = cari_kunci($_GET['q'] ?? $_POST['q'] ?? '');
+$refQs = cari_qs($refQ);
+if ($refQ !== '') {
+    $refRows = cari_filter($refRows, $refCfg['search'] ?? ['nama', 'url', 'deskripsi'], $refQ);
+}
 $refId = (int) ($_GET['id'] ?? 0);
 $refEditing = (($_GET['action'] ?? '') === 'edit' && $refId) ? Referensi::find($refId) : null;
-$refBack = '?entity=materi&sub=referensi&action=' . ($refEditing ? 'edit&id=' . $refId : 'create');
+$refBack = '?entity=materi&sub=referensi&action=' . ($refEditing ? 'edit&id=' . $refId : 'create') . $refQs;
 ?>
 <section class="card" id="referensi" style="margin-top:26px; scroll-margin-top:86px;">
   <div class="section-head" style="margin-bottom:14px;">
@@ -43,9 +49,11 @@ $refBack = '?entity=materi&sub=referensi&action=' . ($refEditing ? 'edit&id=' . 
     </div>
     <div style="display:flex; gap:10px; margin-top:10px;">
       <button class="btn btn-primary" type="submit"><?= $refEditing ? 'Simpan Perubahan' : 'Tambah Referensi' ?></button>
-      <?php if ($refEditing): ?><a class="btn btn-outline" href="?entity=materi">Batal</a><?php endif; ?>
+      <?php if ($refEditing): ?><a class="btn btn-outline" href="?entity=materi&amp;sub=referensi<?= e($refQs) ?>">Batal</a><?php endif; ?>
     </div>
   </form>
+
+  <?= cari_form(['entity' => 'materi', 'sub' => 'referensi'], $refQ, 'Cari referensi...', count($refRows), $refTotal) ?>
 
   <div class="table-wrap">
     <table>
@@ -63,8 +71,8 @@ $refBack = '?entity=materi&sub=referensi&action=' . ($refEditing ? 'edit&id=' . 
             <?php endforeach; ?>
             <td>
               <div class="row-actions">
-                <a class="icon-btn" href="?entity=materi&sub=referensi&action=edit&id=<?= (int) $row['id'] ?>"><i class="bi bi-pencil"></i></a>
-                <form method="post" action="?entity=materi&sub=referensi&action=delete&id=<?= (int) $row['id'] ?>" style="display:flex;"
+                <a class="icon-btn" href="?entity=materi&sub=referensi&action=edit&id=<?= (int) $row['id'] ?><?= e($refQs) ?>"><i class="bi bi-pencil"></i></a>
+                <form method="post" action="?entity=materi&sub=referensi&action=delete&id=<?= (int) $row['id'] ?><?= e($refQs) ?>" style="display:flex;"
                       onsubmit="return confirm('Hapus data ini?')">
                   <?= Csrf::field() ?>
                   <button type="submit" class="icon-btn" title="Hapus"><i class="bi bi-trash"></i></button>
@@ -73,7 +81,7 @@ $refBack = '?entity=materi&sub=referensi&action=' . ($refEditing ? 'edit&id=' . 
             </td>
           </tr>
         <?php endforeach; ?>
-        <?php if (!$refRows): ?><tr><td colspan="<?= count($refCfg['list']) + 1 ?>"><div class="empty">Belum ada referensi.</div></td></tr><?php endif; ?>
+        <?php if (!$refRows): ?><tr><td colspan="<?= count($refCfg['list']) + 1 ?>"><div class="empty"><?= $refQ !== '' ? 'Data tidak ditemukan.' : 'Belum ada referensi.' ?></div></td></tr><?php endif; ?>
       </tbody>
     </table>
   </div>

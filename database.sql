@@ -131,7 +131,7 @@ CREATE TABLE lomba (
   tanggal DATE NOT NULL,
   lokasi VARCHAR(120) DEFAULT NULL,
   kategori VARCHAR(80) DEFAULT NULL,
-  status ENUM('Pendaftaran Dibuka','Akan Datang','Selesai') NOT NULL DEFAULT 'Akan Datang',
+  status ENUM('Akan Datang','Selesai') NOT NULL DEFAULT 'Akan Datang',
   hasil VARCHAR(80) DEFAULT NULL
 ) ENGINE=InnoDB;
 
@@ -341,7 +341,7 @@ INSERT INTO lomba (id, nama, penyelenggara, tanggal, lokasi, kategori, status, h
 (1,'KRPAI 2025 Regional Sulut-Malut','Kemendikbudristek','2025-10-05','Manado','Robot Pemadam Api','Selesai','Juara 2'),
 (2,'Lomba Karya Inovasi Siswa Provinsi Malut 2025','Dinas Pendidikan Provinsi','2025-11-12','Ternate','Inovasi Robotika','Selesai','Juara 2'),
 (3,'KRPAI 2026 Regional','Kemendikbudristek','2026-03-15','Manado','Robot Pemadam Api','Selesai','Juara 3'),
-(4,'Lomba Robotik Line Tracer Antar SMA Kota Ternate','MGMP Informatika Kota Ternate','2026-10-20','SMA Negeri 4 Ternate','Line Tracer','Pendaftaran Dibuka',NULL),
+(4,'Lomba Robotik Line Tracer Antar SMA Kota Ternate','MGMP Informatika Kota Ternate','2026-10-20','SMA Negeri 4 Ternate','Line Tracer','Akan Datang',NULL),
 (5,'Olimpiade Sains Nasional bidang komputer','BSN','2026-11-25','Jakarta','Komputer','Akan Datang',NULL);
 
 INSERT INTO lomba_peserta (lomba_id, anggota_id) VALUES

@@ -4,6 +4,10 @@
  * Konfigurasi field per entitas untuk halaman admin/crud.php.
  * type: text | textarea | select | date | file | video | doc_file | anggota_select
  *       | akun_username | password | pelatihan_multi | anggota_multi
+ *
+ * 'search' (opsional) = kolom yang dicari di kotak pencarian daftar; kolom
+ * '_cari_*' diisi sementara oleh crud.php (mis. username, nama pembuat) dan
+ * tidak ada di tabel. Entitas tanpa kolom teks (mis. slider) memakai [].
  */
 function crud_config(): array
 {
@@ -20,6 +24,7 @@ function crud_config(): array
                 'password' => ['label' => 'Kata Sandi Login', 'type' => 'password'],
             ],
             'list' => ['nama', 'kelas', 'fokus', 'username'],
+            'search' => ['nama', 'kelas', 'fokus', 'kontak', 'deskripsi', '_cari_username'],
         ],
         'materi' => [
             'label' => 'Materi', 'model' => Materi::class,
@@ -34,6 +39,7 @@ function crud_config(): array
                 'pelatihan_ids' => ['label' => 'Pelatihan Tertaut', 'type' => 'pelatihan_multi'],
             ],
             'list' => ['judul', 'topik'],
+            'search' => ['judul', 'topik', 'deskripsi'],
         ],
         'referensi' => [
             'label' => 'Referensi', 'model' => Referensi::class,
@@ -43,6 +49,7 @@ function crud_config(): array
                 'deskripsi' => ['label' => 'Deskripsi', 'type' => 'textarea'],
             ],
             'list' => ['nama', 'url', 'deskripsi'],
+            'search' => ['nama', 'url', 'deskripsi'],
         ],
         'karya' => [
             'label' => 'Karya', 'model' => Karya::class,
@@ -58,6 +65,7 @@ function crud_config(): array
                 'foto' => ['label' => 'Foto', 'type' => 'file', 'subfolder' => 'karya'],
             ],
             'list' => ['judul', 'kategori', 'progres', 'publikasi'],
+            'search' => ['judul', 'kategori', 'deskripsi', 'teknologi', '_cari_pembuat'],
         ],
         'galeri' => [
             'label' => 'Galeri', 'model' => Galeri::class,
@@ -70,6 +78,7 @@ function crud_config(): array
                 'video' => ['label' => 'Link Video', 'type' => 'video'],
             ],
             'list' => ['judul', 'kategori', 'tanggal'],
+            'search' => ['judul', 'kategori', 'deskripsi'],
             // Foto dirender di dalam kartu form utama (lebar penuh), bukan
             // panel terpisah di kanan — lihat crud.php.
             'foto_inline' => true,
@@ -80,6 +89,9 @@ function crud_config(): array
                 'foto' => ['label' => 'Gambar', 'type' => 'file', 'subfolder' => 'hero'],
             ],
             'list' => [],
+            // Slider hanya berisi foto: tidak ada kolom teks, jadi kotak
+            // pencarian disembunyikan (lihat crud.php, $cfg['search']).
+            'search' => [],
             // Slider hanya punya 1 field (foto), jadi foto dirender di dalam
             // kartu utama — bukan panel terpisah di kanan (lihat crud.php).
             'foto_inline' => true,
@@ -101,6 +113,7 @@ function crud_config(): array
                 'video' => ['label' => 'Link Video', 'type' => 'video', 'show_when' => ['status' => 'Selesai']],
             ],
             'list' => ['nama', 'tanggal', 'lokasi', 'status'],
+            'search' => ['nama', 'deskripsi', 'lokasi', 'waktu'],
         ],
         'lomba' => [
             'label' => 'Lomba', 'model' => Lomba::class,
@@ -114,6 +127,7 @@ function crud_config(): array
                 'hasil' => ['label' => 'Hasil', 'type' => 'text'],
             ],
             'list' => ['nama', 'tanggal', 'status', 'hasil'],
+            'search' => ['nama', 'penyelenggara', 'lokasi', 'kategori', 'hasil'],
         ],
         'pengumuman' => [
             'label' => 'Pengumuman', 'model' => Pengumuman::class,
@@ -123,6 +137,7 @@ function crud_config(): array
                 'tanggal' => ['label' => 'Tanggal', 'type' => 'date', 'required' => true],
             ],
             'list' => ['judul', 'tanggal'],
+            'search' => ['judul', 'isi'],
         ],
         'pelatihan' => [
             'label' => 'Pelatihan', 'model' => Pelatihan::class,
@@ -138,6 +153,7 @@ function crud_config(): array
                 'akses' => ['label' => 'Sifat Akses', 'type' => 'select', 'options' => ['Anggota','Umum']],
             ],
             'list' => ['nama', 'tanggal_mulai', 'kuota', 'status', 'akses'],
+            'search' => ['nama', 'deskripsi', 'lokasi', 'waktu'],
         ],
         'prestasi' => [
             'label' => 'Prestasi', 'model' => Prestasi::class,
@@ -154,6 +170,7 @@ function crud_config(): array
                 'peraih' => ['label' => 'Peraih Prestasi', 'type' => 'peraih'],
             ],
             'list' => ['nama', 'lomba_nama', 'tingkat', 'hasil', 'tanggal', 'status'],
+            'search' => ['nama', 'lomba_teks', 'lomba_nama', 'hasil', 'deskripsi'],
             'column_labels' => ['lomba_nama' => 'Lomba'],
         ],
     ];
