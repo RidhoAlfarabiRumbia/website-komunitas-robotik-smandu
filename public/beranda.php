@@ -6,6 +6,19 @@ $isAnggota = Auth::role() === 'anggota';
 // Admin juga melihat konten anggota di beranda (PRD 7: seluruh menu anggota).
 $kontenAnggota = $isAnggota || $isAdmin;
 
+// ---- Mode kelola admin: tambah / ubah / sembunyikan gambar slider beranda ----
+$crudEntitas = 'hero';
+$crudItemEntity = 'hero';                           // tombol Ubah/Hapus di tiap slide
+$crudQs = '?manage=hero';
+$crudAktif = $isAdmin && (($_GET['manage'] ?? $_POST['manage'] ?? '') === $crudEntitas);
+$crudForm = false;
+if ($crudAktif) {
+    $crudPath = 'beranda.php';
+    $crudParam = 'manage';
+    include __DIR__ . '/../app/includes/crud_handle.php';
+    $crudForm = $showForm;
+}
+
 $heroData = Hero::getSliderData();
 $heroSlides = $heroData['slides'];      // first slide for initial render
 $heroTunda = $heroData['deferred'];     // remaining slides for lazy load
@@ -86,7 +99,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
           <?php if ($isAdmin || $nSlides > 1): ?>
             <div class="dots">
               <?php if ($isAdmin): ?>
-                <a class="chip-admin" href="<?= base_url('admin/crud.php?entity=hero') ?>" title="Kelola gambar slider"><i class="bi bi-gear"></i> Kelola Slider</a>
+                <a class="chip-admin" href="?manage=hero" title="Kelola gambar slider"><i class="bi bi-gear"></i> Kelola Slider</a>
               <?php endif; ?>
               <?php if ($nSlides > 1): ?>
                 <?php for ($i = 0; $i < $nSlides; $i++): ?><button type="button" class="<?= $i === 0 ? 'active' : '' ?>" aria-label="Ke slide <?= $i + 1 ?>"></button><?php endfor; ?>
@@ -98,7 +111,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
         <div class="hero-illustration"><img src="<?= base_url('assets/img/hero-illustration.svg') ?>" alt="Ilustrasi robot"></div>
       <?php endif; ?>
       <?php if ($isAdmin && !$heroSlides): ?>
-        <a class="chip-admin" href="<?= base_url('admin/crud.php?entity=hero') ?>" title="Kelola gambar slider"><i class="bi bi-gear"></i> Kelola Slider</a>
+        <a class="chip-admin" href="?manage=hero" title="Kelola gambar slider"><i class="bi bi-gear"></i> Kelola Slider</a>
       <?php endif; ?>
     </div>
     <div class="welcome-scrim" aria-hidden="true"></div>
@@ -124,7 +137,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
         <a class="btn btn-outline" href="<?= base_url('login.php') ?>"><i class="bi bi-box-arrow-in-right"></i> Masuk</a>
       <?php elseif ($isAdmin): ?>
         <a class="btn btn-primary" href="<?= base_url('admin/dashboard.php') ?>"><i class="bi bi-speedometer2"></i> Dashboard Admin</a>
-        <a class="btn btn-outline" href="<?= base_url('admin/crud.php?entity=anggota') ?>"><i class="bi bi-people"></i> Kelola Anggota</a>
+        <a class="btn btn-outline" href="<?= base_url('anggota.php') ?>" title="Tambah, ubah, atau hapus anggota langsung di halaman Anggota"><i class="bi bi-people"></i> Kelola Anggota</a>
       <?php else: ?>
         <a class="btn btn-primary" href="<?= base_url('profil.php') ?>"><i class="bi bi-person-circle"></i> Lihat Profil Saya</a>
         <a class="btn btn-outline" href="<?= base_url('ajukan-karya.php') ?>"><i class="bi bi-plus-circle"></i> Ajukan Karya</a>
@@ -133,6 +146,53 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
       </div>
     </section>
   </div>
+
+  <?php if ($crudAktif): ?>
+    <?php if ($msg = flash_get()): ?><div class="alert <?= flash_alert_class($msg['type']) ?>"><?= e($msg['text']) ?></div><?php endif; ?>
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <div class="eyebrow">KELOLA</div>
+          <h2><?= $crudForm ? ($editing ? 'Ubah' : 'Tambah') . ' Gambar Slider' : 'Gambar Slider Beranda' ?></h2>
+          <p class="desc">Gambar slider yang tampil di bagian atas beranda. Slide yang disembunyikan tidak muncul untuk pengunjung.</p>
+        </div>
+        <?php if (!$crudForm): ?>
+          <a class="btn btn-primary" href="?manage=hero&amp;action=create"><i class="bi bi-plus-circle"></i> Tambah Gambar</a>
+        <?php endif; ?>
+      </div>
+
+      <?php if ($crudForm): ?>
+        <?php include __DIR__ . '/../app/includes/crud_form.php'; ?>
+      <?php elseif ($rows): ?>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th style="width:140px;">Gambar</th><th>Status</th><th style="width:150px;">Aksi</th></tr></thead>
+            <tbody>
+              <?php foreach ($rows as $row): $tampil = ($row['status'] ?? '') === 'Tampil'; ?>
+                <tr>
+                  <td><img src="<?= base_url(e($row['foto'] ?? 'assets/img/hero-illustration.svg')) ?>" alt="" loading="lazy" decoding="async" style="display:block; width:120px; height:68px; object-fit:cover; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface-2);"></td>
+                  <td><span class="badge <?= $tampil ? 'badge-teal' : 'badge-muted' ?>"><?= $tampil ? 'Tampil' : 'Disembunyikan' ?></span></td>
+                  <td>
+                    <div class="row-actions">
+                      <form method="post" action="<?= e($crudQs) ?>&amp;action=toggle_status&amp;id=<?= (int) $row['id'] ?>" style="display:flex;">
+                        <?= Csrf::field() ?>
+                        <button type="submit" class="icon-btn<?= $tampil ? ' is-on' : '' ?>" title="<?= $tampil ? 'Sembunyikan dari beranda' : 'Tampilkan di beranda' ?>">
+                          <i class="bi <?= $tampil ? 'bi-eye' : 'bi-eye-slash' ?>"></i>
+                        </button>
+                      </form>
+                      <?php $itemId = (int) $row['id']; include __DIR__ . '/../app/includes/partial_admin_actions.php'; ?>
+                    </div>
+                  </td>
+                </tr>
+              <?php endforeach; ?>
+            </tbody>
+          </table>
+        </div>
+      <?php else: ?>
+        <div class="empty">Belum ada gambar slider. Klik "Tambah Gambar" untuk mengunggah.</div>
+      <?php endif; ?>
+    </section>
+  <?php endif; ?>
 
   <?php if (!$isAnggota): ?>
   <section class="section reveal">

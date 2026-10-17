@@ -102,11 +102,29 @@ function bindDrawer(toggleId, panelId, openClass, closeId, backdropId){
 bindDrawer('sidebarToggle','adminSidebar','sidebar-open','sidebarClose','sidebarBackdrop');
 bindDrawer('navToggle','navMenu','nav-open','navClose','navBackdrop');
 
-/* Scroll reveal */
+/* Scroll reveal — wajib gagal-aman.
+   .reveal punya opacity:0 di CSS, jadi kalau observer ini tidak pernah memicu,
+   area konten terlihat BLANK (hanya header & footer). Karena itu:
+   1) threshold 0 (bukan 0.1) + rootMargin kecil → memicu begitu 1px terlihat,
+      termasuk pada elemen yang lebih tinggi daripada layar;
+   2) jaring pengaman berbasis posisi: element yang sudah berada di layar
+      langsung ditampilkan setelah 1,2 detik, dan juga saat halaman dipulihkan
+      dari cache (pageshow). */
 (function(){
   var els=document.querySelectorAll('.reveal');
   if(!els.length)return;
-  if(!('IntersectionObserver' in window)){els.forEach(function(e){e.classList.add('visible');});return;}
+  function tampilkanYangSudahDilihat(){
+    var tinggi=window.innerHeight||document.documentElement.clientHeight||0;
+    for(var i=0;i<els.length;i++){
+      var el=els[i];
+      if(el.classList.contains('visible'))continue;
+      // Tampilkan yang sudah masuk layar ATAU sudah dilewati scroll ke atas
+      // (mis. posisi scroll dipulihkan saat halaman dimuat ulang). Yang di bawah
+      // layar tetap menunggu animasi saat digulir.
+      if(el.getBoundingClientRect().top<tinggi)el.classList.add('visible');
+    }
+  }
+  if(!('IntersectionObserver' in window)){tampilkanYangSudahDilihat();return;}
   var obs=new IntersectionObserver(function(entries){
     entries.forEach(function(entry){
       if(entry.isIntersecting){
@@ -114,8 +132,10 @@ bindDrawer('navToggle','navMenu','nav-open','navClose','navBackdrop');
         obs.unobserve(entry.target);
       }
     });
-  },{threshold:0.1,rootMargin:'0px 0px -40px 0px'});
+  },{threshold:0,rootMargin:'0px 0px -10px 0px'});
   els.forEach(function(e){obs.observe(e);});
+setTimeout(tampilkanYangSudahDilihat,1200);
+window.addEventListener('pageshow',tampilkanYangSudahDilihat);
 })();
 </script>
 </body>

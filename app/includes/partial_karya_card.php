@@ -1,3 +1,10 @@
+<?php
+// Kartu karya. Dimuat di dalam loop yang menamai variabel $k.
+// Tombol Ubah/Hapus hanya muncul untuk admin, dan hanya pada halaman yang
+// memang mengelola karya di sana ($crudItemEntity = 'karya').
+$kartuDikelola = Auth::isAdmin() && ($crudItemEntity ?? '') === 'karya';
+?>
+<div class="card-wrap">
 <a href="karya-detail.php?id=<?= $k['id'] ?>" class="work-card">
   <div class="work-thumb"><img src="<?= base_url(e($k['foto'] ?? 'assets/img/karya-robot.svg')) ?>" alt="<?= e($k['judul']) ?>" loading="lazy" decoding="async"></div>
   <div class="work-body">
@@ -12,3 +19,5 @@
     <div class="work-foot"><span class="work-meta"><i class="bi bi-person"></i> <?= e($k['pembuat_nama'] ?? '') ?></span></div>
   </div>
 </a>
+<?php if ($kartuDikelola): $itemId = (int) $k['id']; include __DIR__ . '/partial_admin_actions.php'; endif; ?>
+</div>

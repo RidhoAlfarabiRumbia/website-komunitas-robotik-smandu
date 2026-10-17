@@ -7,6 +7,19 @@
  */
 require_once __DIR__ . '/../app/includes/bootstrap.php';
 
+// ---- Mode kelola admin: tambah / ubah / hapus prestasi langsung di halaman ini ----
+$crudEntitas = 'prestasi';
+$crudItemEntity = 'prestasi';                      // tombol Ubah/Hapus di tiap kartu
+$crudQs = '?manage=prestasi';
+$crudAktif = Auth::isAdmin() && (($_GET['manage'] ?? $_POST['manage'] ?? '') === $crudEntitas);
+$crudForm = false;
+if ($crudAktif) {
+    $crudPath = 'prestasi.php';
+    $crudParam = 'manage';
+    include __DIR__ . '/../app/includes/crud_handle.php';
+    $crudForm = $showForm;
+}
+
 $daftar = Prestasi::tayang();
 
 $pageTitle = 'Prestasi';
@@ -23,14 +36,25 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
     <?php if (Auth::role() === 'anggota'): ?>
       <a class="btn btn-primary" href="ajukan-prestasi.php"><i class="bi bi-trophy"></i> Ajukan Prestasi</a>
     <?php endif; ?>
+    <?php if (Auth::isAdmin() && !$crudForm): ?>
+      <a class="btn btn-primary" href="?manage=prestasi&amp;action=create"><i class="bi bi-plus-circle"></i> Tambah Prestasi</a>
+    <?php endif; ?>
   </div>
+
+  <?php if ($crudAktif && $msg = flash_get()): ?><div class="alert <?= flash_alert_class($msg['type']) ?>"><?= e($msg['text']) ?></div><?php endif; ?>
+  <?php if ($crudForm): ?>
+    <div class="section-head" style="justify-content:flex-start;"><h2><?= $editing ? 'Ubah' : 'Tambah' ?> Prestasi</h2></div>
+    <?php include __DIR__ . '/../app/includes/crud_form.php'; ?>
+    <div style="margin:30px 0; border-top:1px solid var(--border);"></div>
+  <?php endif; ?>
 
   <?php if ($daftar): ?>
     <div class="grid grid-3 grid-stagger reveal">
       <?php foreach ($daftar as $p):
         $tim = Prestasi::tim((int) $p['id']);
       ?>
-        <div class="card">
+        <div class="card card-admin">
+          <?php if ($crudItemEntity === 'prestasi'): $itemId = (int) $p['id']; include __DIR__ . '/../app/includes/partial_admin_actions.php'; endif; ?>
           <?php if ($p['foto']): ?>
             <img src="<?= base_url(e($p['foto'])) ?>" alt="<?= e($p['nama']) ?>" loading="lazy" decoding="async" style="width:100%; height:170px; object-fit:cover; border-radius:var(--radius-md); margin-bottom:14px;">
           <?php else: ?>

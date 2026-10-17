@@ -1,3 +1,10 @@
+<?php
+// Kartu galeri. Dimuat di dalam loop yang menamai variabel $g.
+// Tombol Ubah/Hapus hanya muncul untuk admin, dan hanya pada halaman yang
+// memang mengelola galeri di sana ($crudItemEntity = 'galeri').
+$kartuDikelola = Auth::isAdmin() && ($crudItemEntity ?? '') === 'galeri';
+?>
+<div class="card-wrap">
 <div class="work-card">
   <div class="work-thumb"><img src="<?= base_url(e($g['foto'] ?? 'assets/img/galeri-latihan.svg')) ?>" alt="<?= e($g['judul']) ?>" loading="lazy" decoding="async"></div>
   <div class="work-body">
@@ -6,4 +13,6 @@
     <div class="work-desc"><?= e($g['deskripsi']) ?></div>
     <div class="work-meta"><?= tanggal_indo($g['tanggal']) ?></div>
   </div>
+</div>
+<?php if ($kartuDikelola): $itemId = (int) $g['id']; include __DIR__ . '/partial_admin_actions.php'; endif; ?>
 </div>

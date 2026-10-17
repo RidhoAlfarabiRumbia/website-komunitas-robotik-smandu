@@ -7,6 +7,21 @@
  */
 require_once __DIR__ . '/../app/includes/bootstrap.php';
 
+// ---- Mode kelola admin: tambah / ubah / hapus pelatihan langsung di halaman ini ----
+// Diletakkan sebelum blok pendaftaran di bawah: partial ini hanya aktif bila
+// ?manage=pelatihan (atau POST dari form/form hapus di halaman ini).
+$crudEntitas = 'pelatihan';
+$crudItemEntity = 'pelatihan';                      // tombol Ubah/Hapus di tiap kartu
+$crudQs = '?manage=pelatihan';
+$crudAktif = Auth::isAdmin() && (($_GET['manage'] ?? $_POST['manage'] ?? '') === $crudEntitas);
+$crudForm = false;
+if ($crudAktif) {
+    $crudPath = 'pelatihan.php';
+    $crudParam = 'manage';
+    include __DIR__ . '/../app/includes/crud_handle.php';
+    $crudForm = $showForm;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Csrf::verify();
     Auth::requireRole('anggota');
@@ -56,7 +71,17 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
     <?php if (!Auth::check()): ?>
       <a class="btn btn-outline" href="login.php"><i class="bi bi-box-arrow-in-right"></i> Masuk untuk Daftar</a>
     <?php endif; ?>
+    <?php if (Auth::isAdmin() && !$crudForm): ?>
+      <a class="btn btn-primary" href="?manage=pelatihan&amp;action=create"><i class="bi bi-plus-circle"></i> Tambah Pelatihan</a>
+    <?php endif; ?>
   </div>
+
+  <?php if ($crudAktif && $msg = flash_get()): ?><div class="alert <?= flash_alert_class($msg['type']) ?>"><?= e($msg['text']) ?></div><?php endif; ?>
+  <?php if ($crudForm): ?>
+    <div class="section-head" style="justify-content:flex-start;"><h2><?= $editing ? 'Ubah' : 'Tambah' ?> Pelatihan</h2></div>
+    <?php include __DIR__ . '/../app/includes/crud_form.php'; ?>
+    <div style="margin:30px 0; border-top:1px solid var(--border);"></div>
+  <?php endif; ?>
 
   <?php if (!Auth::check()): ?>
     <div class="alert alert-info" style="display:flex; gap:10px; align-items:flex-start;">
@@ -71,7 +96,8 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
         $sisa = Pelatihan::sisaKuota($p, (int) $p['jumlah_disetujui']);
         $saya = Auth::role() === 'anggota' ? Pelatihan::pendaftaranAnggota((int) $p['id'], (int) Auth::anggotaId()) : null;
       ?>
-        <div class="card">
+        <div class="card card-admin">
+          <?php if ($crudItemEntity === 'pelatihan'): $itemId = (int) $p['id']; include __DIR__ . '/../app/includes/partial_admin_actions.php'; endif; ?>
           <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;">
             <span class="badge <?= $p['status'] === 'Dibuka' ? 'badge-teal' : 'badge-muted' ?>"><?= e($p['status']) ?></span>
             <span class="badge <?= $p['akses'] === 'Umum' ? 'badge-blue' : 'badge-amber' ?>">

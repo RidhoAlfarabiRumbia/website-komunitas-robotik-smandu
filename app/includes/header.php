@@ -22,5 +22,10 @@
   }
 })();
 </script>
+<noscript>
+  <!-- Tanpa JavaScript, elemen .reveal (opacity:0) tidak akan pernah terlihat.
+       Paksa tampil agar konten halaman tetap terbaca. -->
+  <style>.reveal{opacity:1 !important;transform:none !important;}</style>
+</noscript>
 </head>
 <body>

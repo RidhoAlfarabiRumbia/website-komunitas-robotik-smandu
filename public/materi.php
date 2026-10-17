@@ -11,6 +11,20 @@ Auth::requireMember();
 $idAnggota = (int) Auth::anggotaId();
 $isAdmin = Auth::isAdmin();
 
+// ---- Mode kelola admin: tambah / ubah / hapus materi langsung di halaman ini ----
+// Referensi tetap dikelola dari admin/crud.php?entity=materi&sub=referensi.
+$crudEntitas = 'materi';
+$crudItemEntity = 'materi';                        // tombol Ubah/Hapus di tiap kartu
+$crudQs = '?manage=materi';
+$crudAktif = $isAdmin && (($_GET['manage'] ?? $_POST['manage'] ?? '') === $crudEntitas);
+$crudForm = false;
+if ($crudAktif) {
+    $crudPath = 'materi.php';
+    $crudParam = 'manage';
+    include __DIR__ . '/../app/includes/crud_handle.php';
+    $crudForm = $showForm;
+}
+
 $materi = Materi::semuaWithPelatihan();
 $referensi = Referensi::all('nama ASC');
 
@@ -25,7 +39,17 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
       <h1>Materi Pembelajaran</h1>
       <p class="desc">Materi pelatihan terbuka bagi peserta yang telah disetujui admin pada pelatihan terkait, lengkap dengan referensi belajar eksternal.</p>
     </div>
+    <?php if ($isAdmin && !$crudForm): ?>
+      <a class="btn btn-primary" href="?manage=materi&amp;action=create"><i class="bi bi-plus-circle"></i> Tambah Materi</a>
+    <?php endif; ?>
   </div>
+
+  <?php if ($crudAktif && $msg = flash_get()): ?><div class="alert <?= flash_alert_class($msg['type']) ?>"><?= e($msg['text']) ?></div><?php endif; ?>
+  <?php if ($crudForm): ?>
+    <div class="section-head" style="justify-content:flex-start;"><h2><?= $editing ? 'Ubah' : 'Tambah' ?> Materi</h2></div>
+    <?php include __DIR__ . '/../app/includes/crud_form.php'; ?>
+    <div style="margin:30px 0; border-top:1px solid var(--border);"></div>
+  <?php endif; ?>
 
   <?php if ($materi): ?>
     <div class="grid grid-3 grid-stagger reveal">
@@ -35,7 +59,8 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
         $hasLink = !empty($m['link_url']);
         $terkait = array_filter(explode(', ', (string) $m['pelatihan_terkait']));
       ?>
-      <div class="card">
+      <div class="card card-admin">
+        <?php if ($crudItemEntity === 'materi'): $itemId = (int) $m['id']; include __DIR__ . '/../app/includes/partial_admin_actions.php'; endif; ?>
         <span class="badge badge-blue"><?= e($m['topik']) ?></span>
         <h3 style="font-size:15px; margin:10px 0 6px;"><?= e($m['judul']) ?></h3>
         <p style="font-size:13px; color:var(--text-muted); margin-bottom:12px;"><?= e(trunc($m['deskripsi'] ?? '', 110)) ?></p>
