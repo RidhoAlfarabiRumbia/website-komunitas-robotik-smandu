@@ -560,4 +560,5 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
   }
 })();
 </script>
+<?php include __DIR__ . '/../app/includes/partial_lightbox.php'; ?>
 <?php include __DIR__ . '/../app/includes/footer.php'; ?>

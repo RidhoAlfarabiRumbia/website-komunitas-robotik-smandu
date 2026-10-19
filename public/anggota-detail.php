@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/../app/includes/bootstrap.php';
-$id = (int) ($_GET['id'] ?? 0);
+$id = nilai_int($_GET, 'id');
 $a = Anggota::find($id);
 $pageTitle = 'Profil Anggota';
 include __DIR__ . '/../app/includes/header.php';
@@ -20,7 +20,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
     <div class="avatar" style="width:64px; height:64px;"><img src="<?= base_url(e($a['foto'] ?? 'assets/img/avatar-1.svg')) ?>" alt=""></div>
     <div>
       <h1 style="font-size:20px;"><?= e($a['nama']) ?></h1>
-      <div class="meta" style="margin:4px 0 8px;"><?= e($a['kelas']) ?> · Fokus <?= e($a['fokus']) ?></div>
+      <div class="meta" style="margin:4px 0 8px;"><?= e($a['kelas']) ?> Â· Fokus <?= e($a['fokus']) ?></div>
       <p style="font-size:13.5px; color:var(--text-muted); max-width:60ch;"><?= e($a['deskripsi']) ?></p>
     </div>
   </div>
@@ -37,4 +37,5 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
   </div>
 <?php endif; ?>
 </div>
+<?php include __DIR__ . '/../app/includes/partial_lightbox.php'; ?>
 <?php include __DIR__ . '/../app/includes/footer.php'; ?>

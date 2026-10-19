@@ -26,11 +26,24 @@ class Auth
         }
         self::resetPercobaan($username);
 
+        // Cek keabsahan anggota DULUAN, sebelum apa pun ditulis ke session.
+        // Kalau ini tidak diperiksa di sini dan kita return false setelah
+        // $_SESSION['user_id'] terisi, sesi berisi "sudah masuk" padahal
+        // datanya tidak ada — halaman berikutnya mengira pengguna masuk.
+        $anggota = null;
+        if ($user['role'] === 'anggota') {
+            $anggota = Anggota::find((int) $user['anggota_id']);
+            // Akun tanpa baris anggota (mis. anggota dihapus dari panel admin)
+            // tidak boleh masuk: halamannya akan kosong semua.
+            if (!$anggota) {
+                return false;
+            }
+        }
+
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['role'] = $user['role'];
 
         if ($user['role'] === 'anggota') {
-            $anggota = Anggota::find((int) $user['anggota_id']);
             $_SESSION['anggota'] = $anggota;
         } else {
             $_SESSION['nama'] = 'Admin Robotik';

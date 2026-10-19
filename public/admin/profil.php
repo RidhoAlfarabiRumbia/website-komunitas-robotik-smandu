@@ -16,13 +16,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         flash_set('error', 'Akun admin tidak ditemukan.');
         redirect('admin/profil.php');
     }
-    $passBaru = (string) ($_POST['password_baru'] ?? '');
-    $errors = $passBaru !== (string) ($_POST['password_baru2'] ?? '')
+    $passBaru = nilai_teks($_POST, 'password_baru', false);
+    $errors = $passBaru !== nilai_teks($_POST, 'password_baru2', false)
         ? ['Pengulangan kata sandi baru tidak sama.']
         : User::ubahAkun(
             (int) $akun['id'],
-            (string) ($_POST['username'] ?? ''),
-            (string) ($_POST['password_lama'] ?? ''),
+            nilai_teks($_POST, 'username'),
+            nilai_teks($_POST, 'password_lama', false),
             $passBaru
         );
     if (!$errors) {
@@ -72,7 +72,7 @@ include __DIR__ . '/../../app/includes/header.php';
         <div class="form-grid">
           <div class="field field-full">
             <label>Username</label>
-            <input name="username" value="<?= e($_POST['username'] ?? ($akun['username'] ?? '')) ?>" minlength="3" required autocomplete="username">
+            <input name="username" value="<?= e(nilai_teks($_POST, 'username') ?: ($akun['username'] ?? '')) ?>" minlength="3" required autocomplete="username">
           </div>
           <div class="field">
             <label>Kata sandi saat ini *</label>

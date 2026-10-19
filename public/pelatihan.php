@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Csrf::verify();
     Auth::requireRole('anggota');
 
-    $id = (int) ($_POST['pelatihan_id'] ?? 0);
+    $id = nilai_int($_POST, 'pelatihan_id');
     $p = Pelatihan::detail($id);
 
     if (!$p) {
@@ -96,7 +96,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
         $sisa = Pelatihan::sisaKuota($p, (int) $p['jumlah_disetujui']);
         $saya = Auth::role() === 'anggota' ? Pelatihan::pendaftaranAnggota((int) $p['id'], (int) Auth::anggotaId()) : null;
       ?>
-        <div class="card card-admin">
+        <div class="card<?= Auth::isAdmin() && ($crudItemEntity ?? '') === 'pelatihan' ? ' card-admin' : '' ?>">
           <?php if ($crudItemEntity === 'pelatihan'): $itemId = (int) $p['id']; include __DIR__ . '/../app/includes/partial_admin_actions.php'; endif; ?>
           <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;">
             <span class="badge <?= $p['status'] === 'Dibuka' ? 'badge-teal' : 'badge-muted' ?>"><?= e($p['status']) ?></span>

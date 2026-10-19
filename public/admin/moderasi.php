@@ -8,19 +8,20 @@ $qs = cari_qs($q);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Csrf::verify();
-    $id = (int) $_POST['id'];
-    $aksi = $_POST['aksi'];
+    $id = nilai_int($_POST, 'id');
+    $aksi = nilai_teks($_POST, 'aksi');
     if ($aksi === 'approve') {
         Karya::moderasi($id, 'Approved');
         flash_set('Karya disetujui dan kini tayang di portal.');
     } elseif ($aksi === 'reject') {
-        Karya::moderasi($id, 'Rejected', trim($_POST['alasan'] ?? '') ?: 'Perlu perbaikan sebelum diajukan kembali.');
+        Karya::moderasi($id, 'Rejected', nilai_teks($_POST, 'alasan') ?: 'Perlu perbaikan sebelum diajukan kembali.');
         flash_set('Karya ditolak dan anggota dapat melihat catatannya.');
     }
-    redirect('admin/moderasi.php?status=' . urlencode($_POST['status_kembali'] ?? 'Pending') . $qs);
+    $statusKembali = nilai_teks($_POST, 'status_kembali') ?: 'Pending';
+    redirect('admin/moderasi.php?status=' . urlencode($statusKembali) . $qs);
 }
 
-$status = $_GET['status'] ?? 'Pending';
+$status = nilai_teks($_GET, 'status') ?: 'Pending';
 if (!in_array($status, ['Pending', 'Approved', 'Rejected'], true)) $status = 'Pending';
 $list = Karya::byStatus($status);
 $totalList = count($list);

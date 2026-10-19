@@ -56,10 +56,11 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
       <?php foreach ($materi as $m):
         $boleh = Materi::bolehAkses((int) $m['id'], $idAnggota, $isAdmin);
         $hasFile = !empty($m['file_path']);
-        $hasLink = !empty($m['link_url']);
+        // Hanya tautan http/https yang boleh diklik (anti javascript: pada data lama).
+        $hasLink = !empty($m['link_url']) && preg_match('#^https?://#i', (string) $m['link_url']);
         $terkait = array_filter(explode(', ', (string) $m['pelatihan_terkait']));
       ?>
-      <div class="card card-admin">
+      <div class="card<?= Auth::isAdmin() && ($crudItemEntity ?? '') === 'materi' ? ' card-admin' : '' ?>">
         <?php if ($crudItemEntity === 'materi'): $itemId = (int) $m['id']; include __DIR__ . '/../app/includes/partial_admin_actions.php'; endif; ?>
         <span class="badge badge-blue"><?= e($m['topik']) ?></span>
         <h3 style="font-size:15px; margin:10px 0 6px;"><?= e($m['judul']) ?></h3>

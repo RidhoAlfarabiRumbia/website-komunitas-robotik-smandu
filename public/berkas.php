@@ -12,7 +12,7 @@
 require_once __DIR__ . '/../app/includes/bootstrap.php';
 
 $jenis = $_GET['jenis'] ?? '';
-$id = (int) ($_GET['id'] ?? 0);
+$id = nilai_int($_GET, 'id');
 $inline = !empty($_GET['lihat']);
 
 if ($id <= 0) {

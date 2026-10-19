@@ -7,7 +7,9 @@ if (session_status() !== PHP_SESSION_ACTIVE || !Auth::isAdmin()) {
 }
 
 $current = basename($_SERVER['SCRIPT_NAME']);
-$entity = $_GET['entity'] ?? '';
+// entity bisa berupa array bila URL dibuat seperti ?entity[]=karya — coerce aman
+// supaya admin_link() tidak melempar TypeError.
+$entity = is_string($_GET['entity'] ?? null) ? $_GET['entity'] : '';
 $pendingCount = Karya::hitungPending();
 $pendingPeserta = Pelatihan::pendingPeserta();
 $pendingDaftar = Pendaftaran::hitungStatus('Baru');

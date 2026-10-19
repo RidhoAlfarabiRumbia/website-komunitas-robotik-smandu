@@ -20,12 +20,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Csrf::verify();
 
     $form = [
-        'judul' => trim($_POST['judul'] ?? ''),
-        'kategori' => $_POST['kategori'] ?? '',
-        'deskripsi' => trim($_POST['deskripsi'] ?? ''),
-        'progres' => $_POST['progres'] ?? '',
-        'teknologi' => trim($_POST['teknologi'] ?? ''),
-        'link_demo' => trim($_POST['link_demo'] ?? ''),
+        'judul' => nilai_teks($_POST, 'judul'),
+        'kategori' => nilai_teks($_POST, 'kategori'),
+        'deskripsi' => nilai_teks($_POST, 'deskripsi'),
+        'progres' => nilai_teks($_POST, 'progres'),
+        'teknologi' => nilai_teks($_POST, 'teknologi'),
+        'link_demo' => nilai_teks($_POST, 'link_demo'),
     ];
 
     if ($form['judul'] === '') $errors[] = 'Judul karya wajib diisi.';

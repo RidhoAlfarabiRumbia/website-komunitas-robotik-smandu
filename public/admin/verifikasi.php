@@ -7,7 +7,7 @@
 require_once __DIR__ . '/../../app/includes/bootstrap.php';
 Auth::requireRole('admin');
 
-$filter = $_GET['status'] ?? '';
+$filter = nilai_teks($_GET, 'status');
 // Pencarian daftar; kata kunci ikut dibawa ke link detail & redirect.
 $q = cari_kunci($_GET['q'] ?? $_POST['q'] ?? '');
 $qs = cari_qs($q);            // untuk URL yang sudah punya query string
@@ -16,20 +16,20 @@ $qsBase = cari_qs($q, '?');   // untuk URL tanpa query string
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Csrf::verify();
 
-    $id = (int) ($_POST['id'] ?? 0);
-    $aksi = $_POST['aksi'] ?? '';
+    $id = nilai_int($_POST, 'id');
+    $aksi = nilai_teks($_POST, 'aksi');
     $p = Pendaftaran::find($id);
     if (!$p) {
         flash_set('error', 'Data pendaftaran tidak ditemukan.');
         redirect('admin/verifikasi.php' . $qsBase);
     }
 
-    $catatan = trim($_POST['catatan'] ?? '');
+    $catatan = nilai_teks($_POST, 'catatan');
 
     if ($aksi === 'verifikasi') {
         // Buat akun anggota + login sehingga anggota bisa langsung masuk
-        $username = trim($_POST['username'] ?? '');
-        $password = (string) ($_POST['password'] ?? '');
+        $username = nilai_teks($_POST, 'username');
+        $password = nilai_teks($_POST, 'password', false);
 
         if ($username === '') {
             flash_set('error', 'Username wajib diisi untuk mengaktifkan akun.');
@@ -83,7 +83,7 @@ $totalDaftar = count($daftar);
 if ($q !== '') {
     $daftar = cari_filter($daftar, ['nama', 'kelas', 'kontak', 'email', 'alasan', 'catatan', 'nama_berkas'], $q);
 }
-$detail = (int) ($_GET['id'] ?? 0) ? Pendaftaran::detail((int) $_GET['id']) : null;
+$detail = nilai_int($_GET, 'id') ? Pendaftaran::detail(nilai_int($_GET, 'id')) : null;
 
 $pageTitle = 'Verifikasi Pendaftaran';
 include __DIR__ . '/../../app/includes/header.php';

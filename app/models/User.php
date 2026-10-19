@@ -30,6 +30,18 @@ class User extends Model
         ]);
     }
 
+    /**
+     * Hapus akun login milik seorang anggota.
+     * Dipanggil sebelum baris anggota dihapus. Database sebenarnya sudah memakai
+     * ON DELETE CASCADE pada users.anggota_id, jadi ini lapisan pengaman tambahan
+     * (penting bila DB diimpor dari skema lama atau FK belum dibuat).
+     */
+    public static function deleteByAnggota(int $anggotaId): bool
+    {
+        $stmt = static::db()->prepare('DELETE FROM users WHERE anggota_id = ?');
+        return $stmt->execute([$anggotaId]);
+    }
+
     public static function setPassword(int $userId, string $password): bool
     {
         $stmt = self::db()->prepare('UPDATE users SET password_hash = ? WHERE id = ?');

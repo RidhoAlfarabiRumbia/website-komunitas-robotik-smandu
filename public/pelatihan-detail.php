@@ -6,14 +6,14 @@
  */
 require_once __DIR__ . '/../app/includes/bootstrap.php';
 
-$id = (int) ($_GET['id'] ?? 0);
+$id = nilai_int($_GET, 'id');
 
 // Pendaftaran peserta (hanya anggota)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Csrf::verify();
     Auth::requireRole('anggota');
 
-    $id = (int) ($_POST['pelatihan_id'] ?? $id);
+    $id = nilai_int($_POST, 'pelatihan_id') ?: $id;
     $p = Pelatihan::detail($id);
 
     if (!$p) {
@@ -100,7 +100,8 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
                   <a class="btn btn-outline btn-sm" href="berkas.php?jenis=materi&amp;id=<?= (int) $m['id'] ?>">
                     <i class="bi bi-download"></i> Unduh
                   </a>
-                <?php elseif ($m['link_url']): ?>
+                <?php // Hanya tautan http/https yang boleh diklik (anti javascript: pada data lama).
+                elseif (!empty($m['link_url']) && preg_match('#^https?://#i', (string) $m['link_url'])): ?>
                   <a class="btn btn-outline btn-sm" href="<?= e($m['link_url']) ?>" target="_blank" rel="noopener">
                     <i class="bi bi-box-arrow-up-right"></i> Buka
                   </a>

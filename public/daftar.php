@@ -33,11 +33,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $old = [
-        'nama' => trim($_POST['nama'] ?? ''),
-        'kelas' => trim($_POST['kelas'] ?? ''),
-        'kontak' => trim($_POST['kontak'] ?? ''),
-        'email' => trim($_POST['email'] ?? ''),
-        'alasan' => trim($_POST['alasan'] ?? ''),
+        'nama' => nilai_teks($_POST, 'nama'),
+        'kelas' => nilai_teks($_POST, 'kelas'),
+        'kontak' => nilai_teks($_POST, 'kontak'),
+        'email' => nilai_teks($_POST, 'email'),
+        'alasan' => nilai_teks($_POST, 'alasan'),
     ];
 
     if ($old['nama'] === '') {

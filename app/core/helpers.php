@@ -131,6 +131,35 @@ function flash_alert_class(string $type): string
 }
 
 /**
+ * Ambil satu nilai dari $_POST/$_GET sebagai teks.
+ *
+ * Query seperti "nama[]=x" membuat nilainya berupa array, dan trim()/e()/fungsi
+ * bertipe string akan melempar TypeError yang menghentikan seluruh halaman
+ * (PHP mengirim "Fatal error" tanpa kode status yang benar). Karena itu nilai
+ * non-scalar diperlakukan sebagai tidak ada.
+ */
+function nilai_teks(array $src, string $key, bool $trim = true): string
+{
+    $v = $src[$key] ?? null;
+    if (!is_scalar($v)) {
+        return '';
+    }
+    $v = (string) $v;
+    return $trim ? trim($v) : $v;
+}
+
+/**
+ * Ambil satu nilai dari $_POST/$_GET sebagai bilangan bulat.
+ * Nilai non-scalar menghasilkan 0 — bukan 1 seperti hasil (int) pada array,
+ * yang bisa membuat id[]=99 tertunjuk ke baris nomor 1.
+ */
+function nilai_int(array $src, string $key): int
+{
+    $v = $src[$key] ?? null;
+    return is_scalar($v) ? (int) $v : 0;
+}
+
+/**
  * Pencarian daftar di halaman admin.
  * Kata kunci diambil dari GET/POST "q" lalu difilter di PHP terhadap baris yang
  * sudah dimuat — bukan lewat query SQL — sehingga input admin tidak pernah
@@ -334,15 +363,23 @@ function simpan_upload(string $inputName, string $subfolder, array $allowed, int
         return null;
     }
     $file = $_FILES[$inputName];
+    // Multipart buatan tangan bisa membuat 'name' berupa array (mis. "foto[][name]").
+    // pathinfo() bertipe string dan akan melempar TypeError.
+    if (!isset($file['name']) || !is_string($file['name'])) {
+        return null;
+    }
     $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
 
-    if ($file['error'] !== UPLOAD_ERR_OK) return null;
+    if (!isset($file['error']) || !is_scalar($file['error']) || (int) $file['error'] !== UPLOAD_ERR_OK) return null;
     if (!in_array($ext, $allowed, true)) {
         flash_set('Format file tidak didukung. Gunakan ' . $labelFormat . '.');
         return null;
     }
-    if ($file['size'] > $maxSize) {
+    if (!isset($file['size']) || !is_scalar($file['size']) || (int) $file['size'] > $maxSize) {
         flash_set('Ukuran file maksimal ' . $labelSize . '.');
+        return null;
+    }
+    if (!isset($file['tmp_name']) || !is_string($file['tmp_name'])) {
         return null;
     }
     // Verifikasi isi berkas benar-benar cocok dengan ekstensi yang diklaim.

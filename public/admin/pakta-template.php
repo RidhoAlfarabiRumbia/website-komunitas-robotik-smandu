@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Csrf::verify();
 
     $lama = pakta_template();
-    $aksi = $_POST['aksi'] ?? '';
+    $aksi = nilai_teks($_POST, 'aksi');
 
     if ($aksi === 'hapus') {
         if ($lama['abs'] !== null) @unlink($lama['abs']);

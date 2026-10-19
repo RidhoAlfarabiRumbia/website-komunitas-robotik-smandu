@@ -22,23 +22,27 @@ $old = [
 $lombaList = Lomba::all('tanggal DESC');
 $anggotaList = Anggota::all('nama ASC');
 $idAnggotaValid = array_map('intval', array_column($anggotaList, 'id'));
+// Opsi tingkat dipakai form (baris ~160) SEBELUM blok POST berjalan, jadi
+// harus didefinisikan di sini — bukan hanya di dalam blok POST.
+$tingkatOpsi = ['Sekolah', 'Kota', 'Provinsi', 'Nasional', 'Internasional'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Csrf::verify();
 
     $old = [
-        'nama' => trim($_POST['nama'] ?? ''),
-        'lomba_id' => (int) ($_POST['lomba_id'] ?? 0),
-        'tanggal' => $_POST['tanggal'] ?? '',
-        'tingkat' => $_POST['tingkat'] ?? '',
-        'hasil' => trim($_POST['hasil'] ?? ''),
-        'deskripsi' => trim($_POST['deskripsi'] ?? ''),
+        'nama' => nilai_teks($_POST, 'nama'),
+        'lomba_id' => nilai_int($_POST, 'lomba_id'),
+        'tanggal' => nilai_teks($_POST, 'tanggal'),
+        'tingkat' => nilai_teks($_POST, 'tingkat'),
+        'hasil' => nilai_teks($_POST, 'hasil'),
+        'deskripsi' => nilai_teks($_POST, 'deskripsi'),
         'anggota_ids' => array_map('intval', (array) ($_POST['anggota_ids'] ?? [])),
     ];
 
     // Validasi berkas unggahan sebelum disimpan
     foreach (['foto' => ['jpg', 'jpeg', 'png', 'webp'], 'sertifikat' => ['pdf', 'jpg', 'jpeg', 'png']] as $input => $exts) {
         if (empty($_FILES[$input]['name'])) continue;
+        if (!is_string($_FILES[$input]['name'])) { $errors[$input] = 'Format berkas tidak didukung.'; continue; }
         $ext = strtolower(pathinfo($_FILES[$input]['name'], PATHINFO_EXTENSION));
         if (!in_array($ext, $exts, true)) $errors[$input] = 'Format berkas tidak didukung.';
         elseif ($_FILES[$input]['size'] > 2 * 1024 * 1024) $errors[$input] = 'Ukuran berkas maksimal 2MB.';
@@ -54,7 +58,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors['tanggal'] = 'Tanggal wajib diisi.';
     }
 
-    $tingkatOpsi = ['Sekolah', 'Kota', 'Provinsi', 'Nasional', 'Internasional'];
     if (!in_array($old['tingkat'], $tingkatOpsi, true)) {
         $errors['tingkat'] = 'Pilih tingkat yang valid.';
     }

@@ -419,13 +419,34 @@ tr:last-child td{border-bottom:none;}
    .admin-item-actions  sepasang tombol Ubah / Hapus                              */
 .card-wrap{position:relative; display:flex;}
 .card-wrap > .work-card, .card-wrap > .card{flex:1 1 auto; min-width:0;}
-.card-admin{position:relative;}
+/* Class di bawah hanya dipasang saat admin (lihat partial_admin_actions.php).
+   padding-top / padding-right menyisakan ruang agar tombol admin tidak menutupi
+   badge atau teks kartu. */
+.card-admin{position:relative; padding-top:54px;}
+.card-wrap-admin > .card{padding-right:78px;}
 .admin-item-actions{display:flex; gap:5px; align-items:center;}
 .card-wrap > .admin-item-actions, .card-admin > .admin-item-actions{position:absolute; top:9px; right:9px; z-index:3;}
 .card-wrap > .admin-item-actions .icon-btn, .card-admin > .admin-item-actions .icon-btn{background:var(--surface); box-shadow:var(--shadow-2);}
 /* Pada baris daftar (.list-item) tombol diletakkan di kanan, bukan mengambang. */
 .list-item > .admin-item-actions{margin-left:auto; align-self:center; padding-left:10px;}
 .list-item > .admin-item-actions .icon-btn{background:var(--surface);}
+/* ===== Lightbox foto (lihat app/includes/partial_lightbox.php) =====
+   Foto bertanda data-lightbox diklik -> tampil ukuran penuh di atas halaman. */
+[data-lightbox]{cursor:zoom-in;}
+[data-lightbox]:focus-visible{outline:3px solid var(--teal); outline-offset:3px;}
+.lightbox{position:fixed; inset:0; z-index:200; display:flex; align-items:center; justify-content:center; padding:24px; background:rgba(8,14,22,.88); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); animation:lightboxFade .18s ease both;}
+.lightbox[hidden]{display:none;}
+.lightbox-inner{max-width:min(1100px, 100%); max-height:100%; display:flex; flex-direction:column; gap:12px; align-items:center;}
+.lightbox-img{max-width:100%; max-height:calc(100vh - 130px); object-fit:contain; border-radius:var(--radius-md); box-shadow:var(--shadow-3); background:var(--surface-2); animation:lightboxPop .22s cubic-bezier(.22,.61,.36,1) both;}
+.lightbox-cap{color:#e9eef5; font-size:13.5px; text-align:center; max-width:70ch;}
+.lightbox-close{position:absolute; top:16px; right:16px; width:40px; height:40px; border-radius:999px; border:1px solid rgba(255,255,255,.25); background:rgba(255,255,255,.12); color:#fff; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center;}
+.lightbox-close:hover{background:rgba(255,255,255,.22);}
+@keyframes lightboxFade{from{opacity:0;}to{opacity:1;}}
+@keyframes lightboxPop{from{opacity:0; transform:scale(.96);}to{opacity:1; transform:scale(1);}}
+/* Hormati preferensi pengguna yang mengurangi animasi. */
+@media (prefers-reduced-motion: reduce){
+  .lightbox, .lightbox-img{animation:none;}
+}
 /* Form CRUD: kartu isian di kiri, panel gambar di luar kartu (sebelah kanan) */
 .crud-form{display:flex; gap:18px; align-items:flex-start; flex-wrap:wrap; max-width:978px;}
 .crud-form-main{flex:1 1 440px; min-width:0; max-width:680px;}
@@ -453,6 +474,8 @@ tr:last-child td{border-bottom:none;}
 .breadcrumb a:hover{color:var(--teal);}
 .detail-hero{border-radius:var(--radius-lg); overflow:hidden; margin-bottom:24px; border:0; background:var(--surface-2); height:260px; box-shadow:var(--card-shadow);}
 .detail-hero img{width:100%; height:100%; object-fit:cover;}
+/* Pembungkus foto detail karya (klik-able untuk pratinjau penuh). */
+.detail-hero > [data-lightbox]{display:block; width:100%; height:100%;}
 .two-col{display:grid; grid-template-columns:2fr 1fr; gap:28px;}
 @media (max-width:800px){ .two-col{grid-template-columns:1fr;} }
 /* Beranda anggota: section daftar ditata grid 2 kolom — tiap baris berisi

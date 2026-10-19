@@ -7,9 +7,9 @@
 require_once __DIR__ . '/../../app/includes/bootstrap.php';
 Auth::requireRole('admin');
 
-$id = (int) ($_GET['id'] ?? 0);
+$id = nilai_int($_GET, 'id');
 $filterPelatihan = $id;
-$filterStatus = $_GET['status'] ?? '';
+$filterStatus = nilai_teks($_GET, 'status');
 // Pencarian daftar; kata kunci ikut dibawa ke filter & redirect.
 $q = cari_kunci($_GET['q'] ?? $_POST['q'] ?? '');
 $qs = cari_qs($q);            // untuk URL yang sudah punya query string
@@ -18,8 +18,8 @@ $qsBase = cari_qs($q, '?');   // untuk URL tanpa query string
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Csrf::verify();
 
-    $aksi = $_POST['aksi'] ?? '';
-    $pesertaId = (int) ($_POST['peserta_id'] ?? 0);
+    $aksi = nilai_teks($_POST, 'aksi');
+    $pesertaId = nilai_int($_POST, 'peserta_id');
     $row = PelatihanPeserta::find($pesertaId);
     if (!$row) {
         flash_set('error', 'Data peserta tidak ditemukan.');

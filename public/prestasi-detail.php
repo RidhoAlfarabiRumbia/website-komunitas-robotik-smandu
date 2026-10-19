@@ -4,13 +4,13 @@
  */
 require_once __DIR__ . '/../app/includes/bootstrap.php';
 
-$id = (int) ($_GET['id'] ?? 0);
+$id = nilai_int($_GET, 'id');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Csrf::verify();
     Auth::requireRole('admin');
 
-    $id = (int) ($_POST['id'] ?? 0);
+    $id = nilai_int($_POST, 'id');
     $p = Prestasi::detail($id);
     if (!$p) {
         flash_set('error', 'Prestasi tidak ditemukan.');

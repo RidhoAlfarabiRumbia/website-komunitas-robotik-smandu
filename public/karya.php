@@ -21,7 +21,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
 ?>
 <div class="main">
   <div class="page-head">
-    <div><div class="eyebrow">BERKARYA</div><h1>Karya Anggota</h1><p class="desc">Karya yang telah disetujui dan ditampilkan di portal — mulai dari robot, IoT, hingga AI.</p></div>
+    <div><div class="eyebrow">BERKARYA</div><h1>Karya Anggota</h1><p class="desc">Karya yang telah disetujui dan ditampilkan di portal.</p></div>
     <?php if (Auth::check() && Auth::role() === 'anggota'): ?>
       <a class="btn btn-primary" href="ajukan-karya.php"><i class="bi bi-plus-circle"></i> Ajukan Karya</a>
     <?php elseif (!Auth::check()): ?>
@@ -45,4 +45,5 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
     <div class="empty">Belum ada karya yang disetujui.</div>
   <?php endif; ?>
 </div>
+<?php include __DIR__ . '/../app/includes/partial_lightbox.php'; ?>
 <?php include __DIR__ . '/../app/includes/footer.php'; ?>

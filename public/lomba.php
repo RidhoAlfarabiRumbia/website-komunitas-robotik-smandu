@@ -35,7 +35,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
   <?php if ($lomba): ?>
     <div class="grid grid-2 grid-stagger reveal">
       <?php foreach ($lomba as $l): $peserta = Lomba::peserta($l['id']); ?>
-      <div class="card card-admin">
+      <div class="card<?= Auth::isAdmin() && ($crudItemEntity ?? '') === 'lomba' ? ' card-admin' : '' ?>">
         <?php if ($crudItemEntity === 'lomba'): $itemId = (int) $l['id']; include __DIR__ . '/../app/includes/partial_admin_actions.php'; endif; ?>
         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
           <span class="badge <?= $l['status'] === 'Selesai' ? 'badge-muted' : ($l['status'] === 'Akan Datang' ? 'badge-blue' : 'badge-teal') ?>"><?= e($l['status']) ?></span>

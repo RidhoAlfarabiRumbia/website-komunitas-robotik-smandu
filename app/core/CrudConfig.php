@@ -35,7 +35,7 @@ function crud_config(): array
                 // Materi bersifat terbatas (hanya peserta pelatihan yang disetujui),
                 // jadi berkas WAJIB disimpan di luar document root: restricted => true.
                 'file_path' => ['label' => 'File Dokumen', 'type' => 'doc_file', 'subfolder' => 'materi', 'restricted' => true],
-                'link_url' => ['label' => 'Tautan Link', 'type' => 'text'],
+                'link_url' => ['label' => 'Tautan Link', 'type' => 'text', 'link' => true],
                 'pelatihan_ids' => ['label' => 'Pelatihan Tertaut', 'type' => 'pelatihan_multi'],
             ],
             'list' => ['judul', 'topik'],
@@ -61,7 +61,10 @@ function crud_config(): array
                 'publikasi' => ['label' => 'Publikasi', 'type' => 'select', 'options' => ['Pending','Approved','Rejected']],
                 'pembuat_id' => ['label' => 'Pembuat', 'type' => 'anggota_select', 'required' => true],
                 'teknologi' => ['label' => 'Teknologi (pisahkan koma)', 'type' => 'text'],
-                'link_demo' => ['label' => 'Tautan Proyek', 'type' => 'text'],
+                // 'link' = wajib berupa tautan http/https (lihat crud_handle.php).
+                // Tanpa ini, admin bisa menyimpan javascript: yang dieksekusi
+                // saat anggota mengeklik tautannya di karya-detail.php.
+                'link_demo' => ['label' => 'Tautan Proyek', 'type' => 'text', 'link' => true],
                 'foto' => ['label' => 'Foto', 'type' => 'file', 'subfolder' => 'karya'],
             ],
             'list' => ['judul', 'kategori', 'progres', 'publikasi'],

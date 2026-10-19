@@ -17,8 +17,14 @@ class Csrf
 
     public static function verify(): void
     {
-        $sent = $_POST['csrf_token'] ?? '';
-        if (!hash_equals($_SESSION['csrf_token'] ?? '', $sent)) {
+        // csrf_token[]=x membuat nilainya array; hash_equals() bertipe string
+        // dan akan melempar TypeError. Perlakukan sebagai token tidak valid.
+        $sent = $_POST['csrf_token'] ?? null;
+        if (!is_scalar($sent)) {
+            $sent = '';
+        }
+        $sent = (string) $sent;
+        if (!hash_equals((string) ($_SESSION['csrf_token'] ?? ''), $sent)) {
             http_response_code(403);
             die('Permintaan tidak valid (token keamanan tidak cocok). Silakan muat ulang halaman.');
         }

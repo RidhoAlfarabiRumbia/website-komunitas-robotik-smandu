@@ -39,7 +39,9 @@ $crudPath = $crudPath ?? 'admin/crud.php';
 
 $config = crud_config();
 $crudEntitas = $crudEntitas ?? ($_GET['entity'] ?? 'anggota');
-if (!isset($config[$crudEntitas])) $crudEntitas = 'anggota';
+// Entitas harus berupa string yang dikenal: URL seperti ?entity[]=karya membuat
+// $crudEntitas berupa array dan isset($config[...]) akan melempar TypeError.
+if (!is_string($crudEntitas) || !isset($config[$crudEntitas])) $crudEntitas = 'anggota';
 // Action form per item (query saja) — aman dipakai di halaman mana pun.
 $crudQs = '?' . $crudParam . '=' . $crudEntitas;
 // Tujuan redirect setelah aksi CRUD.
@@ -51,7 +53,7 @@ $akunTypes = ['akun_username', 'password'];
 /** @var Model $crudModel */
 $crudModel = $crudCfg['model'];
 $action = $_GET['action'] ?? 'list';
-$id = (int) ($_GET['id'] ?? 0);
+$id = nilai_int($_GET, 'id');
 
 // Pencarian daftar: kata kunci ikut dibawa ke link aksi, form, dan redirect
 // supaya admin tidak perlu mengetiknya lagi setelah simpan/batal.
@@ -69,12 +71,12 @@ $refPanel = $crudReferensi
 // ---- Simpan referensi (panel Materi) ----
 if ($crudReferensi && $_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['sub_form'] ?? '') === 'referensi') {
     Csrf::verify();
-    $refId = (int) ($_POST['id'] ?? 0);
+    $refId = nilai_int($_POST, 'id');
     $refBack = $crudBaseMateri . '&sub=referensi&action=' . ($refId ? 'edit&id=' . $refId : 'create') . $qs;
     $refData = [
-        'nama' => trim($_POST['nama'] ?? ''),
-        'url' => trim($_POST['url'] ?? ''),
-        'deskripsi' => trim($_POST['deskripsi'] ?? ''),
+        'nama' => nilai_teks($_POST, 'nama'),
+        'url' => nilai_teks($_POST, 'url'),
+        'deskripsi' => nilai_teks($_POST, 'deskripsi'),
     ];
     if ($refData['nama'] === '' || $refData['url'] === '') {
         flash_set('error', 'Nama dan URL referensi wajib diisi.');
@@ -119,6 +121,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'delete' && $id) {
         flash_set('success', 'Referensi berhasil dihapus.');
 redirect($crudBaseMateri . '&sub=referensi' . $qs);
     }
+    // Akun login ikut dihapus (lapisan pengaman: users.anggota_id sudah memakai
+    // ON DELETE CASCADE di database).
+    if ($crudEntitas === 'anggota') {
+        User::deleteByAnggota($id);
+    }
     $crudModel::delete($id);
     flash_set($crudCfg['label'] . ' berhasil dihapus.');
     redirect($crudBase . $qs);
@@ -130,15 +137,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $errors = [];
     foreach ($crudCfg['fields'] as $key => $f) {
         if (!empty($f['required']) && !in_array($f['type'], array_merge(['file', 'doc_file'], $akunTypes))) {
-            $val = trim($_POST[$key] ?? '');
+            $val = nilai_teks($_POST, $key);
             if ($val === '') $errors[] = e($f['label']) . ' wajib diisi.';
         }
     }
 
     $isAkun = $crudEntitas === 'anggota';
-    $postId = (int) ($_POST['id'] ?? 0);
-    $username = trim($_POST['username'] ?? '');
-    $password = (string) ($_POST['password'] ?? '');
+    $postId = nilai_int($_POST, 'id');
+    $username = nilai_teks($_POST, 'username');
+    $password = nilai_teks($_POST, 'password', false);
     $akun = null;
     if ($isAkun) {
         $akun = $postId ? User::findByAnggota($postId) : null;
@@ -148,14 +155,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($password !== '' && strlen($password) < 8) $errors[] = 'Kata sandi minimal 8 karakter.';
     }
 
-    // Tautan video harus http/https (anti javascript: dll).
+    // Tautan wajib http/https (anti javascript: dll). Berlaku untuk field
+    // bertipe 'video' (video kegiatan/galeri/prestasi) dan field teks yang
+    // ditandai 'link' => true (link_demo karya, link_url materi).
     foreach ($crudCfg['fields'] as $key => $f) {
-        if ($f['type'] !== 'video') continue;
+        if ($f['type'] !== 'video' && empty($f['link'])) continue;
         if (!empty($f['show_when'])) {
             $ck = array_key_first($f['show_when']);
-            if ((string) ($_POST[$ck] ?? '') !== $f['show_when'][$ck]) continue;
+            if (nilai_teks($_POST, $ck, false) !== $f['show_when'][$ck]) continue;
         }
-        $url = trim($_POST[$key] ?? '');
+        $url = nilai_teks($_POST, $key);
         if ($url !== '' && !preg_match('#^https?://#i', $url)) {
             $errors[] = $f['label'] . ' harus berupa tautan http/https.';
         }
@@ -184,7 +193,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     foreach ($crudCfg['fields'] as $key => $f) {
         if (!empty($f['show_when'])) {
             $ck = array_key_first($f['show_when']);
-            if ((string) ($_POST[$ck] ?? '') !== $f['show_when'][$ck]) {
+            if (nilai_teks($_POST, $ck, false) !== $f['show_when'][$ck]) {
                 $data[$key] = null;
                 continue;
             }
@@ -195,7 +204,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif ($f['type'] === 'video') {
             $path = handle_video_upload($key . '_file', $f['subfolder'] ?? $crudEntitas);
             // Kalau tidak ada file, pakai URL yang diketik admin.
-            $data[$key] = $path ?: trim($_POST[$key] ?? '');
+            $data[$key] = $path ?: nilai_teks($_POST, $key);
         } elseif ($f['type'] === 'doc_file') {
             // Field bertanda restricted (mis. materi) disimpan DI LUAR document
             // root agar tidak bisa diunduh dengan menebak URL-nya; hanya bisa
@@ -209,7 +218,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // 'peraih' bukan kolom tabel — diproses khusus saat simpanTim prestasi.
             continue;
         } elseif (!in_array($f['type'], $akunTypes)) {
-            $data[$key] = trim($_POST[$key] ?? '');
+            $data[$key] = nilai_teks($_POST, $key);
         }
     }
 
@@ -222,8 +231,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    if (!empty($_POST['id'])) {
-        $savedId = (int) $_POST['id'];
+    if ($postId > 0) {
+        $savedId = $postId;
         $crudModel::update($savedId, $data);
         flash_set('success', $crudCfg['label'] . ' berhasil diperbarui.');
     } else {
@@ -238,7 +247,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($crudEntitas === 'prestasi') {
         // Mode peraih: 'anggota' (checkbox) atau 'manual' (teks pisah koma).
         if (($_POST['peraih_mode'] ?? 'anggota') === 'manual') {
-            $manualNames = array_values(array_filter(array_map('trim', explode(',', (string) ($_POST['peraih_manual'] ?? '')))));
+            $manualNames = array_values(array_filter(array_map('trim', explode(',', nilai_teks($_POST, 'peraih_manual')))));
             Prestasi::simpanTim((int) $savedId, [], $manualNames);
         } else {
             $anggotaIds = array_values(array_filter(array_map('intval', (array) ($_POST['anggota_ids'] ?? []))));
@@ -253,6 +262,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             User::update((int) $akun['id'], $userData);
         } else {
             User::createForAnggota($savedId, $username, $password);
+        }
+    }
+
+    // Karya hanya tampil di halaman publik bila publikasinya Approved. Kalau admin
+    // menambah karya dari halaman fitur dengan status lain, karyanya tidak akan
+    // terlihat di daftar — arahkan ke moderasi supaya tidak dikira gagal simpan.
+    if ($crudEntitas === 'karya' && $crudParam === 'manage') {
+        $publikasi = (string) ($data['publikasi'] ?? 'Pending');
+        if ($publikasi !== 'Approved') {
+            flash_set('success', 'Karya berhasil disimpan dengan status ' . $publikasi
+                . '. Halaman Karya hanya menampilkan karya Approved, jadi belum tayang. Tinjau di Moderasi.');
+            redirect('admin/moderasi.php?status=' . urlencode($publikasi));
         }
     }
     redirect($crudBase . $qs);

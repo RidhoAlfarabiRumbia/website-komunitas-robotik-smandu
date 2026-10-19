@@ -16,7 +16,7 @@ $refQs = cari_qs($refQ);
 if ($refQ !== '') {
     $refRows = cari_filter($refRows, $refCfg['search'] ?? ['nama', 'url', 'deskripsi'], $refQ);
 }
-$refId = (int) ($_GET['id'] ?? 0);
+$refId = nilai_int($_GET, 'id');
 $refEditing = (($_GET['action'] ?? '') === 'edit' && $refId) ? Referensi::find($refId) : null;
 $refBack = '?entity=materi&sub=referensi&action=' . ($refEditing ? 'edit&id=' . $refId : 'create') . $refQs;
 ?>

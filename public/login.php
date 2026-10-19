@@ -8,8 +8,8 @@ if (Auth::check()) {
 $errors = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Csrf::verify();
-    $username = trim($_POST['username'] ?? '');
-    $password = $_POST['password'] ?? '';
+    $username = nilai_teks($_POST, 'username');
+    $password = nilai_teks($_POST, 'password', false);
     if ($username === '') $errors[] = 'Username wajib diisi.';
     if ($password === '') $errors[] = 'Kata sandi wajib diisi.';
     if (!$errors) {
