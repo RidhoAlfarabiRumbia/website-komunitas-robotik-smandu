@@ -70,21 +70,21 @@
 .dark{
   color-scheme:dark;
 
-  --bg:#05080d;
-  --surface:#0b1017;
-  --surface-2:#10161f;
-  --surface-3:#18212c;
-  --border:#212c39;
-  --border-strong:#31404f;
-  --glass:rgba(5,8,13,.80);
-  --glass-strong:rgba(5,8,13,.94);
+  --bg:#0a0a0a;
+  --surface:#111111;
+  --surface-2:#161616;
+  --surface-3:#1d1d1d;
+  --border:#262626;
+  --border-strong:#343434;
+  --glass:rgba(10,10,10,.80);
+  --glass-strong:rgba(10,10,10,.94);
 
-  --text:#e6edf6;
-  --text-muted:#a2b1c2;
-  --text-dim:#7b8b9e;
+  --text:#ebebeb;
+  --text-muted:#a0a0a0;
+  --text-dim:#7d7d7d;
 
   --teal:#63b8f5;
-  --teal-dim:#12293d;
+  --teal-dim:#181818;
   --teal-hover:#86cbff;
   --amber:#f0b551;
   --amber-dim:#33270f;
@@ -93,7 +93,7 @@
   --blue:#93b4ff;
   --blue-dim:#1e2a4d;
 
-  --on-teal:#08121d;
+  --on-teal:#0d0d0d;
   --on-amber:#241703;
   --on-red:#2a0f0c;
 
@@ -104,11 +104,11 @@
   --card-shadow:0 2px 4px rgba(0,0,0,.45), 0 8px 24px rgba(0,0,0,.4);
   --scrim:linear-gradient(transparent, rgba(0,0,0,.78));
 
-  /* Latar halaman gelap: glow atas + aksen pojok */
-  --glow-top:rgba(99,184,245,.14);
-  --glow-corner-tl:rgba(63,124,190,.11);
-  --glow-corner-tr:rgba(165,162,245,.11);
-  --glow-bottom:rgba(63,124,190,.11);
+  /* Latar halaman gelap: glow netral (bukan biru) di atas hitam */
+  --glow-top:rgba(255,255,255,.05);
+  --glow-corner-tl:rgba(255,255,255,.04);
+  --glow-corner-tr:rgba(255,255,255,.04);
+  --glow-bottom:rgba(255,255,255,.04);
   --bg-scene:
     radial-gradient(1100px 520px at 50% -160px, var(--glow-top), transparent 70%),
     radial-gradient(900px 460px at -8% 16%, var(--glow-corner-tl), transparent 66%),
@@ -563,9 +563,9 @@ tr:last-child td{border-bottom:none;}
 /* Scroll feedback dihapus (2026-10-10): overlay gelap mengikuti scroll bikin
    repaint besar tiap frame dan menurunkan FPS. Hero sekarang tampil statis. */
 .welcome-media .slider{position:absolute; inset:0; flex:none; width:100%; height:100%; min-height:0; border-radius:inherit; background:#141c29; box-shadow:none; cursor:pointer;}
-.dark .welcome-media .slider{background:#08111c;}
+.dark .welcome-media .slider{background:#0e0e0e;}
 .welcome-media .slider .slide{background:#141c29;}
-.dark .welcome-media .slider .slide{background:#08111c;}
+.dark .welcome-media .slider .slide{background:#0e0e0e;}
 /* Haluskan sudut membulat: tiap lapisan di dalam hero ikut membulat DAN
    memotong isinya sendiri. Slide (transisi opacity) dan grid foto (animasi
    fadeIn) di-composite terpisah oleh browser — bila hanya .welcome-hero yang
@@ -588,8 +588,8 @@ tr:last-child td{border-bottom:none;}
 .welcome-scrim{position:absolute; inset:0; z-index:1; pointer-events:none;
   background:radial-gradient(ellipse at 50% 48%, rgba(5,12,22,.4), rgba(5,12,22,.5) 100%),
              linear-gradient(180deg, rgba(5,12,22,.1), rgba(5,12,22,.2));}
-.dark .welcome-scrim{background:radial-gradient(ellipse at 50% 48%, rgba(5,12,22,.55), rgba(5,12,22,.74) 100%),
-             linear-gradient(180deg, rgba(5,12,22,.28), rgba(5,12,22,.42));}
+.dark .welcome-scrim{background:radial-gradient(ellipse at 50% 48%, rgba(0,0,0,.55), rgba(0,0,0,.74) 100%),
+             linear-gradient(180deg, rgba(0,0,0,.28), rgba(0,0,0,.42));}
 .welcome-copy{position:relative; z-index:2; min-width:0; max-width:860px; margin:0 auto; color:#fff;}
 .welcome-actions{display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin-top:26px;}
 .welcome-actions .btn{flex:0 1 auto; min-width:0; padding:11px 20px; font-size:14px; white-space:nowrap;}

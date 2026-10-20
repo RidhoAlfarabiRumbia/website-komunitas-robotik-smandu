@@ -6,7 +6,7 @@ $kartuDikelola = Auth::isAdmin() && ($crudItemEntity ?? '') === 'galeri';
 ?>
 <div class="card-wrap">
 <div class="work-card">
-  <div class="work-thumb"><img src="<?= base_url(e($g['foto'] ?? 'assets/img/galeri-latihan.svg')) ?>" alt="<?= e($g['judul']) ?>" loading="lazy" decoding="async"></div>
+  <span class="work-thumb" data-lightbox="<?= base_url(e($g['foto'] ?? 'assets/img/galeri-latihan.svg')) ?>" tabindex="0" role="button" aria-label="Perbesar foto galeri: <?= e($g['judul']) ?>"><img src="<?= base_url(e($g['foto'] ?? 'assets/img/galeri-latihan.svg')) ?>" alt="<?= e($g['judul']) ?>" loading="lazy" decoding="async"></span>
   <div class="work-body">
     <span class="badge badge-blue"><?= e($g['kategori']) ?></span>
     <div class="work-title" style="font-size:14px;"><?= e($g['judul']) ?></div>
