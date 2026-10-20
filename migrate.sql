@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS pelatihan (
   tanggal_selesai DATE DEFAULT NULL,
   waktu VARCHAR(60) DEFAULT NULL,
   lokasi VARCHAR(150) DEFAULT NULL,
-  kuota INT NOT NULL DEFAULT 20,
+  mode ENUM('Daring','Luring') NOT NULL DEFAULT 'Daring',
   status ENUM('Dibuka','Ditutup') NOT NULL DEFAULT 'Dibuka',
   akses ENUM('Umum','Anggota') NOT NULL DEFAULT 'Anggota',
   dibuat_pada DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -187,11 +187,11 @@ DELETE FROM pelatihan WHERE nama LIKE 'Workshop %';
 DELETE FROM prestasi WHERE nama LIKE 'Juara %';
 DELETE FROM materi_pelatihan;
 
-INSERT INTO pelatihan (id, nama, deskripsi, tanggal_mulai, tanggal_selesai, waktu, lokasi, kuota, status, akses) VALUES
-(1,'Workshop Mini Arduino untuk Pemula','Pengenalan rangkaian dan pemrograman Arduino dari nol, diakhiri proyek robot pemadam api sederhana.','2026-10-10','2026-10-24','Sabtu, 09.00 - 12.00','Lab Robotika',30,'Dibuka','Umum'),
-(2,'Workshop Sensor dan IoT dengan ESP32','Praktik langsung membaca sensor, mengirim data ke dashboard, dan menghubungkan ESP32 dengan WiFi sekolah.','2026-11-07','2026-11-21','Sabtu, 09.00 - 12.00','Lab Komputer 1',20,'Dibuka','Anggota'),
-(3,'Workshop Pemrograman Lanjutan','Pembahasan algoritma, struktur data, dan machine learning ringan untuk proyek robot.','2026-09-12','2026-09-26','Sabtu, 10.00 - 13.00','Lab Komputer 2',16,'Ditutup','Anggota'),
-(4,'Workshop Terbuka Umum: Demo Robot Sortir','Pameran karya untuk siswa luar sekolah. Komunitas memamerkan lengan robot sortir warna.','2026-12-05','2026-12-05','Sabtu, 09.00 - 11.00','Aula Sekolah',50,'Dibuka','Umum')
+INSERT INTO pelatihan (id, nama, deskripsi, tanggal_mulai, tanggal_selesai, waktu, lokasi, mode, status, akses) VALUES
+(1,'Workshop Mini Arduino untuk Pemula','Pengenalan rangkaian dan pemrograman Arduino dari nol, diakhiri proyek robot pemadam api sederhana.','2026-10-10','2026-10-24','Sabtu, 09.00 - 12.00','Lab Robotika','Luring','Dibuka','Umum'),
+(2,'Workshop Sensor dan IoT dengan ESP32','Praktik langsung membaca sensor, mengirim data ke dashboard, dan menghubungkan ESP32 dengan WiFi sekolah.','2026-11-07','2026-11-21','Sabtu, 09.00 - 12.00','Lab Komputer 1','Luring','Dibuka','Anggota'),
+(3,'Workshop Pemrograman Lanjutan','Pembahasan algoritma, struktur data, dan machine learning ringan untuk proyek robot.','2026-09-12','2026-09-26','Sabtu, 10.00 - 13.00','Lab Komputer 2','Luring','Ditutup','Anggota'),
+(4,'Workshop Terbuka Umum: Demo Robot Sortir','Pameran karya untuk siswa luar sekolah. Komunitas memamerkan lengan robot sortir warna.','2026-12-05','2026-12-05','Sabtu, 09.00 - 11.00','Aula Sekolah','Luring','Dibuka','Umum')
 ON DUPLICATE KEY UPDATE nama = VALUES(nama);
 
 INSERT INTO pelatihan_peserta (pelatihan_id, anggota_id, nama, kontak, asal, status) VALUES

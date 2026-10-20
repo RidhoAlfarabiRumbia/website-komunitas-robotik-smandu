@@ -1,7 +1,7 @@
 <?php
 /**
  * Kelola Peserta Pelatihan (PRD 8.4).
- * Admin menyetujui atau menolak peserta sesuai kuota. Status "Disetujui" inilah
+ * Admin menyetujui atau menolak peserta. Status "Disetujui" inilah
  * yang membuka akses materi untuk anggota tersebut.
  */
 require_once __DIR__ . '/../../app/includes/bootstrap.php';
@@ -29,12 +29,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $redirectKe = 'admin/pelatihan-peserta.php?id=' . (int) $row['pelatihan_id'] . $qs;
 
     if ($aksi === 'setuju') {
-        $p = Pelatihan::find((int) $row['pelatihan_id']);
-        $terpakai = Pelatihan::jumlahDisetujui((int) $row['pelatihan_id']);
-        if ($p && Pelatihan::sisaKuota($p, $terpakai) <= 0) {
-            flash_set('error', 'Kuota pelatihan sudah penuh. Naikkan kuota terlebih dahulu.');
-            redirect($redirectKe);
-        }
         PelatihanPeserta::setStatus($pesertaId, 'Disetujui');
         flash_set('success', 'Peserta disetujui. Materi pelatihan kini terbuka untuknya.');
     } elseif ($aksi === 'tolak') {
@@ -92,7 +86,7 @@ include __DIR__ . '/../../app/includes/header.php';
       <div>
         <div class="eyebrow">MODERASI</div>
         <h1>Peserta Pelatihan</h1>
-        <p class="desc">Setujui peserta sesuai kuota. Hanya peserta disetujui yang dapat mengunduh materi pelatihan.</p>
+        <p class="desc">Setujui peserta. Hanya peserta disetujui yang dapat mengunduh materi pelatihan.</p>
       </div>
       <a class="btn btn-outline" href="crud.php?entity=pelatihan"><i class="bi bi-mortarboard"></i> Kelola Pelatihan</a>
     </div>
@@ -106,7 +100,7 @@ include __DIR__ . '/../../app/includes/header.php';
           <option value="0">Semua pelatihan</option>
           <?php foreach ($semuaPelatihan as $pl): ?>
             <option value="<?= (int) $pl['id'] ?>" <?= $id === (int) $pl['id'] ? 'selected' : '' ?>>
-              <?= e($pl['nama']) ?> (<?= (int) $pl['jumlah_disetujui'] ?>/<?= (int) $pl['kuota'] ?>)
+              <?= e($pl['nama']) ?> (<?= (int) $pl['jumlah_disetujui'] ?> disetujui)
             </option>
           <?php endforeach; ?>
         </select>
@@ -135,7 +129,7 @@ include __DIR__ . '/../../app/includes/header.php';
           <strong style="font-size:14px;"><?= e($pelatihan['nama']) ?></strong>
           <span class="badge badge-teal"><?= e(tanggal_rentang($pelatihan['tanggal_mulai'], $pelatihan['tanggal_selesai'])) ?></span>
           <span class="badge <?= $pelatihan['akses'] === 'Umum' ? 'badge-blue' : 'badge-amber' ?>"><?= e($pelatihan['akses']) ?></span>
-          <span class="badge badge-muted"><?= (int) $pelatihan['jumlah_disetujui'] ?> disetujui / <?= (int) $pelatihan['kuota'] ?> kuota</span>
+          <span class="badge badge-muted"><?= (int) $pelatihan['jumlah_disetujui'] ?> disetujui</span>
         </div>
       </div>
     <?php endif; ?>

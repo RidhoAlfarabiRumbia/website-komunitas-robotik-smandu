@@ -10,7 +10,7 @@ class Pelatihan extends Model
     protected static string $table = 'pelatihan';
     protected static array $fillable = [
         'nama', 'deskripsi', 'tanggal_mulai', 'tanggal_selesai',
-        'waktu', 'lokasi', 'kuota', 'status', 'akses',
+        'waktu', 'lokasi', 'mode', 'status', 'akses',
     ];
 
     public static function semua(): array
@@ -48,12 +48,11 @@ class Pelatihan extends Model
         return strcmp((string) $selesai, date('Y-m-d')) >= 0;
     }
 
-    /** Apakah pendaftaran peserta masih dibuka (status Dibuka, kuota, belum daftar, tanggal valid)? */
-    public static function bisaDaftar(?array $pelatihan, int $terpakai = 0): bool
+    /** Apakah pendaftaran peserta masih dibuka (status Dibuka, belum daftar, tanggal valid)? */
+    public static function bisaDaftar(?array $pelatihan): bool
     {
         if (!$pelatihan) return false;
         if ($pelatihan['status'] !== 'Dibuka') return false;
-        if (self::sisaKuota($pelatihan, $terpakai) <= 0) return false;
 
         $today = date('Y-m-d');
         $mulai = $pelatihan['tanggal_mulai'] ?? null;
@@ -91,12 +90,6 @@ class Pelatihan extends Model
             'INSERT INTO pelatihan_peserta (pelatihan_id, anggota_id, nama, kontak, asal, status)
              VALUES (?, NULL, ?, ?, "Umum", "Pending")'
         )->execute([$pelatihanId, $nama, $kontak]);
-    }
-
-    /** Sisa kuota peserta yang disetujui. */
-    public static function sisaKuota(array $pelatihan, int $terpakai): int
-    {
-        return max(0, (int) $pelatihan['kuota'] - $terpakai);
     }
 
     public static function jumlahDisetujui(int $pelatihanId): int

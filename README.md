@@ -45,7 +45,7 @@ Materi belajar robotik tersebar di banyak platform, karya dan dokumentasi tercec
 
 | Tahap | Fitur |
 |---|---|
-| **Belajar** | **Materi** (Arduino, IoT, Python, AI, robotik, elektronika) dengan akses per pelatihan · **Referensi** belajar gratis di halaman Materi · **Pelatihan/Workshop** dengan jadwal, kuota, dan persetujuan peserta |
+| **Belajar** | **Materi** (Arduino, IoT, Python, AI, robotik, elektronika) dengan akses per pelatihan · **Referensi** belajar gratis di halaman Materi · **Pelatihan/Workshop** dengan jadwal, mode pelaksanaan (daring/luring), dan persetujuan peserta |
 | **Berkarya** | **Karya** anggota (Robot, IoT, Programming, AI, Elektronika) dengan status progres · **Ajukan Karya** dengan moderasi admin dan alasan penolakan |
 | **Berkompetisi** | **Lomba** (info, status, hasil, peserta) · **Prestasi** dengan bukti sertifikat, tayang langsung dan bisa ditinjau admin |
 | **Berbagi** | **Galeri** foto dan video · **Kegiatan** dengan video laporan · **Pengumuman** · **Slider Beranda** yang dikelola admin |
@@ -55,7 +55,7 @@ Materi belajar robotik tersebar di banyak platform, karya dan dokumentasi tercec
 
 - **Materi** hanya terbuka bagi peserta pelatihan terkait yang disetujui, selama pelatihan belum berakhir. Admin selalu punya akses penuh.
 - **Karya** ditinjau admin **sebelum** tayang. **Prestasi** tayang langsung dan ditinjau **sesudahnya**.
-- **Persetujuan peserta** pelatihan otomatis ditolak bila kuota penuh.
+- **Mode pelaksanaan** pelatihan ditandai **Daring (online)** atau **Luring (tatap muka)**; tanpa batas kuota — admin menyetujui peserta secara manual.
 - **Dokumen Pakta Integritas** bersifat privat dan hanya bisa dibuka admin.
 
 ## Peran Pengguna

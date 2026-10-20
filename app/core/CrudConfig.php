@@ -151,11 +151,11 @@ function crud_config(): array
                 'tanggal_selesai' => ['label' => 'Tanggal Selesai', 'type' => 'date'],
                 'waktu' => ['label' => 'Waktu', 'type' => 'text'],
                 'lokasi' => ['label' => 'Lokasi', 'type' => 'text'],
-                'kuota' => ['label' => 'Kuota Peserta', 'type' => 'text', 'required' => true],
+                'mode' => ['label' => 'Mode Pelaksanaan', 'type' => 'select', 'options' => ['Daring','Luring']],
                 'status' => ['label' => 'Status Pendaftaran', 'type' => 'select', 'options' => ['Dibuka','Ditutup']],
                 'akses' => ['label' => 'Sifat Akses', 'type' => 'select', 'options' => ['Anggota','Umum']],
             ],
-            'list' => ['nama', 'tanggal_mulai', 'kuota', 'status', 'akses'],
+            'list' => ['nama', 'tanggal_mulai', 'mode', 'status', 'akses'],
             'search' => ['nama', 'deskripsi', 'lokasi', 'waktu'],
         ],
         'prestasi' => [

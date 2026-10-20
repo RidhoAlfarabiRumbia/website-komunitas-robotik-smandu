@@ -2,7 +2,7 @@
 /**
  * Pelatihan / Workshop (PRD 8.4).
  * Pengunjung umum hanya melihat pelatihan berlabel "Umum".
- * Anggota dapat mendaftar; admin menyetujui sesuai kuota.
+ * Anggota dapat mendaftar; admin menyetujui peserta.
  * Materi pelatihan hanya terbuka bagi peserta yang sudah disetujui.
  */
 require_once __DIR__ . '/../app/includes/bootstrap.php';
@@ -41,11 +41,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         flash_set('error', 'Pendaftaran pelatihan ini sudah ditutup.');
         redirect('pelatihan-detail.php?id=' . $id);
     }
-    if (Pelatihan::sisaKuota($p, (int) $p['jumlah_disetujui']) <= 0) {
-        flash_set('error', 'Kuota pelatihan ini sudah penuh.');
-        redirect('pelatihan-detail.php?id=' . $id);
-    }
-
     Pelatihan::daftar($id, (int) Auth::anggotaId());
     flash_set('success', 'Pendaftaran terkirim. Menunggu persetujuan admin sebelum materi dapat dibuka.');
     redirect('pelatihan-detail.php?id=' . $id);
@@ -93,7 +88,6 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
   <?php if ($daftar): ?>
     <div class="grid grid-2 grid-stagger reveal">
       <?php foreach ($daftar as $p):
-        $sisa = Pelatihan::sisaKuota($p, (int) $p['jumlah_disetujui']);
         $saya = Auth::role() === 'anggota' ? Pelatihan::pendaftaranAnggota((int) $p['id'], (int) Auth::anggotaId()) : null;
       ?>
         <div class="card<?= Auth::isAdmin() && ($crudItemEntity ?? '') === 'pelatihan' ? ' card-admin' : '' ?>">
@@ -112,7 +106,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
           <div class="side-info-row"><span class="k">Jadwal</span><span><?= e(tanggal_rentang($p['tanggal_mulai'], $p['tanggal_selesai'])) ?></span></div>
           <div class="side-info-row"><span class="k">Waktu</span><span><?= e($p['waktu'] ?: '-') ?></span></div>
           <div class="side-info-row"><span class="k">Lokasi</span><span><?= e($p['lokasi'] ?: '-') ?></span></div>
-          <div class="side-info-row" style="border:none;"><span class="k">Kuota</span><span><?= $sisa ?> kursi tersisa dari <?= (int) $p['kuota'] ?></span></div>
+          <div class="side-info-row" style="border:none;"><span class="k">Mode</span><span><i class="bi <?= $p['mode'] === 'Luring' ? 'bi-geo-alt' : 'bi-globe2' ?>"></i> <?= $p['mode'] === 'Luring' ? 'Luring (Tatap Muka)' : 'Daring (Online)' ?></span></div>
 
           <div style="display:flex; gap:8px; margin-top:16px; flex-wrap:wrap; align-items:center;">
             <a class="btn btn-outline btn-sm" href="pelatihan-detail.php?id=<?= (int) $p['id'] ?>">Lihat Detail</a>
@@ -122,14 +116,12 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
             <?php elseif (Auth::role() === 'anggota'): ?>
               <?php if ($saya): ?>
                 <?= badge_status_peserta($saya['status']) ?>
-              <?php elseif ($p['status'] === 'Dibuka' && $sisa > 0): ?>
+              <?php elseif ($p['status'] === 'Dibuka'): ?>
                 <form method="post" style="display:inline;">
                   <?= Csrf::field() ?>
                   <input type="hidden" name="pelatihan_id" value="<?= (int) $p['id'] ?>">
                   <button class="btn btn-primary btn-sm" type="submit"><i class="bi bi-pencil-square"></i> Daftar</button>
                 </form>
-              <?php elseif ($sisa <= 0): ?>
-                <span class="badge badge-amber">Kuota Penuh</span>
               <?php else: ?>
                 <span class="badge badge-muted">Pendaftaran Ditutup</span>
               <?php endif; ?>

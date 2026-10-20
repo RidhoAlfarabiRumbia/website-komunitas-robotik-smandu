@@ -59,7 +59,7 @@ CREATE TABLE pelatihan (
   tanggal_selesai DATE DEFAULT NULL,
   waktu VARCHAR(60) DEFAULT NULL,
   lokasi VARCHAR(150) DEFAULT NULL,
-  kuota INT NOT NULL DEFAULT 20,
+  mode ENUM('Daring','Luring') NOT NULL DEFAULT 'Daring',
   status ENUM('Dibuka','Ditutup') NOT NULL DEFAULT 'Dibuka',
   akses ENUM('Umum','Anggota') NOT NULL DEFAULT 'Anggota',
   dibuat_pada DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -297,11 +297,11 @@ INSERT INTO materi (judul, topik, deskripsi, file_path, link_url) VALUES
 ('Elektronika Dasar: Sensor dan Aktuator','Elektronika','Pengenalan komponen elektronika yang umum dipakai pada proyek robotika.',NULL,NULL),
 ('Algoritma dan Logika Pemrograman','Pemrograman','Dasar berpikir algoritmik sebelum masuk ke bahasa pemrograman tertentu.',NULL,'https://scratch.mit.edu');
 
-INSERT INTO pelatihan (id, nama, deskripsi, tanggal_mulai, tanggal_selesai, waktu, lokasi, kuota, status, akses) VALUES
-(1,'Workshop Mini Arduino untuk Pemula','Pengenalan rangkaian dan pemrograman Arduino dari nol, diakhiri proyek robot pemadam api sederhana.','2026-10-10','2026-10-24','Sabtu, 09.00 - 12.00','Lab Robotika',30,'Dibuka','Umum'),
-(2,'Workshop Sensor dan IoT dengan ESP32','Praktik langsung membaca sensor, mengirim data ke dashboard, dan mengintegrasikan ESP32 dengan WiFi sekolah.','2026-11-07','2026-11-21','Sabtu, 09.00 - 12.00','Lab Komputer 1',20,'Dibuka','Anggota'),
-(3,'Workshop Pemrograman Lanjutan','Pembahasan algoritma, struktur data, dan machine learning ringan untuk proyek robot sederhana.','2026-09-12','2026-09-26','Sabtu, 10.00 - 13.00','Lab Komputer 2',16,'Ditutup','Anggota'),
-(4,'Workshop Terbuka Umum: Demo Robot Sortir','Pameran karya untuk siswa luar sekolah. Komunitas memamerkan lengan robot sortir warna.','2026-12-05','2026-12-05','Sabtu, 09.00 - 11.00','Aula Sekolah',50,'Dibuka','Umum');
+INSERT INTO pelatihan (id, nama, deskripsi, tanggal_mulai, tanggal_selesai, waktu, lokasi, mode, status, akses) VALUES
+(1,'Workshop Mini Arduino untuk Pemula','Pengenalan rangkaian dan pemrograman Arduino dari nol, diakhiri proyek robot pemadam api sederhana.','2026-10-10','2026-10-24','Sabtu, 09.00 - 12.00','Lab Robotika','Luring','Dibuka','Umum'),
+(2,'Workshop Sensor dan IoT dengan ESP32','Praktik langsung membaca sensor, mengirim data ke dashboard, dan mengintegrasikan ESP32 dengan WiFi sekolah.','2026-11-07','2026-11-21','Sabtu, 09.00 - 12.00','Lab Komputer 1','Luring','Dibuka','Anggota'),
+(3,'Workshop Pemrograman Lanjutan','Pembahasan algoritma, struktur data, dan machine learning ringan untuk proyek robot sederhana.','2026-09-12','2026-09-26','Sabtu, 10.00 - 13.00','Lab Komputer 2','Luring','Ditutup','Anggota'),
+(4,'Workshop Terbuka Umum: Demo Robot Sortir','Pameran karya untuk siswa luar sekolah. Komunitas memamerkan lengan robot sortir warna.','2026-12-05','2026-12-05','Sabtu, 09.00 - 11.00','Aula Sekolah','Luring','Dibuka','Umum');
 
 INSERT INTO pelatihan_peserta (pelatihan_id, anggota_id, nama, kontak, asal, status) VALUES
 (1,1,'Ahmad Fauzan Rizki','0812-3456-7890','SMA Negeri 2','Disetujui'),
@@ -375,7 +375,7 @@ INSERT INTO kegiatan (nama, deskripsi, tanggal, waktu, lokasi, status, video) VA
 
 INSERT INTO pengumuman (judul, isi, tanggal) VALUES
 ('Pendaftaran Anggota Baru Tahun Ajaran 2026/2027','Komunitas Robotik membuka pendaftaran anggota baru untuk siswa kelas X dan XI melalui halaman Pendaftaran. Lengkapi formulir dan Pakta Integritas, lalu tunggu verifikasi admin.','2026-09-08'),
-('Workshop Mini Arduino untuk Pemula Dibuka','Pendaftaran peserta Workshop Mini Arduino untuk Pemula telah dibuka. Kuota 30 peserta dan terbuka untuk umum termasuk siswa di luar sekolah.','2026-09-20'),
+('Workshop Mini Arduino untuk Pemula Dibuka','Pendaftaran peserta Workshop Mini Arduino untuk Pemula telah dibuka. Terbuka untuk umum termasuk siswa di luar sekolah.','2026-09-20'),
 ('Perubahan Jadwal Latihan Rutin','Latihan rutin yang semula hari Rabu dipindahkan menjadi setiap hari Jumat pukul 15.00 WIT di Lab Komputer 2.','2026-09-05'),
 ('Deadline Proposal Karya untuk Pameran STEM','Anggota yang ingin karyanya ditampilkan pada Pameran STEM sekolah wajib mengumpulkan proposal singkat paling lambat 30 September 2026.','2026-09-01');
 

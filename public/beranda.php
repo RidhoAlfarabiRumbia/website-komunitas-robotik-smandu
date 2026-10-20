@@ -45,7 +45,7 @@ $materiTerbaru = $kontenAnggota
     : [];
 
 $fitur = [
-    ['bi-mortarboard', 'teal', 'Pelatihan & Workshop', 'Jadwal pelatihan terjadwal dengan kuota dan persetujuan peserta.', 'pelatihan.php', 'Lihat Pelatihan'],
+    ['bi-mortarboard', 'teal', 'Pelatihan & Workshop', 'Jadwal pelatihan terjadwal dengan mode daring/luring dan persetujuan peserta.', 'pelatihan.php', 'Lihat Pelatihan'],
     ['bi-award', 'amber', 'Prestasi Anggota', 'Jeak juara dan penghargaan yang dicapai anggota komunitas.', 'prestasi.php', 'Lihat Prestasi'],
     ['bi-images', 'blue', 'Galeri Kegiatan', 'Dokumentasi latihan, workshop, lomba, dan pameran karya komunitas.', 'galeri.php', 'Buka Galeri'],
     ['bi-megaphone', 'red', 'Pengumuman', 'Informasi terbaru soal pendaftaran, jadwal, dan pengumuman resmi komunitas.', 'pengumuman.php', 'Baca Pengumuman'],

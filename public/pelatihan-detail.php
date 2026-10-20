@@ -28,10 +28,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         flash_set('error', 'Pendaftaran pelatihan ini sudah ditutup.');
         redirect('pelatihan-detail.php?id=' . $id);
     }
-    if (Pelatihan::sisaKuota($p, (int) $p['jumlah_disetujui']) <= 0) {
-        flash_set('error', 'Kuota pelatihan ini sudah penuh.');
-        redirect('pelatihan-detail.php?id=' . $id);
-    }
 
     Pelatihan::daftar($id, (int) Auth::anggotaId());
     flash_set('success', 'Pendaftaran terkirim. Materi baru terbuka setelah disetujui admin.');
@@ -55,9 +51,7 @@ $isAnggota = Auth::role() === 'anggota';
 $saya = $isAnggota ? Pelatihan::pendaftaranAnggota($id, (int) Auth::anggotaId()) : null;
 
 $materi = Pelatihan::materi($id);
-$sisa = Pelatihan::sisaKuota($p, (int) $p['jumlah_disetujui']);
 $bolehMateri = $isAdmin || ($saya && $saya['status'] === 'Disetujui' && Pelatihan::aktif($p));
-$peserta = (int) $p['jumlah_disetujui'];
 
 $pageTitle = $p['nama'];
 include __DIR__ . '/../app/includes/header.php';
@@ -132,7 +126,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
         <div class="side-info-row"><span class="k">Selesai</span><span><?= e(tanggal_indo($p['tanggal_selesai'])) ?></span></div>
         <div class="side-info-row"><span class="k">Waktu</span><span><?= e($p['waktu'] ?: '-') ?></span></div>
         <div class="side-info-row"><span class="k">Lokasi</span><span><?= e($p['lokasi'] ?: '-') ?></span></div>
-        <div class="side-info-row" style="border:none;"><span class="k">Kuota</span><span><?= (int) $p['kuota'] - $peserta ?> / <?= (int) $p['kuota'] ?></span></div>
+        <div class="side-info-row" style="border:none;"><span class="k">Mode</span><span><i class="bi <?= $p['mode'] === 'Luring' ? 'bi-geo-alt' : 'bi-globe2' ?>"></i> <?= $p['mode'] === 'Luring' ? 'Luring (Tatap Muka)' : 'Daring (Online)' ?></span></div>
 
         <div style="margin-top:18px;">
           <?php if ($isAdmin): ?>
@@ -143,14 +137,12 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
               <p style="font-size:12.5px; color:var(--text-muted); margin-top:10px;">
                 Terdaftar sejak <?= e(tanggal_indo($saya['dibuat_pada'])) ?>.
               </p>
-            <?php elseif ($p['status'] === 'Dibuka' && $sisa > 0): ?>
+            <?php elseif ($p['status'] === 'Dibuka'): ?>
               <form method="post">
                 <?= Csrf::field() ?>
                 <input type="hidden" name="pelatihan_id" value="<?= (int) $p['id'] ?>">
                 <button class="btn btn-primary btn-block" type="submit"><i class="bi bi-pencil-square"></i> Daftar Peserta</button>
               </form>
-            <?php elseif ($sisa <= 0): ?>
-              <div class="alert alert-warn" style="margin:0;">Kuota sudah penuh.</div>
             <?php else: ?>
               <div class="alert alert-muted" style="margin:0;">Pendaftaran sudah ditutup.</div>
             <?php endif; ?>
