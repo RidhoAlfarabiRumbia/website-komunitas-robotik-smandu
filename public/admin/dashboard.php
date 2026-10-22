@@ -2,9 +2,9 @@
 require_once __DIR__ . '/../../app/includes/bootstrap.php';
 Auth::requireRole('admin');
 
-$pending = Karya::byStatus('Pending');
+$pending = Karya::byStatus('Menunggu');
 $totalAnggota = Anggota::jumlah();
-$totalKaryaTayang = Karya::jumlahByStatus('Approved');
+$totalKaryaTayang = Karya::jumlahByStatus('Disetujui');
 $pendingPeserta = Pelatihan::pendingPeserta();
 $pendingDaftar = Pendaftaran::hitungStatus('Baru');
 $totalPelatihan = Pelatihan::jumlah();

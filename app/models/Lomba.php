@@ -3,7 +3,7 @@
 class Lomba extends Model
 {
     protected static string $table = 'lomba';
-    protected static array $fillable = ['nama', 'penyelenggara', 'tanggal', 'lokasi', 'kategori', 'status', 'hasil'];
+    protected static array $fillable = ['nama', 'penyelenggara', 'tanggal', 'lokasi', 'status', 'hasil'];
 
     public static function peserta(int $lombaId): array
     {

@@ -265,14 +265,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Karya hanya tampil di halaman publik bila publikasinya Approved. Kalau admin
+    // Karya hanya tampil di halaman publik bila publikasinya Disetujui. Kalau admin
     // menambah karya dari halaman fitur dengan status lain, karyanya tidak akan
     // terlihat di daftar — arahkan ke moderasi supaya tidak dikira gagal simpan.
     if ($crudEntitas === 'karya' && $crudParam === 'manage') {
-        $publikasi = (string) ($data['publikasi'] ?? 'Pending');
-        if ($publikasi !== 'Approved') {
+        $publikasi = (string) ($data['publikasi'] ?? 'Menunggu');
+        if ($publikasi !== 'Disetujui') {
             flash_set('success', 'Karya berhasil disimpan dengan status ' . $publikasi
-                . '. Halaman Karya hanya menampilkan karya Approved, jadi belum tayang. Tinjau di Moderasi.');
+                . '. Halaman Karya hanya menampilkan karya Disetujui, jadi belum tayang. Tinjau di Moderasi.');
             redirect('admin/moderasi.php?status=' . urlencode($publikasi));
         }
     }

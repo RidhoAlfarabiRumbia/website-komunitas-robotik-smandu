@@ -41,7 +41,7 @@ $stat = [
     'pelatihan' => count($pelatihanSaya),
     'prestasi' => count($prestasiSaya),
 ];
-$jumlahKriyaTayang = count(array_filter($karyaSaya, fn($k) => $k['publikasi'] === 'Approved'));
+$jumlahKriyaTayang = count(array_filter($karyaSaya, fn($k) => $k['publikasi'] === 'Disetujui'));
 
 $pageTitle = 'Profil Saya';
 include __DIR__ . '/../app/includes/header.php';
@@ -90,7 +90,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
           <?= badge_publikasi($k['publikasi']) ?>
         </div>
       </div>
-      <?php if ($k['publikasi'] === 'Rejected' && $k['alasan_tolak']): ?>
+      <?php if ($k['publikasi'] === 'Ditolak' && $k['alasan_tolak']): ?>
         <div style="padding:0 18px 14px 84px; font-size:12.5px; color:var(--red);">Catatan admin: <?= e($k['alasan_tolak']) ?></div>
       <?php endif; ?>
     <?php endforeach; else: ?>

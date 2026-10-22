@@ -111,6 +111,10 @@ cp .env.example .env
 > **Produksi:** arahkan document root server ke folder `public/`. Kode di `app/`, berkas privat di `storage/`, dan `.env` tidak boleh bisa diakses langsung dari browser.
 
 > **Upgrade dari versi lama:** jalankan `migrate.sql` pada database yang sudah ada (cadangkan dulu).
+>
+> Jika database masih memiliki kolom `karya.kategori` atau `lomba.kategori`, jalankan `migrate_hapus_kategori_karya.sql` / `migrate_hapus_kategori_lomba.sql` (cadangkan dulu; data kategori lama akan dihapus).
+>
+> Jika status publikasi karya masih `Pending`/`Approved`/`Rejected`, jalankan `migrate_publikasi_karya_indonesia.sql`.
 
 ### Opsional: performa
 
@@ -138,6 +142,9 @@ portal-robotik/
 ├── storage/terbatas/       # berkas privat (materi, Pakta Integritas)
 ├── database.sql            # instalasi baru: skema + data contoh
 ├── migrate.sql             # migrasi dari versi sebelumnya
+├── migrate_hapus_kategori_karya.sql # migrasi sekali pakai: hapus kolom karya.kategori
+├── migrate_hapus_kategori_lomba.sql # migrasi sekali pakai: hapus kolom lomba.kategori
+├── migrate_publikasi_karya_indonesia.sql # migrasi status publikasi karya
 └── .env                    # konfigurasi lokal (tidak masuk repository)
 ```
 

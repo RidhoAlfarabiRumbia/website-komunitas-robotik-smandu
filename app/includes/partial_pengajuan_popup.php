@@ -18,7 +18,7 @@ if (!Auth::isAdmin()) {
     return;
 }
 
-$notifKarya = Karya::byStatus('Pending');
+$notifKarya = Karya::byStatus('Menunggu');
 $notifPeserta = Pelatihan::semuaPeserta('Pending');
 $notifDaftar = Pendaftaran::semua('Baru');
 

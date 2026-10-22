@@ -4,15 +4,15 @@ class Karya extends Model
 {
     protected static string $table = 'karya';
     protected static array $fillable = [
-        'judul', 'kategori', 'deskripsi', 'progres', 'publikasi',
+        'judul', 'deskripsi', 'progres', 'publikasi',
         'pembuat_id', 'teknologi', 'link_demo', 'foto', 'alasan_tolak',
     ];
 
     public static function approved(int $limit = 0): array
     {
-        $sql = "SELECT k.id, k.judul, k.kategori, k.deskripsi, k.progres, k.publikasi, k.pembuat_id, k.teknologi, k.link_demo, k.foto, k.dibuat_pada, a.nama AS pembuat_nama FROM karya k
+        $sql = "SELECT k.id, k.judul, k.deskripsi, k.progres, k.publikasi, k.pembuat_id, k.teknologi, k.link_demo, k.foto, k.dibuat_pada, a.nama AS pembuat_nama FROM karya k
                 JOIN anggota a ON a.id = k.pembuat_id
-                WHERE k.publikasi = 'Approved' ORDER BY k.dibuat_pada DESC";
+                WHERE k.publikasi = 'Disetujui' ORDER BY k.dibuat_pada DESC";
         if ($limit > 0) {
             $sql .= ' LIMIT ' . (int) $limit;
         }
@@ -47,8 +47,8 @@ class Karya extends Model
     }
 
     /**
-     * Aturan visibilitas karya (PRD 8.7 + keamanan): Approved terlihat semua
-     * orang; Pending/Rejected hanya admin atau pembuatnya sendiri.
+     * Aturan visibilitas karya (PRD 8.7 + keamanan): Disetujui terlihat semua
+     * orang; Menunggu/Ditolak hanya admin atau pembuatnya sendiri.
      * Anggota login lain TIDAK boleh membuka karya yang belum tayang lewat URL.
      */
     public static function bolehDilihat(?array $k, ?int $anggotaId, bool $isAdmin): bool
@@ -56,7 +56,7 @@ class Karya extends Model
         if (!$k) {
             return false;
         }
-        if (($k['publikasi'] ?? '') === 'Approved') {
+        if (($k['publikasi'] ?? '') === 'Disetujui') {
             return true;
         }
         if ($isAdmin) {
@@ -75,19 +75,19 @@ class Karya extends Model
         return (int) $stmt->fetchColumn();
     }
 
-    public static function hitungPending(): int
+    public static function hitungMenunggu(): int
     {
-        return self::jumlahByStatus('Pending');
+        return self::jumlahByStatus('Menunggu');
     }
 
     public static function moderasi(int $id, string $status, ?string $alasan = null): void
     {
-        if (!in_array($status, ['Approved', 'Rejected'], true)) {
+        if (!in_array($status, ['Disetujui', 'Ditolak'], true)) {
             return;
         }
         self::update($id, [
             'publikasi' => $status,
-            'alasan_tolak' => $status === 'Rejected' ? $alasan : null,
+            'alasan_tolak' => $status === 'Ditolak' ? $alasan : null,
         ]);
     }
 }

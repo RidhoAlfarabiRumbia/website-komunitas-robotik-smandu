@@ -4,7 +4,7 @@ require_once __DIR__ . '/../app/includes/bootstrap.php';
 $id = nilai_int($_GET, 'id');
 $k = Karya::detail($id);
 // Karya yang belum tayang hanya boleh dilihat admin atau pembuatnya sendiri
-// (Karya::bolehDilihat); pengunjung umum dan anggota lain hanya Approved.
+// (Karya::bolehDilihat); pengunjung umum dan anggota lain hanya Disetujui.
 if (!Karya::bolehDilihat($k, Auth::anggotaId(), Auth::isAdmin())) {
     $k = null;
 }
@@ -40,7 +40,6 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
     <div>
       <div class="card">
         <div class="side-info-row"><span class="k">Pembuat</span><a href="anggota-detail.php?id=<?= $k['pembuat_id'] ?>"><?= e($k['pembuat_nama']) ?></a></div>
-        <div class="side-info-row"><span class="k">Kategori</span><span><?= e($k['kategori']) ?></span></div>
         <div class="side-info-row"><span class="k">Diajukan</span><span><?= tanggal_indo($k['dibuat_pada']) ?></span></div>
       </div>
     </div>

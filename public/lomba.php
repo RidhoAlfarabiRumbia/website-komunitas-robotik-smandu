@@ -45,7 +45,6 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
         <div class="side-info-row"><span class="k">Penyelenggara</span><span><?= e($l['penyelenggara']) ?></span></div>
         <div class="side-info-row"><span class="k">Tanggal</span><span><?= tanggal_indo($l['tanggal']) ?></span></div>
         <div class="side-info-row"><span class="k">Lokasi</span><span><?= e($l['lokasi']) ?></span></div>
-        <div class="side-info-row"><span class="k">Kategori</span><span><?= e($l['kategori']) ?></span></div>
         <?php if ($peserta): ?>
           <div class="side-info-row" style="border:none;"><span class="k">Peserta</span><span><?= e(implode(', ', array_column($peserta, 'nama'))) ?></span></div>
         <?php endif; ?>

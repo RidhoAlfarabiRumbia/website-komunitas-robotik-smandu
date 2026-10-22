@@ -55,10 +55,9 @@ function crud_config(): array
             'label' => 'Karya', 'model' => Karya::class,
             'fields' => [
                 'judul' => ['label' => 'Judul', 'type' => 'text', 'required' => true],
-                'kategori' => ['label' => 'Kategori', 'type' => 'select', 'options' => ['Robot','IoT','Programming','AI','Elektronika','Lainnya']],
                 'deskripsi' => ['label' => 'Deskripsi', 'type' => 'textarea'],
                 'progres' => ['label' => 'Progres', 'type' => 'select', 'options' => ['Sedang Dikerjakan','Selesai']],
-                'publikasi' => ['label' => 'Publikasi', 'type' => 'select', 'options' => ['Pending','Approved','Rejected']],
+                'publikasi' => ['label' => 'Publikasi', 'type' => 'select', 'options' => ['Menunggu','Disetujui','Ditolak']],
                 'pembuat_id' => ['label' => 'Pembuat', 'type' => 'anggota_select', 'required' => true],
                 'teknologi' => ['label' => 'Teknologi (pisahkan koma)', 'type' => 'text'],
                 // 'link' = wajib berupa tautan http/https (lihat crud_handle.php).
@@ -67,8 +66,8 @@ function crud_config(): array
                 'link_demo' => ['label' => 'Tautan Proyek', 'type' => 'text', 'link' => true],
                 'foto' => ['label' => 'Foto', 'type' => 'file', 'subfolder' => 'karya'],
             ],
-            'list' => ['judul', 'kategori', 'progres', 'publikasi'],
-            'search' => ['judul', 'kategori', 'deskripsi', 'teknologi', '_cari_pembuat'],
+            'list' => ['judul', 'progres', 'publikasi'],
+            'search' => ['judul', 'deskripsi', 'teknologi', '_cari_pembuat'],
         ],
         'galeri' => [
             'label' => 'Galeri', 'model' => Galeri::class,
@@ -125,12 +124,11 @@ function crud_config(): array
                 'penyelenggara' => ['label' => 'Penyelenggara', 'type' => 'text'],
                 'tanggal' => ['label' => 'Tanggal', 'type' => 'date', 'required' => true],
                 'lokasi' => ['label' => 'Lokasi', 'type' => 'text'],
-                'kategori' => ['label' => 'Kategori', 'type' => 'text'],
                 'status' => ['label' => 'Status', 'type' => 'select', 'options' => ['Akan Datang','Selesai']],
                 'hasil' => ['label' => 'Hasil', 'type' => 'text'],
             ],
             'list' => ['nama', 'tanggal', 'status', 'hasil'],
-            'search' => ['nama', 'penyelenggara', 'lokasi', 'kategori', 'hasil'],
+            'search' => ['nama', 'penyelenggara', 'lokasi', 'hasil'],
         ],
         'pengumuman' => [
             'label' => 'Pengumuman', 'model' => Pengumuman::class,

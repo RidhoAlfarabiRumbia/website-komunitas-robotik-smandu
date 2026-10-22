@@ -11,22 +11,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = nilai_int($_POST, 'id');
     $aksi = nilai_teks($_POST, 'aksi');
     if ($aksi === 'approve') {
-        Karya::moderasi($id, 'Approved');
+        Karya::moderasi($id, 'Disetujui');
         flash_set('Karya disetujui dan kini tayang di portal.');
     } elseif ($aksi === 'reject') {
-        Karya::moderasi($id, 'Rejected', nilai_teks($_POST, 'alasan') ?: 'Perlu perbaikan sebelum diajukan kembali.');
+        Karya::moderasi($id, 'Ditolak', nilai_teks($_POST, 'alasan') ?: 'Perlu perbaikan sebelum diajukan kembali.');
         flash_set('Karya ditolak dan anggota dapat melihat catatannya.');
     }
-    $statusKembali = nilai_teks($_POST, 'status_kembali') ?: 'Pending';
+    $statusKembali = nilai_teks($_POST, 'status_kembali') ?: 'Menunggu';
     redirect('admin/moderasi.php?status=' . urlencode($statusKembali) . $qs);
 }
 
-$status = nilai_teks($_GET, 'status') ?: 'Pending';
-if (!in_array($status, ['Pending', 'Approved', 'Rejected'], true)) $status = 'Pending';
+$status = nilai_teks($_GET, 'status') ?: 'Menunggu';
+if (!in_array($status, ['Menunggu', 'Disetujui', 'Ditolak'], true)) $status = 'Menunggu';
 $list = Karya::byStatus($status);
 $totalList = count($list);
 if ($q !== '') {
-    $list = cari_filter($list, ['judul', 'deskripsi', 'teknologi', 'kategori', 'pembuat_nama', 'alasan_tolak'], $q);
+    $list = cari_filter($list, ['judul', 'deskripsi', 'teknologi', 'pembuat_nama', 'alasan_tolak'], $q);
 }
 
 $pageTitle = 'Moderasi Karya';
@@ -56,7 +56,7 @@ include __DIR__ . '/../../app/includes/header.php';
     <?php if ($msg = flash_get()): ?><div class="alert <?= flash_alert_class($msg['type']) ?>"><?= e($msg['text']) ?></div><?php endif; ?>
     <div style="display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap; margin-bottom:16px;">
       <div class="role-tabs" style="max-width:360px; margin-bottom:0;">
-        <?php foreach (['Pending','Approved','Rejected'] as $s): ?>
+        <?php foreach (['Menunggu','Disetujui','Ditolak'] as $s): ?>
           <a href="?status=<?= $s ?><?= e($qs) ?>" class="role-tab <?= $status === $s ? 'active' : '' ?>" style="display:block; text-align:center;"><?= $s ?></a>
         <?php endforeach; ?>
       </div>
@@ -78,7 +78,7 @@ include __DIR__ . '/../../app/includes/header.php';
             <div class="work-tags" style="margin-bottom:14px;"><?php foreach ($teknologi as $t): ?><span class="tag"><?= e($t) ?></span><?php endforeach; ?></div>
           <?php endif; ?>
 
-          <?php if ($k['publikasi'] === 'Pending'): ?>
+          <?php if ($k['publikasi'] === 'Menunggu'): ?>
             <div style="display:flex; gap:8px;">
               <form method="post" style="display:inline;">
                 <?= Csrf::field() ?>
@@ -97,7 +97,7 @@ include __DIR__ . '/../../app/includes/header.php';
               <textarea name="alasan" rows="2" placeholder="Alasan penolakan" style="width:100%; border:1px solid var(--border); border-radius:22px; padding:8px; font-size:13px; margin-bottom:8px;"></textarea>
               <button class="btn btn-danger-outline btn-sm" type="submit">Kirim penolakan</button>
             </form>
-          <?php elseif ($k['publikasi'] === 'Rejected' && $k['alasan_tolak']): ?>
+          <?php elseif ($k['publikasi'] === 'Ditolak' && $k['alasan_tolak']): ?>
             <div style="font-size:12.5px; color:var(--red);">Alasan: <?= e($k['alasan_tolak']) ?></div>
           <?php endif; ?>
         </div>

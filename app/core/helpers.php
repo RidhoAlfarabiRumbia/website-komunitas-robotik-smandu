@@ -63,7 +63,7 @@ function badge_progres(string $progres): string
 
 function badge_publikasi(string $publikasi): string
 {
-    $map = ['Pending' => 'badge-amber', 'Approved' => 'badge-teal', 'Rejected' => 'badge-red'];
+    $map = ['Menunggu' => 'badge-amber', 'Disetujui' => 'badge-teal', 'Ditolak' => 'badge-red'];
     return '<span class="badge ' . ($map[$publikasi] ?? 'badge-muted') . '">' . e($publikasi) . '</span>';
 }
 

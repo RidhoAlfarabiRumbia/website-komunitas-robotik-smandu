@@ -6,14 +6,12 @@ $anggota = Auth::anggota();
 $errors = [];
 $form = [
     'judul' => '',
-    'kategori' => 'Robot',
     'deskripsi' => '',
     'progres' => 'Sedang Dikerjakan',
     'teknologi' => '',
     'link_demo' => '',
 ];
 
-$kategoriOpsi = ['Robot', 'IoT', 'Programming', 'AI', 'Elektronika', 'Lainnya'];
 $progresOpsi = ['Sedang Dikerjakan', 'Selesai'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -21,7 +19,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $form = [
         'judul' => nilai_teks($_POST, 'judul'),
-        'kategori' => nilai_teks($_POST, 'kategori'),
         'deskripsi' => nilai_teks($_POST, 'deskripsi'),
         'progres' => nilai_teks($_POST, 'progres'),
         'teknologi' => nilai_teks($_POST, 'teknologi'),
@@ -30,7 +27,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($form['judul'] === '') $errors[] = 'Judul karya wajib diisi.';
     if ($form['deskripsi'] === '') $errors[] = 'Deskripsi wajib diisi.';
-    if (!in_array($form['kategori'], $kategoriOpsi, true)) $errors[] = 'Kategori tidak valid.';
     if (!in_array($form['progres'], $progresOpsi, true)) $errors[] = 'Status progres tidak valid.';
     if ($form['link_demo'] !== '' && !filter_var($form['link_demo'], FILTER_VALIDATE_URL)) {
         $errors[] = 'Tautan proyek tidak valid.';
@@ -46,10 +42,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         Karya::create([
             'judul' => $form['judul'],
-            'kategori' => $form['kategori'],
             'deskripsi' => $form['deskripsi'],
             'progres' => $form['progres'],
-            'publikasi' => 'Pending',
+            'publikasi' => 'Menunggu',
             'pembuat_id' => $anggota['id'],
             'teknologi' => $form['teknologi'],
             'link_demo' => $form['link_demo'] ?: null,
@@ -70,19 +65,13 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
 <div class="main">
   <div class="breadcrumb"><a href="profil.php">Profil Saya</a> / Ajukan Karya</div>
   <div class="page-head">
-    <div><div class="eyebrow">BERKARYA</div><h1>Ajukan Karya Baru</h1><p class="desc">Karya yang diajukan akan berstatus Pending hingga direview oleh admin.</p></div>
+    <div><div class="eyebrow">BERKARYA</div><h1>Ajukan Karya Baru</h1><p class="desc">Karya yang diajukan akan berstatus Menunggu hingga direview oleh admin.</p></div>
   </div>
   <?php if ($errors): foreach ($errors as $err): ?><div class="alert alert-error"><?= e($err) ?></div><?php endforeach; endif; ?>
   <form class="card" style="max-width:640px;" method="post" enctype="multipart/form-data">
     <?= Csrf::field() ?>
     <div class="form-grid">
       <div class="field field-full"><label>Judul karya</label><input name="judul" required maxlength="150" value="<?= e($form['judul']) ?>" placeholder="Contoh: Robot Penyiram Tanaman Otomatis"></div>
-      <div class="field">
-        <label>Kategori</label>
-        <select name="kategori">
-          <?php foreach ($kategoriOpsi as $c): ?><option <?= $form['kategori'] === $c ? 'selected' : '' ?>><?= e($c) ?></option><?php endforeach; ?>
-        </select>
-      </div>
       <div class="field">
         <label>Status progres</label>
         <select name="progres">

@@ -86,5 +86,5 @@ If a task turns out to be larger than it first looked, **stop and ask** instead 
 
 ## Important Flows
 
-- New member karya is created as `Pending` (see `public/ajukan-karya.php`); `public/admin/moderasi.php` moves it to `Approved`/`Rejected` with an optional `alasan_tolak` shown on the member's Profil Saya. Only `Karya::approved()` results are public.
+- New member karya is created as `Menunggu` (see `public/ajukan-karya.php`); `public/admin/moderasi.php` moves it to `Disetujui`/`Ditolak` with an optional `alasan_tolak` shown on the member's Profil Saya. Only `Karya::approved()` results are public.
 - `public/admin/crud.php` behavior (fields, labels, options, upload subfolders, list columns) is configured per entity in `app/core/CrudConfig.php`; entity classes live in `app/models/` and extend `app/core/Model.php`.

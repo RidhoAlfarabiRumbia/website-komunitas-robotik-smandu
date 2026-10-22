@@ -31,7 +31,7 @@ $pelatihanTerbaru = Pelatihan::untukPengunjung(3);
 $prestasiTerbaru = Prestasi::tayang(3);
 
 // Konten khusus anggota & admin
-// Karya yang sudah tayang (Approved) ditampilkan juga untuk tamu —
+// Karya yang sudah tayang (Disetujui) ditampilkan juga untuk tamu —
 // halaman karya.php kini juga publik.
 $karyaTerbaru = Karya::approved(3);
 // Lomba & agenda kegiatan ditampilkan juga untuk tamu di beranda (ringkasan

@@ -10,7 +10,7 @@ $current = basename($_SERVER['SCRIPT_NAME']);
 // entity bisa berupa array bila URL dibuat seperti ?entity[]=karya — coerce aman
 // supaya admin_link() tidak melempar TypeError.
 $entity = is_string($_GET['entity'] ?? null) ? $_GET['entity'] : '';
-$pendingCount = Karya::hitungPending();
+$pendingCount = Karya::hitungMenunggu();
 $pendingPeserta = Pelatihan::pendingPeserta();
 $pendingDaftar = Pendaftaran::hitungStatus('Baru');
 

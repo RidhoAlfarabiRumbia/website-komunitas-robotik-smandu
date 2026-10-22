@@ -115,9 +115,9 @@ Modul baru untuk mengelola kegiatan belajar terjadwal (mis. "Workshop Mini") yan
 •	Pengajuan anggota harus melalui moderasi (pra-publikasi).
 8.6 Pengajuan Karya
 •	Anggota mengisi informasi karya.
-•	Status awal Pending.
-•	Admin review lalu Approved atau Rejected.
-•	Karya Approved dapat ditampilkan pada portal.
+•	Status awal Menunggu.
+•	Admin review lalu Disetujui atau Ditolak.
+•	Karya Disetujui dapat ditampilkan pada portal.
 8.7 Prestasi (Baru, terpisah dari Galeri)
 Modul khusus untuk mendokumentasikan pencapaian/kejuaraan komunitas sebagai bukti fisik yang juga dibutuhkan sekolah.
 •	Informasi: nama pencapaian/lomba, anggota atau tim terkait, tanggal, tingkat (sekolah/kota/provinsi/nasional/internasional), foto kegiatan, dan file bukti sertifikat (wajib diunggah).
@@ -132,7 +132,7 @@ Modul khusus untuk mendokumentasikan pencapaian/kejuaraan komunitas sebagai bukt
 •	Informasi: nama, deskripsi, tanggal, waktu, lokasi.
 8.10 Lomba
 •	Informasi kompetisi yang diikuti atau menjadi target komunitas.
-•	Nama, penyelenggara, tanggal, lokasi, kategori, status, hasil, dan peserta.
+•	Nama, penyelenggara, tanggal, lokasi, status, hasil, dan peserta.
 •	Menjadi rekam jejak kompetisi komunitas.
 8.11 Pengumuman
 •	Informasi pendaftaran, perubahan jadwal, deadline proyek, dan informasi komunitas.
@@ -177,11 +177,11 @@ Moderasi	Ya	Tidak	Tidak
 11. Alur Moderasi Karya
 1. Anggota membuka Profil Saya / Karya Saya.
 2. Memilih Tambah Karya dan mengisi informasi.
-3. Sistem menyimpan pengajuan dengan status Pending.
+3. Sistem menyimpan pengajuan dengan status Menunggu.
 4. Admin melakukan review.
-5. Admin memilih Approved atau Rejected.
-6. Jika Approved, karya ditampilkan pada portal.
-7. Jika Rejected, karya tidak dipublikasikan dan dapat diperbaiki/diajukan kembali.
+5. Admin memilih Disetujui atau Ditolak.
+6. Jika Disetujui, karya ditampilkan pada portal.
+7. Jika Ditolak, karya tidak dipublikasikan dan dapat diperbaiki/diajukan kembali.
 11.1 Alur Publikasi Prestasi (Baru)
 1. Anggota mengunggah data prestasi beserta foto kegiatan dan file bukti sertifikat.
 2. Sistem langsung menayangkan prestasi tersebut pada portal tanpa menunggu persetujuan admin.

@@ -17,7 +17,7 @@ class Anggota extends Model
 
     public static function jumlahKarya(int $anggotaId): int
     {
-        $stmt = self::db()->prepare("SELECT COUNT(*) FROM karya WHERE pembuat_id = ? AND publikasi = 'Approved'");
+        $stmt = self::db()->prepare("SELECT COUNT(*) FROM karya WHERE pembuat_id = ? AND publikasi = 'Disetujui'");
         $stmt->execute([$anggotaId]);
         return (int) $stmt->fetchColumn();
     }
