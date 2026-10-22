@@ -18,6 +18,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $menit = (int) ceil($jeda / 60);
             $errors[] = "Terlalu banyak percobaan gagal. Coba lagi dalam $menit menit.";
         } elseif (Auth::attempt($username, $password)) {
+            // Popup pengajuan terbaru ditampilkan sekali di dashboard admin.
+            if (Auth::role() === 'admin') {
+                $_SESSION['popup_pengajuan'] = true;
+            }
             redirect(Auth::role() === 'admin' ? 'admin/dashboard.php' : 'beranda.php');
         } else {
             $errors[] = 'Username atau kata sandi salah.';

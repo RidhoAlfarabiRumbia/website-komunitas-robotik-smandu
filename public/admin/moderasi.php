@@ -38,6 +38,7 @@ include __DIR__ . '/../../app/includes/header.php';
   <div style="flex:1;"></div>
   <div class="user-chip">
     <a class="btn btn-outline btn-sm" href="<?= base_url('beranda.php') ?>" title="Lihat Beranda"><i class="bi bi-eye"></i> Beranda</a>
+    <?php include __DIR__ . '/../../app/includes/partial_pengajuan_popup.php'; ?>
     <button type="button" class="theme-toggle" onclick="toggleTheme()" title="Mode gelap/terang" aria-label="Toggle dark mode">
       <i class="bi bi-moon-stars-fill" id="themeIconDark"></i>
       <i class="bi bi-sun-fill" id="themeIconLight" style="display:none;"></i>
