@@ -544,6 +544,109 @@ function pakta_template(): array
 }
 
 /**
+ * Status kunci pendaftaran anggota (PRD 8.12).
+ *
+ * Konfigurasi disimpan di tabel pengaturan:
+ * - pendaftaran_mode: buka | tutup | jadwal
+ * - pendaftaran_mulai / pendaftaran_selesai: Y-m-d
+ *
+ * Mode buka/tutup mengalahkan jadwal. Mode jadwal membuka pendaftaran secara
+ * inklusif dari 00.00 WIT pada tanggal mulai sampai 23.59 WIT pada tanggal
+ * selesai. Konfigurasi kosong atau tidak valid selalu dianggap tertutup.
+ */
+function pendaftaran_gate(?DateTimeImmutable $sekarang = null): array
+{
+    $zona = new DateTimeZone('Asia/Jayapura');
+    $sekarang ??= new DateTimeImmutable('now', $zona);
+
+    $mode = strtolower(trim((string) Pengaturan::nilai('pendaftaran_mode', '')));
+    $mulai = trim((string) Pengaturan::nilai('pendaftaran_mulai', ''));
+    $selesai = trim((string) Pengaturan::nilai('pendaftaran_selesai', ''));
+
+    $hasil = [
+        'buka' => false,
+        'mode' => $mode,
+        'mulai' => $mulai,
+        'selesai' => $selesai,
+        'status' => 'belum_diatur',
+        'label' => 'Belum diatur',
+        'pesan' => 'Pendaftaran anggota sedang ditutup.',
+        'diatur' => $mode !== '',
+        'zona' => 'Asia/Jayapura',
+        'zona_label' => 'WIT',
+    ];
+
+    if ($mode === 'buka') {
+        $hasil['buka'] = true;
+        $hasil['status'] = 'dibuka';
+        $hasil['label'] = 'Dibuka';
+        $hasil['pesan'] = 'Pendaftaran anggota sedang dibuka.';
+        return $hasil;
+    }
+
+    if ($mode === 'tutup') {
+        $hasil['status'] = 'ditutup';
+        $hasil['label'] = 'Ditutup';
+        $hasil['pesan'] = 'Pendaftaran anggota sedang ditutup.';
+        return $hasil;
+    }
+
+    if ($mode !== 'jadwal') {
+        if ($mode !== '') {
+            $hasil['status'] = 'tidak_valid';
+            $hasil['label'] = 'Tidak valid';
+            $hasil['pesan'] = 'Konfigurasi kunci pendaftaran tidak valid. Hubungi admin.';
+        }
+        return $hasil;
+    }
+
+    $parseTanggal = static function (string $nilai) use ($zona): ?DateTimeImmutable {
+        if ($nilai === '') return null;
+        $tanggal = DateTimeImmutable::createFromFormat('!Y-m-d', $nilai, $zona);
+        $error = DateTimeImmutable::getLastErrors();
+        if (!$tanggal
+            || ($error !== false && ($error['warning_count'] > 0 || $error['error_count'] > 0))
+            || $tanggal->format('Y-m-d') !== $nilai) {
+            return null;
+        }
+        return $tanggal;
+    };
+
+    $awal = $parseTanggal($mulai);
+    $akhir = $parseTanggal($selesai);
+
+    if (!$awal || !$akhir || $akhir < $awal) {
+        $hasil['status'] = 'tidak_valid';
+        $hasil['label'] = 'Jadwal tidak valid';
+        $hasil['pesan'] = 'Jadwal pendaftaran belum diatur dengan benar. Hubungi admin.';
+        return $hasil;
+    }
+
+    $awal = $awal->setTime(0, 0, 0);
+    $akhir = $akhir->setTime(23, 59, 59);
+
+    if ($sekarang < $awal) {
+        $hasil['status'] = 'belum_dibuka';
+        $hasil['label'] = 'Belum dibuka';
+        $hasil['pesan'] = 'Pendaftaran anggota akan dibuka pada ' . tanggal_indo($mulai) . ' pukul 00.00 WIT.';
+        return $hasil;
+    }
+
+    if ($sekarang > $akhir) {
+        $hasil['status'] = 'selesai';
+        $hasil['label'] = 'Sudah ditutup';
+        $hasil['pesan'] = 'Pendaftaran anggota ditutup pada ' . tanggal_indo($selesai) . ' pukul 23.59 WIT.';
+        return $hasil;
+    }
+
+    $hasil['buka'] = true;
+    $hasil['status'] = 'berlangsung';
+    $hasil['label'] = 'Dibuka sesuai jadwal';
+    $hasil['pesan'] = 'Pendaftaran anggota dibuka sampai ' . tanggal_indo($selesai) . ' pukul 23.59 WIT.';
+    return $hasil;
+}
+
+/**
  * Path absolut di server untuk berkas upload. Path relatif hasil handle_upload
  * (mis. "uploads/galeri/x.jpg" atau "terbatas/materi/y.pdf") dikembalikan
  * sebagai path absolut, atau null bila berkas tidak ada / di luar jangkauan.

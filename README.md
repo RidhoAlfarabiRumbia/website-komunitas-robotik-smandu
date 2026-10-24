@@ -50,7 +50,7 @@ Materi belajar robotik tersebar di banyak platform, karya dan dokumentasi tercec
 | **Berkompetisi** | **Lomba** (info, status, hasil, peserta) · **Prestasi** dengan bukti sertifikat, tayang langsung dan bisa ditinjau admin |
 | **Berbagi** | **Galeri** foto dan video · **Kegiatan** dengan video laporan · **Pengumuman** · **Slider Beranda** yang dikelola admin |
 | **Akun** | Login username · **Lupa password via email** dengan token sekali pakai · Pengelolaan email dan kata sandi di Profil |
-| **Regenerasi** | **Pendaftaran Anggota** dengan Pakta Integritas · **Profil** berisi rekam jejak karya, prestasi, dan pelatihan |
+| **Regenerasi** | **Pendaftaran Anggota** dengan Pakta Integritas dan **kunci periode** (buka manual, tutup manual, atau jadwal WIT) · **Profil** berisi rekam jejak karya, prestasi, dan pelatihan |
 
 ### Aturan akses utama
 
@@ -58,6 +58,7 @@ Materi belajar robotik tersebar di banyak platform, karya dan dokumentasi tercec
 - **Karya** ditinjau admin **sebelum** tayang. **Prestasi** tayang langsung dan ditinjau **sesudahnya**.
 - **Mode pelaksanaan** pelatihan ditandai **Daring (online)** atau **Luring (tatap muka)**; tanpa batas kuota — admin menyetujui peserta secara manual.
 - **Dokumen Pakta Integritas** bersifat privat dan hanya bisa dibuka admin.
+- **Pendaftaran anggota** default **tertutup** dan hanya bisa diisi saat admin membuka periode melalui **Admin → Kunci Pendaftaran**. Admin dapat memilih buka manual, tutup manual, atau jadwal tanggal WIT.
 
 ## Peran Pengguna
 
@@ -65,7 +66,7 @@ Materi belajar robotik tersebar di banyak platform, karya dan dokumentasi tercec
 |---|---|---|
 | **Pengunjung** | Guru, kepala sekolah, siswa luar, mitra (tanpa login) | Melihat prestasi, galeri, pengumuman, pelatihan terbuka; mendaftar anggota; mengunduh template Pakta Integritas |
 | **Anggota** | Anggota terverifikasi | Mengakses materi pelatihan yang diikuti, mendaftar pelatihan, mengajukan karya, mengunggah prestasi, mengelola profil |
-| **Admin** | Pembina komunitas dan satu murid yang ditugaskan | Mengelola semua konten, memoderasi karya, memverifikasi pendaftaran, menyetujui peserta pelatihan |
+| **Admin** | Pembina komunitas dan satu murid yang ditugaskan | Mengelola semua konten, mengatur kunci/periode pendaftaran, memoderasi karya, memverifikasi pendaftaran, menyetujui peserta pelatihan |
 
 ## Teknologi
 
@@ -122,6 +123,8 @@ cp .env.example .env
 
 > Data contoh dan akun awal ada di `database.sql`. Ganti atau hapus akun bawaan sebelum dipakai di produksi. Email akun contoh kosong; isi lewat CRUD Anggota atau halaman Profil agar fitur lupa password bisa dipakai.
 
+> Pendaftaran anggota **default tertutup**. Buka melalui **Admin → Kunci Pendaftaran** untuk memilih buka manual, tutup manual, atau jadwal tanggal WIT.
+
 > **Produksi:** arahkan document root server ke folder `public/`. Kode di `app/`, berkas privat di `storage/`, dan `.env` tidak boleh bisa diakses langsung dari browser.
 
 > **Upgrade dari versi lama:** jalankan `migrate.sql` pada database yang sudah ada (cadangkan dulu).
@@ -131,6 +134,8 @@ cp .env.example .env
 > Jika status publikasi karya masih `Pending`/`Approved`/`Rejected`, jalankan `migrate_publikasi_karya_indonesia.sql`.
 >
 > Untuk fitur lupa password, jalankan `migrate_password_reset.sql` (menambah kolom `users.email` dan tabel `password_resets`). Setelah itu isi email akun yang sudah ada lewat CRUD Anggota atau halaman Profil admin/anggota.
+>
+> Fitur kunci & periode pendaftaran tidak memerlukan migrasi tambahan. Atur melalui **Admin → Kunci Pendaftaran**.
 
 ### Opsional: performa
 

@@ -13,6 +13,7 @@ Versi	Tanggal	Perubahan
 •	Penegasan prioritas tampilan mobile/Android
 •	Penyesuaian hak akses, struktur navigasi, dan prioritas pengembangan
 1.2	Oktober 2026	Penambahan fitur lupa password via email, pengelolaan email akun, dan token reset sekali pakai.
+1.3	Oktober 2026	Penambahan kunci dan periode pendaftaran anggota (buka manual, tutup manual, atau jadwal tanggal WIT).
 
 1. Informasi Produk
 Item	Keterangan
@@ -140,6 +141,7 @@ Modul khusus untuk mendokumentasikan pencapaian/kejuaraan komunitas sebagai bukt
 •	Admin mengelola; anggota dan pengunjung dapat melihat.
 8.12 Pendaftaran Anggota dan Pakta Integritas (Baru)
 •	Calon anggota mengisi formulir pendaftaran (data diri, kelas, kontak, email).
+•	Pendaftaran dibuka berdasarkan kunci dan periode yang diatur admin. Default tertutup; admin dapat memilih buka manual, tutup manual, atau mengikuti jadwal tanggal WIT. Tanggal selesai bersifat inklusif sampai pukul 23.59 WIT.
 •	Pakta Integritas: pernyataan komitmen keanggotaan yang diisi dan ditandatangani (bila perlu bermeterai), kemudian diunggah sebagai dokumen/hasil pindai.
 •	Admin memverifikasi formulir dan dokumen sebelum akun anggota diaktifkan.
 •	Status Pakta Integritas (sudah/belum lengkap) terlihat pada profil anggota.
@@ -197,10 +199,11 @@ Moderasi	Ya	Tidak	Tidak
 3. Admin dapat meninjau kembali sewaktu-waktu.
 4. Jika ditemukan tidak valid/fiktif, admin menyembunyikan atau menghapus data prestasi tersebut.
 11.2 Alur Pendaftaran Anggota dan Pakta Integritas (Baru)
-1. Calon anggota mengisi formulir pendaftaran.
-2. Calon anggota mengisi dan menandatangani Pakta Integritas, lalu mengunggah hasil pindai.
-3. Admin memverifikasi kelengkapan formulir dan dokumen.
-4. Jika lengkap dan sesuai, akun anggota diaktifkan.
+1. Admin membuka pendaftaran, baik secara manual maupun melalui jadwal tanggal WIT.
+2. Calon anggota mengisi formulir pendaftaran selama periode dibuka.
+3. Calon anggota mengisi dan menandatangani Pakta Integritas, lalu mengunggah hasil pindai.
+4. Admin memverifikasi kelengkapan formulir dan dokumen.
+5. Jika lengkap dan sesuai, akun anggota diaktifkan.
 11.3 Alur Pendaftaran Pelatihan/Workshop (Baru)
 1. Admin membuat Pelatihan/Workshop baru: jadwal, kuota, dan status (khusus anggota atau terbuka umum).
 2. Anggota (atau pengunjung, jika terbuka umum) mendaftar sebagai peserta.

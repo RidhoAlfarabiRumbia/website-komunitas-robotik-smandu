@@ -6,11 +6,17 @@
  */
 require_once __DIR__ . '/../app/includes/bootstrap.php';
 
+$gate = pendaftaran_gate();
 $errors = [];
 $old = ['nama' => '', 'kelas' => '', 'kontak' => '', 'email' => '', 'alasan' => ''];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Csrf::verify();
+
+    if (!$gate['buka']) {
+        flash_set('error', 'Pendaftaran sedang ditutup. Kiriman tidak diproses.');
+        redirect('daftar.php');
+    }
 
     /* Endpoint publik tanpa login: batasi jumlah kiriman agar tidak bisa
        dipakai menghabiskan disk (spam/banjiri unggahan).
@@ -134,9 +140,13 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
       <div>
         <div class="eyebrow">GABUNG</div>
         <h1>Pendaftaran Anggota</h1>
-        <p class="desc">Isi data dan unggah Pakta Integritas. Admin memverifikasinya sebelum akun diaktifkan.</p>
+        <p class="desc"><?= $gate['buka']
+            ? 'Isi data dan unggah Pakta Integritas. Admin memverifikasinya sebelum akun diaktifkan.'
+            : 'Pendaftaran hanya dapat diisi saat admin membuka periode.' ?></p>
       </div>
     </div>
+
+    <?php if ($msg = flash_get()): ?><div class="alert <?= flash_alert_class($msg['type']) ?>"><?= e($msg['text']) ?></div><?php endif; ?>
 
     <?php if (isset($_GET['terkirim'])): ?>
       <div class="card" style="text-align:center; padding:44px 24px;">
@@ -146,6 +156,23 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
           Terima kasih. Admin akan memeriksa Pakta Integritas kamu. Proses ini biasanya memerlukan waktu 1-3 hari kerja.
         </p>
         <a class="btn btn-outline" href="beranda.php">Kembali ke Beranda</a>
+      </div>
+    <?php elseif (!$gate['buka']): ?>
+      <div class="card" style="text-align:center; padding:44px 24px;">
+        <div style="font-size:44px; color:var(--amber); margin-bottom:12px;"><i class="bi bi-lock"></i></div>
+        <h2 style="font-size:20px; margin-bottom:10px;">Pendaftaran Ditutup</h2>
+        <p style="color:var(--text-muted); max-width:500px; margin:0 auto 18px;"><?= e($gate['pesan']) ?></p>
+
+        <?php if (in_array($gate['status'], ['belum_dibuka', 'selesai'], true)): ?>
+          <div class="alert alert-muted" style="display:inline-block; text-align:left; margin-bottom:18px;">
+            <div><strong>Periode pendaftaran:</strong> <?= e(tanggal_indo($gate['mulai'])) ?> s.d. <?= e(tanggal_indo($gate['selesai'])) ?></div>
+            <div style="font-size:12.5px; margin-top:4px;">Zona waktu WIT (Asia/Jayapura), tanggal selesai sampai pukul 23.59.</div>
+          </div>
+        <?php endif; ?>
+
+        <div>
+          <a class="btn btn-outline" href="beranda.php">Kembali ke Beranda</a>
+        </div>
       </div>
     <?php else: ?>
       <div class="alert alert-info" style="display:flex; gap:10px; align-items:flex-start; margin-bottom:18px;">

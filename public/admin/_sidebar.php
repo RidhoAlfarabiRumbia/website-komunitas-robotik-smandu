@@ -53,6 +53,7 @@ function admin_link(string $file, string $label, string $icon, string $current, 
   </a>
 
   <div class="side-label">Pendaftaran</div>
+  <?= admin_link('pendaftaran-pengaturan.php', 'Kunci Pendaftaran', 'bi-lock', $current) ?>
   <?= admin_link('pakta-template.php', 'Template Pakta Integritas', 'bi-file-earmark-text', $current) ?>
 
   <div class="side-label">Akun</div>
