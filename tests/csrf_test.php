@@ -37,3 +37,23 @@ exec(escapeshellarg($php) . ' ' . escapeshellarg($harness) . ' kosong 2>&1', $ou
 $hasil = implode("\n", $out);
 ok(str_contains($hasil, 'tidak valid'), 'token kosong → pesan "tidak valid" ditampilkan');
 ok(!str_contains($hasil, 'TIDAK_DIE'), 'token kosong → eksekusi berhenti (die)');
+
+$dipanggil = false;
+$_POST['csrf_token'] = 'token_salah_xyz';
+Csrf::verify(function () use (&$dipanggil): void {
+    $dipanggil = true;
+});
+ok($dipanggil, 'verify() memanggil callback saat token tidak cocok');
+
+$_SERVER['HTTP_HOST'] = 'localhost';
+$_SERVER['SERVER_PORT'] = 80;
+unset($_SERVER['HTTPS'], $_SERVER['HTTP_X_FORWARDED_PROTO'], $_SERVER['HTTP_REFERER'], $_SERVER['HTTP_SEC_FETCH_SITE']);
+$_SERVER['HTTP_ORIGIN'] = 'http://localhost';
+ok(Csrf::sameOrigin(), 'sameOrigin() menerima origin yang sama');
+
+$_SERVER['HTTP_ORIGIN'] = 'https://contoh-lain.test';
+ok(!Csrf::sameOrigin(), 'sameOrigin() menolak origin lain');
+
+unset($_SERVER['HTTP_ORIGIN']);
+$_SERVER['HTTP_SEC_FETCH_SITE'] = 'same-origin';
+ok(Csrf::sameOrigin(), 'sameOrigin() mengenali Sec-Fetch-Site same-origin');
