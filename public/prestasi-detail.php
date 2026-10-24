@@ -55,7 +55,9 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
       </p>
 
       <?php if ($p['foto']): ?>
-        <img src="<?= base_url(e($p['foto'])) ?>" alt="<?= e($p['nama']) ?>" style="width:100%; max-height:420px; object-fit:cover; border-radius:var(--radius-md); margin-bottom:22px;">
+        <span data-lightbox="<?= base_url(e($p['foto'])) ?>" tabindex="0" role="button" aria-label="Perbesar foto prestasi: <?= e($p['nama']) ?>" style="display:block;">
+          <img src="<?= base_url(e($p['foto'])) ?>" alt="<?= e($p['nama']) ?>" style="width:100%; max-height:420px; object-fit:cover; border-radius:var(--radius-md); margin-bottom:22px;">
+        </span>
       <?php endif; ?>
 
       <?php if ($p['deskripsi']): ?>
@@ -110,4 +112,5 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
     </aside>
   </div>
 </div>
+<?php include __DIR__ . '/../app/includes/partial_lightbox.php'; ?>
 <?php include __DIR__ . '/../app/includes/footer.php'; ?>

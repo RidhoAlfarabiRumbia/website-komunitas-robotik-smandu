@@ -226,7 +226,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
       <div class="grid grid-3 grid-stagger">
         <?php foreach ($prestasiTerbaru as $p): ?>
           <a href="prestasi-detail.php?id=<?= (int) $p['id'] ?>" class="work-card">
-            <div class="work-thumb"><img src="<?= base_url(e($p['foto'] ?? 'assets/img/galeri-prestasi.svg')) ?>" alt="<?= e($p['nama']) ?>" loading="lazy" decoding="async"></div>
+            <span class="work-thumb" data-lightbox="<?= base_url(e($p['foto'] ?? 'assets/img/galeri-prestasi.svg')) ?>" tabindex="0" role="button" aria-label="Perbesar foto prestasi: <?= e($p['nama']) ?>"><img src="<?= base_url(e($p['foto'] ?? 'assets/img/galeri-prestasi.svg')) ?>" alt="<?= e($p['nama']) ?>" loading="lazy" decoding="async"></span>
             <div class="work-body">
               <span class="badge badge-amber"><i class="bi bi-trophy"></i> <?= e($p['hasil']) ?></span>
               <div class="work-title" style="font-size:14px;"><?= e($p['nama']) ?></div>
