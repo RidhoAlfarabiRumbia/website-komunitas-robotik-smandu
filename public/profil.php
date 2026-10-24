@@ -6,6 +6,37 @@ $u = Auth::anggota();
 $id = (int) $u['id'];
 $akun = User::findByAnggota($id);
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'foto_profil') {
+    Csrf::verify();
+    $uploadError = (isset($_FILES['foto']['error']) && is_scalar($_FILES['foto']['error']))
+        ? (int) $_FILES['foto']['error']
+        : UPLOAD_ERR_NO_FILE;
+
+    if ($uploadError === UPLOAD_ERR_NO_FILE || empty($_FILES['foto']['name'])) {
+        flash_set('error', 'Pilih foto profil terlebih dahulu.');
+        redirect('profil.php');
+    }
+    if (in_array($uploadError, [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true)) {
+        flash_set('error', 'Ukuran foto terlalu besar. Maksimal 2MB.');
+        redirect('profil.php');
+    }
+
+    $foto = handle_upload('foto', 'anggota');
+    if ($foto === null) {
+        if ($uploadError !== UPLOAD_ERR_OK) {
+            flash_set('error', 'Upload foto gagal. Coba lagi.');
+        }
+        redirect('profil.php');
+    }
+    if (!Anggota::update($id, ['foto' => $foto])) {
+        flash_set('error', 'Foto profil gagal disimpan. Coba lagi.');
+        redirect('profil.php');
+    }
+    Auth::refreshAnggota();
+    flash_set('success', 'Foto profil berhasil diperbarui.');
+    redirect('profil.php');
+}
+
 // Ubah username / email / kata sandi — wajib CSRF + kata sandi lama (lihat User::ubahAkun)
 $errors = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -59,6 +90,16 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
       <h1 style="font-size:20px;"><?= e($u['nama']) ?></h1>
       <div class="meta" style="margin:4px 0 8px;"><?= e($u['kelas']) ?> · Fokus <?= e($u['fokus']) ?></div>
       <p style="font-size:13.5px; color:var(--text-muted); max-width:60ch;"><?= e($u['deskripsi']) ?></p>
+      <form method="post" enctype="multipart/form-data" style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; margin-top:12px;">
+        <?= Csrf::field() ?>
+        <input type="hidden" name="aksi" value="foto_profil">
+        <div class="field" style="margin:0; min-width:240px;">
+          <label for="foto_profil" style="font-size:12.5px;">Ganti foto profil</label>
+          <input id="foto_profil" type="file" name="foto" accept="image/jpeg,image/png,image/webp" required>
+          <span class="hint">JPG, PNG, atau WEBP. Maksimal 2MB.</span>
+        </div>
+        <button class="btn btn-outline btn-sm" type="submit"><i class="bi bi-camera"></i> Simpan Foto</button>
+      </form>
     </div>
     <div style="display:flex; gap:8px; flex-wrap:wrap;">
       <a class="btn btn-primary" href="ajukan-karya.php"><i class="bi bi-plus-circle"></i> Ajukan Karya</a>

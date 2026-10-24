@@ -49,7 +49,7 @@ Materi belajar robotik tersebar di banyak platform, karya dan dokumentasi tercec
 | **Berkarya** | **Karya** anggota (Robot, IoT, Programming, AI, Elektronika) dengan status progres · **Ajukan Karya** dengan moderasi admin dan alasan penolakan |
 | **Berkompetisi** | **Lomba** (info, status, hasil, peserta) · **Prestasi** dengan bukti sertifikat, tayang langsung dan bisa ditinjau admin |
 | **Berbagi** | **Galeri** foto dan video · **Kegiatan** dengan video laporan · **Pengumuman** · **Slider Beranda** yang dikelola admin |
-| **Akun** | Login username · **Lupa password via email** dengan token sekali pakai · Pengelolaan email dan kata sandi di Profil |
+| **Akun** | Login username · **Lupa password via email** dengan token sekali pakai · Pengelolaan email, kata sandi, dan foto profil di Profil |
 | **Regenerasi** | **Pendaftaran Anggota** dengan Pakta Integritas dan **kunci periode** (buka manual, tutup manual, atau jadwal WIT) · **Profil** berisi rekam jejak karya, prestasi, dan pelatihan |
 
 ### Aturan akses utama
