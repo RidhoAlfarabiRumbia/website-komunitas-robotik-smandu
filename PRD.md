@@ -1,6 +1,6 @@
 PRODUCT REQUIREMENTS DOCUMENT (PRD)
 Portal Komunitas Robotik SMA Negeri 2
-Revisi 1.1 — berdasarkan hasil wawancara pembina komunitas, Oktober 2026
+Revisi 1.2 — berdasarkan hasil wawancara pembina komunitas, Oktober 2026
 0. Riwayat Revisi
 Versi	Tanggal	Perubahan
 1.0	September 2026	Draft awal PRD berdasarkan diskusi awal tim.
@@ -12,6 +12,7 @@ Versi	Tanggal	Perubahan
 •	Dukungan upload video untuk dokumentasi kegiatan, selain foto
 •	Penegasan prioritas tampilan mobile/Android
 •	Penyesuaian hak akses, struktur navigasi, dan prioritas pengembangan
+1.2	Oktober 2026	Penambahan fitur lupa password via email, pengelolaan email akun, dan token reset sekali pakai.
 
 1. Informasi Produk
 Item	Keterangan
@@ -138,7 +139,7 @@ Modul khusus untuk mendokumentasikan pencapaian/kejuaraan komunitas sebagai bukt
 •	Informasi pendaftaran, perubahan jadwal, deadline proyek, dan informasi komunitas.
 •	Admin mengelola; anggota dan pengunjung dapat melihat.
 8.12 Pendaftaran Anggota dan Pakta Integritas (Baru)
-•	Calon anggota mengisi formulir pendaftaran (data diri, kelas, kontak).
+•	Calon anggota mengisi formulir pendaftaran (data diri, kelas, kontak, email).
 •	Pakta Integritas: pernyataan komitmen keanggotaan yang diisi dan ditandatangani (bila perlu bermeterai), kemudian diunggah sebagai dokumen/hasil pindai.
 •	Admin memverifikasi formulir dan dokumen sebelum akun anggota diaktifkan.
 •	Status Pakta Integritas (sudah/belum lengkap) terlihat pada profil anggota.
@@ -146,10 +147,18 @@ Modul khusus untuk mendokumentasikan pencapaian/kejuaraan komunitas sebagai bukt
 •	Nama, kelas, deskripsi singkat, jumlah karya, jumlah lomba, jumlah kegiatan, riwayat pelatihan yang diikuti, dan daftar karya.
 •	Menampilkan status kelengkapan Pakta Integritas.
 •	Berfungsi sebagai rekam jejak kontribusi anggota.
+•	Anggota dapat mengubah username, email, dan kata sandi sendiri dengan verifikasi kata sandi lama.
 8.14 Upload Media (Baru)
 •	Mendukung unggah foto (karya, galeri, prestasi) dan video (dokumentasi/laporan kegiatan).
 •	Video laporan kegiatan dapat berdurasi lebih panjang (kurang lebih hingga 15–20 menit), berbeda dari video promosi singkat (1–4 menit); batas ukuran file video dibuat lebih besar dibanding foto.
 •	Validasi tipe dan ukuran file tetap diterapkan untuk setiap jenis upload.
+8.15 Lupa Password dan Email Akun (Baru)
+•	Setiap akun wajib memiliki email yang unik. Email diisi saat pendaftaran diverifikasi admin, lewat CRUD Anggota, atau halaman Profil.
+•	Pengguna dapat meminta tautan reset password dari halaman Login dengan memasukkan email.
+•	Tautan reset memakai token acak 32 byte, disimpan sebagai hash, berlaku 30 menit, dan hanya bisa dipakai sekali.
+•	Permintaan dibatasi per email dan per IP untuk mencegah spam.
+•	Respons halaman selalu generik agar tidak membocorkan apakah sebuah email terdaftar.
+•	Kata sandi baru minimal 8 karakter; setelah diubah, tautan reset lama tidak berlaku.
 9. Perbedaan Galeri, Karya, Prestasi, dan Profil
 Fitur	Fokus
 Galeri	Apa yang dilakukan komunitas? Dokumentasi umum perjalanan dan aktivitas (latihan, workshop, demo, proses proyek).
@@ -171,7 +180,7 @@ Pengumuman	CRUD	Lihat	Lihat
 Anggota	CRUD + verifikasi pendaftaran	Lihat	-
 Pakta Integritas	Verifikasi	Isi + Upload (saat pendaftaran)	-
 Profil	Kelola	Edit sendiri	-
-Akun	Kelola	Edit sendiri	-
+Akun	Kelola + atur email	Edit sendiri (username, email, sandi); lupa password via email	-
 Moderasi	Ya	Tidak	Tidak
 
 11. Alur Moderasi Karya
@@ -197,6 +206,12 @@ Moderasi	Ya	Tidak	Tidak
 2. Anggota (atau pengunjung, jika terbuka umum) mendaftar sebagai peserta.
 3. Admin menyetujui peserta sesuai kuota.
 4. Peserta yang disetujui mendapat akses ke Materi yang dikaitkan dengan pelatihan tersebut, selama periode berlangsung.
+11.4 Alur Lupa Password (Baru)
+1. Pengguna membuka halaman Lupa Password dan memasukkan email akun.
+2. Sistem membatasi frekuensi permintaan, lalu membuat token reset bila email terdaftar.
+3. Sistem mengirim tautan reset ke email tersebut dan menampilkan pesan generik.
+4. Pengguna membuka tautan, memasukkan kata sandi baru dua kali, dan menyimpannya.
+5. Token ditandai terpakai, seluruh token reset lain milik akun dibatalkan, lalu pengguna diarahkan ke halaman Login.
 12. Kebutuhan Non-Fungsional
 12.1 Keamanan
 •	Password menggunakan hashing.
@@ -205,6 +220,8 @@ Moderasi	Ya	Tidak	Tidak
 •	CSRF pada operasi penting.
 •	Validasi input.
 •	Validasi tipe dan ukuran file upload (foto maupun video).
+•	Token reset password disimpan sebagai hash, memiliki masa berlaku, dan dibatasi per email/IP.
+•	Tautan reset tidak memuat data sensitif dan halaman reset tidak di-cache.
 •	Dokumen Pakta Integritas (hasil pindai/tanda tangan) disimpan sebagai file dengan akses terbatas hanya untuk admin.
 •	Konfigurasi sensitif disimpan di .env dan tidak masuk repository.
 12.2 Antarmuka

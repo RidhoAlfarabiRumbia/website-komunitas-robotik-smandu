@@ -20,6 +20,7 @@ $hasWhen = false;
       if ($key === 'foto' && !($crudCfg['foto_inline'] ?? false)) continue; // panel kanan, di luar kartu
       $val = $editing[$key] ?? '';
       if ($key === 'username') $val = $akunUsername;
+      if ($key === 'akun_email') $val = $akunEmail;
       $full = in_array($f['type'], ['textarea', 'pelatihan_multi', 'anggota_multi', 'peraih']) ? ' field-full' : '';
       if ($key === 'foto' && ($crudCfg['foto_inline'] ?? false)) $full = ' field-full';
       $whenAttr = '';
@@ -102,6 +103,9 @@ $hasWhen = false;
           </select>
         <?php elseif ($f['type'] === 'akun_username'): ?>
           <input name="<?= $key ?>" value="<?= e($val) ?>" required autocomplete="off">
+        <?php elseif ($f['type'] === 'akun_email'): ?>
+          <input type="email" name="<?= $key ?>" value="<?= e($val) ?>" maxlength="120" required autocomplete="email">
+          <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Dipakai untuk reset kata sandi.</div>
         <?php elseif ($f['type'] === 'password'): ?>
           <input type="password" name="<?= $key ?>" <?= $editing ? '' : 'required' ?> minlength="8" autocomplete="new-password">
           <div style="font-size:12px; color:var(--text-muted); margin-top:4px;"><?= $editing ? 'Kosongkan bila tidak ingin mengubah kata sandi.' : 'Minimal 8 karakter.' ?></div>

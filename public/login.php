@@ -61,6 +61,7 @@ include __DIR__ . '/../app/includes/header.php';
         </div>
 
         <div class="field"><label>Kata sandi</label><input type="password" name="password" required></div>
+        <p style="font-size:12.5px; margin:-4px 0 14px; text-align:right;"><a href="<?= base_url('lupa-password.php') ?>" style="color:var(--teal); text-decoration:none;">Lupa password?</a></p>
         <button class="btn btn-primary" style="width:100%;" type="submit">Masuk ke portal <i class="bi bi-arrow-right"></i></button>
       </form>
       <p style="font-size:12px; margin-top:12px;"><a href="<?= base_url('beranda.php') ?>" style="color:var(--teal); text-decoration:none;"><i class="bi bi-arrow-left"></i> Kembali ke Beranda</a></p>

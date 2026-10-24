@@ -30,17 +30,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Buat akun anggota + login sehingga anggota bisa langsung masuk
         $username = nilai_teks($_POST, 'username');
         $password = nilai_teks($_POST, 'password', false);
+        $email = strtolower(nilai_teks($_POST, 'email'));
+
+        $anggotaId = (int) ($p['anggota_id'] ?? 0);
+        $akunLama = $anggotaId ? User::findByAnggota($anggotaId) : null;
+        $akunId = $akunLama ? (int) $akunLama['id'] : 0;
 
         if ($username === '') {
             flash_set('error', 'Username wajib diisi untuk mengaktifkan akun.');
             redirect('admin/verifikasi.php?id=' . $id . $qs);
         }
-        if (User::usernameTaken($username)) {
+        if (User::usernameTaken($username, $akunId)) {
             flash_set('error', 'Username sudah dipakai akun lain.');
             redirect('admin/verifikasi.php?id=' . $id . $qs);
         }
         if (strlen($password) < 8) {
             flash_set('error', 'Kata sandi minimal 8 karakter.');
+            redirect('admin/verifikasi.php?id=' . $id . $qs);
+        }
+
+        if ($email === '') {
+            flash_set('error', 'Email wajib diisi untuk mengaktifkan akun.');
+            redirect('admin/verifikasi.php?id=' . $id . $qs);
+        }
+        if (strlen($email) > 120 || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            flash_set('error', 'Format email akun tidak valid.');
+            redirect('admin/verifikasi.php?id=' . $id . $qs);
+        }
+        if (User::emailTaken($email, $akunId)) {
+            flash_set('error', 'Email sudah dipakai akun lain.');
             redirect('admin/verifikasi.php?id=' . $id . $qs);
         }
 
@@ -50,7 +68,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // username+sandi miliknya terpasang ke akun anggota tersebut (account
         // takeover). Satu-satunya sumber kebenaran adalah $p['anggota_id'] yang
         // sudah terisi dari verifikasi sebelumnya.
-        $anggotaId = (int) ($p['anggota_id'] ?? 0);
         if (!$anggotaId) {
             $anggotaId = (int) Anggota::create([
                 'nama' => $p['nama'],
@@ -61,8 +78,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
         }
 
-        if (!User::findByAnggota($anggotaId)) {
-            User::createForAnggota($anggotaId, $username, $password);
+        if ($akunLama) {
+            User::update((int) $akunLama['id'], ['email' => $email]);
+        } else {
+            User::createForAnggota($anggotaId, $username, $password, $email);
         }
 
         Pendaftaran::verifikasi($id, 'Diverifikasi', $catatan, $anggotaId);
@@ -165,6 +184,11 @@ include __DIR__ . '/../../app/includes/header.php';
               <div class="field">
                 <label>Username akun <span class="req">*</span></label>
                 <input name="username" value="<?= e(strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $detail['nama']))) ?>" maxlength="50" autocomplete="off">
+              </div>
+              <div class="field">
+                <label>Email akun <span class="req">*</span></label>
+                <input type="email" name="email" value="<?= e($detail['email'] ?: '') ?>" maxlength="120" required autocomplete="email">
+                <span class="hint">Dipakai untuk reset kata sandi. Pastikan email ini milik calon anggota.</span>
               </div>
               <div class="field">
                 <label>Kata sandi <span class="req">*</span></label>

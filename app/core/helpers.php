@@ -25,12 +25,29 @@ function redirect(string $path): void
 
 function base_url(string $path = ''): string
 {
-    $root = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
+    $root = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
     // Jika dipanggil dari dalam folder admin/, arahkan relatif ke root proyek.
     if (str_ends_with($root, '/admin')) {
         $root = substr($root, 0, -6);
     }
     return ($root ?: '') . '/' . ltrim($path, '/');
+}
+
+/**
+ * URL absolut untuk tautan di email. Pakai APP_URL dari .env; bila kosong,
+ * susun dari request saat ini (cukup untuk pengembangan lokal).
+ */
+function app_url(string $path = ''): string
+{
+    $base = trim((string) getenv('APP_URL'));
+    if ($base === '') {
+        $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+            || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
+        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+        $script = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '/index.php');
+        $base = ($https ? 'https' : 'http') . '://' . $host . rtrim(dirname($script), '/');
+    }
+    return rtrim($base, '/') . '/' . ltrim($path, '/');
 }
 
 function tanggal_indo(?string $date): string

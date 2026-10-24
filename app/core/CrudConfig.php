@@ -3,7 +3,7 @@
 /**
  * Konfigurasi field per entitas untuk halaman admin/crud.php.
  * type: text | textarea | select | date | file | video | doc_file | anggota_select
- *       | akun_username | password | pelatihan_multi | anggota_multi
+ *       | akun_username | akun_email | password | pelatihan_multi | anggota_multi
  *
  * 'search' (opsional) = kolom yang dicari di kotak pencarian daftar; kolom
  * '_cari_*' diisi sementara oleh crud.php (mis. username, nama pembuat) dan
@@ -21,10 +21,11 @@ function crud_config(): array
                 'deskripsi' => ['label' => 'Deskripsi', 'type' => 'textarea'],
                 'foto' => ['label' => 'Foto', 'type' => 'file', 'subfolder' => 'anggota'],
                 'username' => ['label' => 'Username Login', 'type' => 'akun_username'],
+                'akun_email' => ['label' => 'Email Login', 'type' => 'akun_email'],
                 'password' => ['label' => 'Kata Sandi Login', 'type' => 'password'],
             ],
-            'list' => ['nama', 'kelas', 'fokus', 'username'],
-            'search' => ['nama', 'kelas', 'fokus', 'kontak', 'deskripsi', '_cari_username'],
+            'list' => ['nama', 'kelas', 'fokus', 'username', 'akun_email'],
+            'search' => ['nama', 'kelas', 'fokus', 'kontak', 'deskripsi', '_cari_username', '_cari_email'],
         ],
         'materi' => [
             'label' => 'Materi', 'model' => Materi::class,

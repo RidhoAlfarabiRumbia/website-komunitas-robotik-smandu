@@ -46,6 +46,7 @@ If a task turns out to be larger than it first looked, **stop and ask** instead 
 - Member pages start `require_once __DIR__ . '/../app/includes/bootstrap.php';`; admin pages (one level deeper) use `__DIR__ . '/../../app/includes/bootstrap.php';`. Then enforce access with `Auth::requireRole('admin'|'anggota')` and set `$pageTitle`. `app/includes/bootstrap.php` loads config, autoload, and helpers — no other requires are needed.
 - `app/config/autoload.php` only loads **classes** from `app/core/` and `app/models/`. `crud_config()` in `app/core/CrudConfig.php` is a function, so it is NOT autoloaded — `public/admin/crud.php` must keep its explicit `require_once __DIR__ . '/../../app/core/CrudConfig.php';`.
 - `.env` lives at the project root (outside `public/`) and is required at runtime: `app/config/env.php` dies if it's missing. A safe placeholder `.env.example` is committed (no credentials). Keep the live `.env` and never commit or hard-code credentials.
+- Fitur lupa password membutuhkan `APP_URL` dan `MAIL_*` di `.env`. `APP_URL` dipakai `app_url()` untuk tautan absolut di email; `MAIL_ENCRYPTION` menerima `tls`, `ssl`, atau `none`. Jangan menebak kredensial SMTP — minta user mengisinya.
 
 ## Page Anatomy (two distinct layouts)
 
@@ -53,6 +54,9 @@ If a task turns out to be larger than it first looked, **stop and ask** instead 
 - **Admin pages** (`public/admin/*.php`): `app/includes/header.php` + inline `.topbar` + `<div class="admin-body">` with `_sidebar.php` (kept in `public/admin/`) + `app/includes/footer.php`. Do NOT include `navbar_anggota.php` here. Keep the `admin_link()` sidebar helper in `_sidebar.php` rather than hand-writing nav.
 - `app/includes/partial_karya_card.php` and `partial_galeri_card.php` render one card from a loop variable already in scope (`$k`, `$g`). Include them *inside* a `foreach` that names that variable; they fall back to `public/assets/img/*.svg` when no photo.
 - `base_url()` is the only way to build URLs + asset paths. It normalizes Windows backslashes from `dirname(SCRIPT_NAME)` and strips a trailing `/admin`, so admin pages can reach the project root too — never hard-code or hand-relative a link, and don't "fix" base_url back to the old implementation.
+- `app_url()` builds absolute URLs for email; it uses `APP_URL` from `.env` and falls back to the current request for local development. Use it for reset-password links, not `base_url()`.
+- Email is sent by `app/core/Mailer.php` over native SMTP (`stream_socket_client` + STARTTLS/AUTH LOGIN), without Composer. A send failure is logged via `error_log` and must not be exposed to the user.
+- `PasswordReset` stores only SHA-256 token hashes. `User::update()` invalidates a user's reset tokens whenever `email` or `password_hash` is included in the update.
 
 ## Conventions & Gotchas
 
@@ -66,6 +70,7 @@ If a task turns out to be larger than it first looked, **stop and ask** instead 
 
 - Every state-changing POST must render `Csrf::field()` in the form and call `Csrf::verify()` before acting.
 - Preserve role checks on protected pages; escape all HTML output including attributes/URLs; validate IDs, enum-like select values, links, and upload type/size at the handling boundary.
+- Reset password: token 32 byte, hanya hash yang disimpan, kedaluwarsa 30 menit, sekali pakai, dan respons permintaan harus generik. Jangan tampilkan apakah email terdaftar.
 - Never commit credentials or replace the local `.env` with hard-coded connection settings.
 
 ## Database Access Rules (do not skip)
@@ -81,10 +86,11 @@ If a task turns out to be larger than it first looked, **stop and ask** instead 
 
 - No test suite/build command. After changing PHP, run `php -l path/to/file.php` on each file, then exercise the affected flow in the XAMPP browser environment.
 - Quick wiring smoke test without MySQL: `php -S 127.0.0.1:8123 -t public` and confirm protected pages `302` to `/login.php` while `login.php` is `200`. Logged-in DB flows (login, ajukan karya, CRUD) need MySQL running (start XAMPP's server; `Start-Service MySQL80` fails without admin).
-- For DB/auth changes, use `database.sql` only when needed; verify both admin and anggota flows manually.
+- For DB/auth changes, use `database.sql` only when needed; verify both admin and anggota flows manually. Fitur lupa password memerlukan `migrate_password_reset.sql` dan pengujian kirim email dengan SMTP nyata.
 - Before changing product scope, check `PRD.md`; before changing setup or folder responsibilities, update or link `README.md` rather than duplicating docs here.
 
 ## Important Flows
 
 - New member karya is created as `Menunggu` (see `public/ajukan-karya.php`); `public/admin/moderasi.php` moves it to `Disetujui`/`Ditolak` with an optional `alasan_tolak` shown on the member's Profil Saya. Only `Karya::approved()` results are public.
 - `public/admin/crud.php` behavior (fields, labels, options, upload subfolders, list columns) is configured per entity in `app/core/CrudConfig.php`; entity classes live in `app/models/` and extend `app/core/Model.php`.
+- Lupa password: `public/lupa-password.php` membuat token dan mengirim email via `Mailer`; `public/reset-password.php` memvalidasi hash token, mengubah sandi lewat `User::setPassword()`, lalu menandai token terpakai. Email akun wajib diisi lewat verifikasi pendaftaran, CRUD Anggota, atau Profil.

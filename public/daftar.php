@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'nama' => nilai_teks($_POST, 'nama'),
         'kelas' => nilai_teks($_POST, 'kelas'),
         'kontak' => nilai_teks($_POST, 'kontak'),
-        'email' => nilai_teks($_POST, 'email'),
+        'email' => strtolower(nilai_teks($_POST, 'email')),
         'alasan' => nilai_teks($_POST, 'alasan'),
     ];
 
@@ -59,8 +59,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors['kontak'] = 'Masukkan nomor kontak yang valid (9-15 digit).';
     }
 
-    if ($old['email'] !== '' && !filter_var($old['email'], FILTER_VALIDATE_EMAIL)) {
-        $errors['email'] = 'Format email tidak valid.';
+    if ($old['email'] === '') {
+        $errors['email'] = 'Email wajib diisi.';
+    } elseif (strlen($old['email']) > 120 || !filter_var($old['email'], FILTER_VALIDATE_EMAIL)) {
+        $errors['email'] = 'Masukkan alamat email yang valid.';
     }
 
     // Pakta Integritas wajib diunggah (PDF / gambar, maks 5MB)
@@ -93,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'nama' => $old['nama'],
             'kelas' => $old['kelas'],
             'kontak' => $old['kontak'],
-            'email' => $old['email'] ?: null,
+            'email' => $old['email'],
             'alasan' => $old['alasan'] ?: null,
             'pakta_integritas' => $berkas,
             'nama_berkas' => sanitize_filename($_FILES['pakta_integritas']['name']),
@@ -174,8 +176,9 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
           </div>
 
           <div class="field" style="grid-column:1/-1;">
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email" value="<?= e($old['email']) ?>" maxlength="120" class="<?= isset($errors['email']) ? 'invalid' : '' ?>">
+            <label for="email">Email <span class="req">*</span></label>
+            <input type="email" id="email" name="email" value="<?= e($old['email']) ?>" maxlength="120" required autocomplete="email" class="<?= isset($errors['email']) ? 'invalid' : '' ?>">
+            <span class="hint">Dipakai untuk reset kata sandi. Tidak ditampilkan ke publik.</span>
             <?php if (isset($errors['email'])): ?><span class="err"><?= e($errors['email']) ?></span><?php endif; ?>
           </div>
 

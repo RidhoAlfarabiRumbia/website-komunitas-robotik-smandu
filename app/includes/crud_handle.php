@@ -17,7 +17,7 @@
 // Menghasilkan variabel untuk form/daftar: $crudQs (query action per item),
 // $crudBase (URL kembali lengkap), $crudCfg, $crudModel, $rows, $editing,
 // $showForm, $refPanel, $q, $qs, $searchCols, $totalRows, $listHasFoto,
-// $akunList, $akunUsername, $anggotaOptions, $pelatihanOptions, $terpilihPelatihan,
+// $akunList, $akunUsername, $akunEmail, $akunEmailList, $anggotaOptions, $pelatihanOptions, $terpilihPelatihan,
 // $terpilihAnggota, $peraihMode, $peraihManualTeks.
 
 // Halaman fitur publik boleh diakses semua orang, tapi partial ini hanya untuk
@@ -49,7 +49,7 @@ $crudBase = $crudPath . $crudQs;
 // URL entitas 'materi' di halaman yang sama (dipakai panel Referensi).
 $crudBaseMateri = $crudPath . '?' . $crudParam . '=materi';
 $crudCfg = $config[$crudEntitas];
-$akunTypes = ['akun_username', 'password'];
+$akunTypes = ['akun_username', 'akun_email', 'password'];
 /** @var Model $crudModel */
 $crudModel = $crudCfg['model'];
 $action = $_GET['action'] ?? 'list';
@@ -145,12 +145,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $isAkun = $crudEntitas === 'anggota';
     $postId = nilai_int($_POST, 'id');
     $username = nilai_teks($_POST, 'username');
+    $akunEmail = strtolower(nilai_teks($_POST, 'akun_email'));
     $password = nilai_teks($_POST, 'password', false);
     $akun = null;
     if ($isAkun) {
         $akun = $postId ? User::findByAnggota($postId) : null;
         if ($username === '') $errors[] = 'Username wajib diisi.';
         elseif (User::usernameTaken($username, (int) ($akun['id'] ?? 0))) $errors[] = 'Username sudah dipakai akun lain.';
+        if ($akunEmail === '') $errors[] = 'Email login wajib diisi.';
+        elseif (strlen($akunEmail) > 120 || !filter_var($akunEmail, FILTER_VALIDATE_EMAIL)) $errors[] = 'Format email login tidak valid.';
+        elseif (User::emailTaken($akunEmail, (int) ($akun['id'] ?? 0))) $errors[] = 'Email login sudah dipakai akun lain.';
         if (!$akun && $password === '') $errors[] = 'Kata sandi wajib diisi.';
         if ($password !== '' && strlen($password) < 8) $errors[] = 'Kata sandi minimal 8 karakter.';
     }
@@ -257,11 +261,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($isAkun) {
         $akun = User::findByAnggota($savedId);
         if ($akun) {
-            $userData = ['username' => $username];
+            $userData = ['username' => $username, 'email' => $akunEmail];
             if ($password !== '') $userData['password_hash'] = password_hash($password, PASSWORD_DEFAULT);
             User::update((int) $akun['id'], $userData);
         } else {
-            User::createForAnggota($savedId, $username, $password);
+            User::createForAnggota($savedId, $username, $password, $akunEmail);
         }
     }
 
@@ -318,11 +322,18 @@ if ($editing) {
     }
 }
 $akunUsername = '';
+$akunEmail = '';
 $akunList = [];
+$akunEmailList = [];
 if ($crudEntitas === 'anggota') {
-    $akunUsername = $editing ? (User::findByAnggota((int) $editing['id'])['username'] ?? '') : '';
+    $akunEdit = $editing ? User::findByAnggota((int) $editing['id']) : null;
+    $akunUsername = (string) ($akunEdit['username'] ?? '');
+    $akunEmail = (string) ($akunEdit['email'] ?? '');
     foreach (User::all() as $u) {
-        if ($u['anggota_id'] !== null) $akunList[(int) $u['anggota_id']] = $u['username'];
+        if ($u['anggota_id'] !== null) {
+            $akunList[(int) $u['anggota_id']] = $u['username'];
+            $akunEmailList[(int) $u['anggota_id']] = $u['email'];
+        }
     }
 }
 
@@ -335,6 +346,7 @@ if (!$showForm && !$refPanel && $searchCols && $q !== '') {
     if ($crudEntitas === 'anggota') {
         foreach ($rows as &$row) {
             $row['_cari_username'] = $akunList[(int) $row['id']] ?? '';
+            $row['_cari_email'] = $akunEmailList[(int) $row['id']] ?? '';
         }
         unset($row);
     }

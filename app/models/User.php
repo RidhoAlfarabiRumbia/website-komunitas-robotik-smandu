@@ -3,12 +3,38 @@
 class User extends Model
 {
     protected static string $table = 'users';
-    protected static array $fillable = ['username', 'password_hash', 'role', 'anggota_id'];
+    protected static array $fillable = ['username', 'email', 'password_hash', 'role', 'anggota_id'];
+
+    /**
+     * Setiap perubahan email atau kata sandi membatalkan tautan reset lama.
+     * Ini mencegah tautan yang sudah beredar tetap berlaku setelah akun diubah.
+     */
+    public static function update(int $id, array $data): bool
+    {
+        $sensitif = array_key_exists('email', $data) || array_key_exists('password_hash', $data);
+        $ok = parent::update($id, $data);
+        if ($ok && $sensitif) {
+            PasswordReset::batalkanTokenUser($id);
+        }
+        return $ok;
+    }
 
     public static function findByAnggota(int $anggotaId): ?array
     {
         $stmt = self::db()->prepare('SELECT * FROM users WHERE anggota_id = ? LIMIT 1');
         $stmt->execute([$anggotaId]);
+        $row = $stmt->fetch();
+        return $row ?: null;
+    }
+
+    public static function findByEmail(string $email): ?array
+    {
+        $email = strtolower(trim($email));
+        if ($email === '') {
+            return null;
+        }
+        $stmt = self::db()->prepare('SELECT * FROM users WHERE email = ? LIMIT 1');
+        $stmt->execute([$email]);
         $row = $stmt->fetch();
         return $row ?: null;
     }
@@ -20,10 +46,27 @@ class User extends Model
         return (int) $stmt->fetchColumn() > 0;
     }
 
-    public static function createForAnggota(int $anggotaId, string $username, string $password): int
+    public static function emailTaken(string $email, int $exceptId = 0): bool
     {
+        $email = strtolower(trim($email));
+        if ($email === '') {
+            return false;
+        }
+        $stmt = self::db()->prepare('SELECT COUNT(*) FROM users WHERE email = ? AND id <> ?');
+        $stmt->execute([$email, $exceptId]);
+        return (int) $stmt->fetchColumn() > 0;
+    }
+
+    public static function createForAnggota(
+        int $anggotaId,
+        string $username,
+        string $password,
+        ?string $email = null
+    ): int {
+        $email = $email !== null && trim($email) !== '' ? strtolower(trim($email)) : null;
         return self::create([
             'username' => $username,
+            'email' => $email,
             'password_hash' => password_hash($password, PASSWORD_DEFAULT),
             'role' => 'anggota',
             'anggota_id' => $anggotaId,
@@ -44,8 +87,9 @@ class User extends Model
 
     public static function setPassword(int $userId, string $password): bool
     {
-        $stmt = self::db()->prepare('UPDATE users SET password_hash = ? WHERE id = ?');
-        return $stmt->execute([password_hash($password, PASSWORD_DEFAULT), $userId]);
+        return self::update($userId, [
+            'password_hash' => password_hash($password, PASSWORD_DEFAULT),
+        ]);
     }
 
     /** Verifikasi kata sandi sebuah akun user. */
@@ -56,15 +100,26 @@ class User extends Model
     }
 
     /**
-     * Ubah username dan/atau kata sandi akun milik user sendiri
+     * Ubah username, email, dan/atau kata sandi akun milik user sendiri
      * (halaman Profil anggota & admin). Kata sandi lama wajib cocok;
-     * $passwordBaru '' berarti sandi tidak diganti.
+     * $passwordBaru '' berarti sandi tidak diganti. $email null berarti
+     * email tidak ikut diubah.
      *
      * @return string[] daftar pesan error — kosong bila berhasil
      */
-    public static function ubahAkun(int $userId, string $username, string $passwordLama, string $passwordBaru): array
-    {
+    public static function ubahAkun(
+        int $userId,
+        string $username,
+        string $passwordLama,
+        string $passwordBaru,
+        ?string $email = null
+    ): array {
         $errors = [];
+        $user = self::find($userId);
+        if (!$user) {
+            return ['Akun tidak ditemukan.'];
+        }
+
         $username = trim($username);
 
         if ($username === '') {
@@ -77,12 +132,23 @@ class User extends Model
 
         if ($passwordLama === '') {
             $errors[] = 'Kata sandi saat ini wajib diisi.';
-        } elseif (!self::verifyPassword($userId, $passwordLama)) {
+        } elseif (!password_verify($passwordLama, $user['password_hash'])) {
             $errors[] = 'Kata sandi saat ini salah.';
         }
 
         if ($passwordBaru !== '' && strlen($passwordBaru) < 8) {
             $errors[] = 'Kata sandi baru minimal 8 karakter.';
+        }
+
+        if ($email !== null) {
+            $email = strtolower(trim($email));
+            if ($email === '') {
+                $errors[] = 'Email wajib diisi.';
+            } elseif (strlen($email) > 120 || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $errors[] = 'Format email tidak valid.';
+            } elseif (self::emailTaken($email, $userId)) {
+                $errors[] = 'Email sudah dipakai akun lain.';
+            }
         }
 
         if ($errors) {
@@ -92,6 +158,10 @@ class User extends Model
         $data = ['username' => $username];
         if ($passwordBaru !== '') {
             $data['password_hash'] = password_hash($passwordBaru, PASSWORD_DEFAULT);
+        }
+        $emailLama = strtolower(trim((string) ($user['email'] ?? '')));
+        if ($email !== null && $email !== $emailLama) {
+            $data['email'] = $email;
         }
         self::update($userId, $data);
 

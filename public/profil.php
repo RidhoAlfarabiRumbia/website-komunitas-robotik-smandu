@@ -6,7 +6,7 @@ $u = Auth::anggota();
 $id = (int) $u['id'];
 $akun = User::findByAnggota($id);
 
-// Ubah username / kata sandi — wajib CSRF + kata sandi lama (lihat User::ubahAkun)
+// Ubah username / email / kata sandi — wajib CSRF + kata sandi lama (lihat User::ubahAkun)
 $errors = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Csrf::verify();
@@ -21,10 +21,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             (int) $akun['id'],
             nilai_teks($_POST, 'username'),
             nilai_teks($_POST, 'password_lama', false),
-            $passBaru
+            $passBaru,
+            nilai_teks($_POST, 'email')
         );
     if (!$errors) {
-        flash_set('success', 'Perubahan username / kata sandi berhasil disimpan.');
+        flash_set('success', 'Perubahan username / email / kata sandi berhasil disimpan.');
         redirect('profil.php');
     }
 }
@@ -181,18 +182,23 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
           <label>Username</label>
           <input name="username" value="<?= e(nilai_teks($_POST, 'username') ?: ($akun['username'] ?? '')) ?>" minlength="3" required autocomplete="username">
         </div>
+        <div class="field field-full">
+          <label>Email *</label>
+          <input type="email" name="email" value="<?= e(nilai_teks($_POST, 'email') ?: ($akun['email'] ?? '')) ?>" maxlength="120" required autocomplete="email">
+          <span class="hint">Dipakai untuk reset kata sandi. Pastikan email ini aktif dan milik Anda.</span>
+        </div>
         <div class="field">
           <label>Kata sandi saat ini *</label>
           <input type="password" name="password_lama" required autocomplete="current-password">
         </div>
         <div class="field">
           <label>Kata sandi baru</label>
-          <input type="password" name="password_baru" minlength="6" autocomplete="new-password">
+          <input type="password" name="password_baru" minlength="8" autocomplete="new-password">
         </div>
         <div class="field field-full">
           <label>Ulangi kata sandi baru</label>
-          <input type="password" name="password_baru2" minlength="6" autocomplete="new-password">
-          <span class="hint">Kosongkan kata sandi baru bila hanya ingin mengganti username. Kata sandi lama tetap wajib diisi untuk menyimpan perubahan; sandi baru minimal 6 karakter.</span>
+          <input type="password" name="password_baru2" minlength="8" autocomplete="new-password">
+          <span class="hint">Kosongkan kata sandi baru bila hanya ingin mengganti username/email. Kata sandi lama tetap wajib diisi untuk menyimpan perubahan; sandi baru minimal 8 karakter.</span>
         </div>
       </div>
       <div style="margin-top:14px;">

@@ -64,9 +64,15 @@ include __DIR__ . '/../../app/includes/header.php';
                   <td><?php if (!empty($row['foto'])): ?><img src="<?= base_url(e($row['foto'])) ?>" alt="" loading="lazy" decoding="async" style="display:block; width:96px; height:96px; object-fit:cover; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface-2);"><?php else: ?><span style="color:var(--text-dim); font-size:12px;">-</span><?php endif; ?></td>
                 <?php endif; ?>
                 <?php foreach ($crudCfg['list'] as $col): ?>
-                  <td><?= $col === 'username'
-                          ? e($akunList[(int) $row['id']] ?? '-')
-                          : e(trunc((string) ($row[$col] ?? '-'), 60)) ?></td>
+                  <td><?php
+                    if ($col === 'username') {
+                        echo e($akunList[(int) $row['id']] ?? '-');
+                    } elseif ($col === 'akun_email') {
+                        echo e(trunc((string) ($akunEmailList[(int) $row['id']] ?? '-'), 40));
+                    } else {
+                        echo e(trunc((string) ($row[$col] ?? '-'), 60));
+                    }
+                  ?></td>
                 <?php endforeach; ?>
                 <td>
                   <div class="row-actions">

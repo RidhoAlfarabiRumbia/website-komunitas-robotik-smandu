@@ -49,6 +49,7 @@ Materi belajar robotik tersebar di banyak platform, karya dan dokumentasi tercec
 | **Berkarya** | **Karya** anggota (Robot, IoT, Programming, AI, Elektronika) dengan status progres · **Ajukan Karya** dengan moderasi admin dan alasan penolakan |
 | **Berkompetisi** | **Lomba** (info, status, hasil, peserta) · **Prestasi** dengan bukti sertifikat, tayang langsung dan bisa ditinjau admin |
 | **Berbagi** | **Galeri** foto dan video · **Kegiatan** dengan video laporan · **Pengumuman** · **Slider Beranda** yang dikelola admin |
+| **Akun** | Login username · **Lupa password via email** dengan token sekali pakai · Pengelolaan email dan kata sandi di Profil |
 | **Regenerasi** | **Pendaftaran Anggota** dengan Pakta Integritas · **Profil** berisi rekam jejak karya, prestasi, dan pelatihan |
 
 ### Aturan akses utama
@@ -79,7 +80,7 @@ Materi belajar robotik tersebar di banyak platform, karya dan dokumentasi tercec
 
 ### Prasyarat
 
-- PHP 8.3
+- PHP 8.3 dengan ekstensi `openssl` (untuk SMTP TLS)
 - MySQL atau MariaDB
 - Apache (XAMPP atau Laragon memudahkan di lokal)
 
@@ -98,15 +99,28 @@ cp .env.example .env
 
    ```env
    APP_NAME="Portal Komunitas Robotik SMA Negeri 2"
+   APP_URL=http://localhost/portal-robotik/public
    DB_HOST=localhost
    DB_NAME=db_robotik
    DB_USER=isi_username_database
    DB_PASS=isi_password_database
+
+   MAIL_HOST=smtp.example.com
+   MAIL_PORT=587
+   MAIL_USERNAME=alamat@example.com
+   MAIL_PASSWORD=isi_password_smtp
+   MAIL_ENCRYPTION=tls
+   MAIL_FROM=alamat@example.com
+   MAIL_FROM_NAME="Portal Robotik"
    ```
+
+   `APP_URL` dipakai untuk membentuk tautan reset password di email. Isi `MAIL_*` dengan SMTP penyedia email (gunakan app password bila penyedia mewajibkannya). `MAIL_ENCRYPTION` menerima `tls`, `ssl`, atau `none`.
+
+   Untuk pengujian lokal dengan Gmail: aktifkan 2-Step Verification, buat App Password 16 karakter, gunakan `MAIL_HOST=smtp.gmail.com`, `MAIL_PORT=587`, `MAIL_ENCRYPTION=tls`, dan isi `MAIL_FROM` dengan alamat Gmail yang sama seperti `MAIL_USERNAME`. Jangan memakai password login Gmail. Buka tautan reset di komputer yang menjalankan server karena `APP_URL` masih `localhost`.
 
 5. Buka `http://localhost/portal-robotik/public/`.
 
-> Data contoh dan akun awal ada di `database.sql`. Ganti atau hapus akun bawaan sebelum dipakai di produksi.
+> Data contoh dan akun awal ada di `database.sql`. Ganti atau hapus akun bawaan sebelum dipakai di produksi. Email akun contoh kosong; isi lewat CRUD Anggota atau halaman Profil agar fitur lupa password bisa dipakai.
 
 > **Produksi:** arahkan document root server ke folder `public/`. Kode di `app/`, berkas privat di `storage/`, dan `.env` tidak boleh bisa diakses langsung dari browser.
 
@@ -115,6 +129,8 @@ cp .env.example .env
 > Jika database masih memiliki kolom `karya.kategori` atau `lomba.kategori`, jalankan `migrate_hapus_kategori_karya.sql` / `migrate_hapus_kategori_lomba.sql` (cadangkan dulu; data kategori lama akan dihapus).
 >
 > Jika status publikasi karya masih `Pending`/`Approved`/`Rejected`, jalankan `migrate_publikasi_karya_indonesia.sql`.
+>
+> Untuk fitur lupa password, jalankan `migrate_password_reset.sql` (menambah kolom `users.email` dan tabel `password_resets`). Setelah itu isi email akun yang sudah ada lewat CRUD Anggota atau halaman Profil admin/anggota.
 
 ### Opsional: performa
 
@@ -145,6 +161,7 @@ portal-robotik/
 ├── migrate_hapus_kategori_karya.sql # migrasi sekali pakai: hapus kolom karya.kategori
 ├── migrate_hapus_kategori_lomba.sql # migrasi sekali pakai: hapus kolom lomba.kategori
 ├── migrate_publikasi_karya_indonesia.sql # migrasi status publikasi karya
+├── migrate_password_reset.sql # migrasi email akun + token reset password
 └── .env                    # konfigurasi lokal (tidak masuk repository)
 ```
 
@@ -156,6 +173,7 @@ portal-robotik/
 - Semua query memakai prepared statement (PDO); semua keluaran HTML di-escape.
 - Validasi tipe dan ukuran berkas unggahan dilakukan di server.
 - Materi dan dokumen Pakta Integritas disimpan **di luar document root** dan hanya dilayani setelah pemeriksaan hak akses.
+- Token reset password disimpan sebagai hash SHA-256, berlaku 30 menit, sekali pakai, dan dibatasi per email/IP.
 - Konfigurasi sensitif ada di `.env` dan **tidak boleh di-commit**.
 
 Menemukan celah keamanan? Mohon laporkan secara privat kepada pengelola, jangan lewat issue publik.
@@ -171,6 +189,7 @@ Menemukan celah keamanan? Mohon laporkan secara privat kepada pengelola, jangan 
 
 - [x] Fitur inti: login, pendaftaran + Pakta Integritas, materi dengan akses pelatihan, pelatihan, karya, prestasi, galeri, kegiatan, lomba, pengumuman, profil
 - [x] Slider Beranda, mode gelap/terang, upload foto dan video
+- [x] Lupa password via email, pengelolaan email akun, dan token reset sekali pakai
 - [ ] Perbaikan keamanan: batasi percobaan login, hapus lewat POST + CSRF, cek status di halaman detail karya
 - [ ] Statistik komunitas di beranda
 - [ ] Pengujian otomatis dan linter

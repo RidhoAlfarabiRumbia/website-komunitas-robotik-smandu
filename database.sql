@@ -28,11 +28,32 @@ CREATE TABLE anggota (
 CREATE TABLE users (
   id INT AUTO_INCREMENT PRIMARY KEY,
   username VARCHAR(60) NOT NULL UNIQUE,
+  email VARCHAR(120) DEFAULT NULL,
   password_hash VARCHAR(255) NOT NULL,
   role ENUM('admin','anggota') NOT NULL,
   anggota_id INT DEFAULT NULL,
   dibuat_pada DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_users_email (email),
   FOREIGN KEY (anggota_id) REFERENCES anggota(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Token reset kata sandi. Token asli tidak disimpan; hanya hash SHA-256.
+-- Baris dengan user_id NULL dipakai untuk mencatat permintaan email tak dikenal
+-- agar rate limit tetap berjalan tanpa membocorkan apakah email terdaftar.
+CREATE TABLE password_resets (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT DEFAULT NULL,
+  email_hash CHAR(64) NOT NULL,
+  token_hash CHAR(64) DEFAULT NULL,
+  requested_ip VARCHAR(45) DEFAULT NULL,
+  expires_at DATETIME DEFAULT NULL,
+  used_at DATETIME DEFAULT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_password_resets_token (token_hash),
+  KEY idx_password_resets_email_created (email_hash, created_at),
+  KEY idx_password_resets_ip_created (requested_ip, created_at),
+  KEY idx_password_resets_user (user_id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 -- ---------------------------------------------------------
