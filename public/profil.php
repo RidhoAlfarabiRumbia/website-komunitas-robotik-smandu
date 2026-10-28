@@ -6,6 +6,37 @@ $u = Auth::anggota();
 $id = (int) $u['id'];
 $akun = User::findByAnggota($id);
 
+/**
+ * Hapus berkas foto profil lama dengan aman.
+ * Hanya bekerja untuk path di uploads/anggota dan ikut membersihkan varian
+ * _opt yang dibuat handle_upload().
+ */
+$hapusBerkasFoto = static function (?string $rel): void {
+    if (!is_string($rel) || !preg_match('#^uploads/anggota/[A-Za-z0-9._-]+$#', $rel)) {
+        return;
+    }
+    $dir = realpath(__DIR__ . '/uploads/anggota');
+    $path = realpath(__DIR__ . '/' . $rel);
+    if ($dir === false || $path === false) {
+        return;
+    }
+    $prefix = rtrim($dir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+    if (!str_starts_with($path, $prefix) || !is_file($path)) {
+        return;
+    }
+    $stem = pathinfo($path, PATHINFO_FILENAME);
+    if (str_ends_with($stem, '_opt')) {
+        $stem = substr($stem, 0, -4);
+    }
+    foreach ([$prefix . $stem . '.*', $prefix . $stem . '_opt.*'] as $pola) {
+        foreach (glob($pola) ?: [] as $file) {
+            if (is_file($file) && !@unlink($file)) {
+                error_log('Gagal menghapus foto profil lama: ' . $file);
+            }
+        }
+    }
+};
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'foto_profil') {
     Csrf::verify();
     $uploadError = (isset($_FILES['foto']['error']) && is_scalar($_FILES['foto']['error']))
@@ -28,12 +59,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'foto_pr
         }
         redirect('profil.php');
     }
+    $fotoLama = (string) ($u['foto'] ?? '');
     if (!Anggota::update($id, ['foto' => $foto])) {
         flash_set('error', 'Foto profil gagal disimpan. Coba lagi.');
         redirect('profil.php');
     }
+    $hapusBerkasFoto($fotoLama);
     Auth::refreshAnggota();
     flash_set('success', 'Foto profil berhasil diperbarui.');
+    redirect('profil.php');
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['aksi'] ?? '') === 'hapus_foto') {
+    Csrf::verify();
+    $fotoLama = (string) ($u['foto'] ?? '');
+    if ($fotoLama === '') {
+        flash_set('error', 'Tidak ada foto profil yang bisa dihapus.');
+        redirect('profil.php');
+    }
+    if (!Anggota::update($id, ['foto' => null])) {
+        flash_set('error', 'Foto profil gagal dihapus. Coba lagi.');
+        redirect('profil.php');
+    }
+    $hapusBerkasFoto($fotoLama);
+    Auth::refreshAnggota();
+    flash_set('success', 'Foto profil berhasil dihapus.');
     redirect('profil.php');
 }
 
@@ -85,21 +135,14 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
   <?php endif; ?>
 
   <div class="card" style="display:flex; gap:20px; align-items:center; margin-bottom:28px; flex-wrap:wrap;">
-    <div class="avatar" style="width:64px; height:64px;"><img src="<?= base_url(e($u['foto'] ?? 'assets/img/avatar-1.svg')) ?>" alt=""></div>
+    <button type="button" class="avatar-btn" id="fotoProfilTrigger" aria-label="Ubah foto profil" aria-haspopup="dialog" aria-controls="fotoProfilModal">
+      <span class="avatar" style="width:64px; height:64px;"><img src="<?= base_url(e($u['foto'] ?? 'assets/img/avatar-1.svg')) ?>" alt="Foto profil <?= e($u['nama']) ?>"></span>
+      <span class="avatar-badge" aria-hidden="true"><i class="bi bi-camera"></i></span>
+    </button>
     <div style="flex:1; min-width:200px;">
       <h1 style="font-size:20px;"><?= e($u['nama']) ?></h1>
       <div class="meta" style="margin:4px 0 8px;"><?= e($u['kelas']) ?> · Fokus <?= e($u['fokus']) ?></div>
       <p style="font-size:13.5px; color:var(--text-muted); max-width:60ch;"><?= e($u['deskripsi']) ?></p>
-      <form method="post" enctype="multipart/form-data" style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; margin-top:12px;">
-        <?= Csrf::field() ?>
-        <input type="hidden" name="aksi" value="foto_profil">
-        <div class="field" style="margin:0; min-width:240px;">
-          <label for="foto_profil" style="font-size:12.5px;">Ganti foto profil</label>
-          <input id="foto_profil" type="file" name="foto" accept="image/jpeg,image/png,image/webp" required>
-          <span class="hint">JPG, PNG, atau WEBP. Maksimal 2MB.</span>
-        </div>
-        <button class="btn btn-outline btn-sm" type="submit"><i class="bi bi-camera"></i> Simpan Foto</button>
-      </form>
     </div>
     <div style="display:flex; gap:8px; flex-wrap:wrap;">
       <a class="btn btn-primary" href="ajukan-karya.php"><i class="bi bi-plus-circle"></i> Ajukan Karya</a>
@@ -249,5 +292,150 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
   </div>
   </section>
 </div>
+
+<div class="foto-modal" id="fotoProfilModal" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="fotoProfilJudul">
+  <div class="foto-card">
+    <button type="button" class="foto-close" id="fotoProfilClose" aria-label="Tutup pengaturan foto profil"><i class="bi bi-x-lg"></i></button>
+    <div class="foto-head">
+      <div class="foto-avatar">
+        <img id="fotoProfilPreview" src="<?= base_url(e($u['foto'] ?? 'assets/img/avatar-1.svg')) ?>" data-current-src="<?= base_url(e($u['foto'] ?? 'assets/img/avatar-1.svg')) ?>" alt="Foto profil saat ini">
+      </div>
+      <h2 id="fotoProfilJudul">Foto Profil</h2>
+      <p class="foto-desc"><?= empty($u['foto']) ? 'Belum ada foto profil. Pilih foto untuk mulai.' : 'Pilih foto baru untuk mengganti foto profil saat ini.' ?></p>
+    </div>
+    <form method="post" enctype="multipart/form-data" class="foto-form" id="fotoProfilForm">
+      <?= Csrf::field() ?>
+      <input type="hidden" name="aksi" value="foto_profil">
+      <input type="file" name="foto" id="fotoProfilInput" accept="image/jpeg,image/png,image/webp" hidden>
+      <div class="foto-actions">
+        <button type="button" class="btn btn-outline" id="fotoProfilPilih"><i class="bi bi-image"></i> Pilih Foto</button>
+        <button type="submit" class="btn btn-primary" id="fotoProfilSimpan" disabled><i class="bi bi-check2"></i> Simpan Foto</button>
+      </div>
+      <p class="hint foto-hint" id="fotoProfilInfo" aria-live="polite">JPG, PNG, atau WEBP. Maksimal 2MB.</p>
+      <p class="foto-error" id="fotoProfilError" role="alert" hidden></p>
+    </form>
+    <?php if (!empty($u['foto'])): ?>
+      <form method="post" class="foto-hapus-form" id="fotoProfilHapusForm">
+        <?= Csrf::field() ?>
+        <input type="hidden" name="aksi" value="hapus_foto">
+        <button type="submit" class="btn btn-danger-outline btn-sm"><i class="bi bi-trash"></i> Hapus Foto</button>
+      </form>
+    <?php endif; ?>
+  </div>
+</div>
+<script>
+(function(){
+  var modal = document.getElementById('fotoProfilModal');
+  var trigger = document.getElementById('fotoProfilTrigger');
+  if (!modal || !trigger) return;
+  var close = document.getElementById('fotoProfilClose');
+  var pilih = document.getElementById('fotoProfilPilih');
+  var input = document.getElementById('fotoProfilInput');
+  var simpan = document.getElementById('fotoProfilSimpan');
+  var preview = document.getElementById('fotoProfilPreview');
+  var info = document.getElementById('fotoProfilInfo');
+  var error = document.getElementById('fotoProfilError');
+  var form = document.getElementById('fotoProfilForm');
+  var hapusForm = document.getElementById('fotoProfilHapusForm');
+  var fotoAwal = preview ? preview.getAttribute('data-current-src') : '';
+  var infoAwal = info ? info.textContent : '';
+  var fokusSebelum = null;
+
+  function pesanError(teks) {
+    if (!error) return;
+    error.textContent = teks || '';
+    error.hidden = !teks;
+  }
+
+  function reset() {
+    if (input) input.value = '';
+    if (simpan) simpan.disabled = true;
+    if (preview) preview.src = fotoAwal;
+    if (info) info.textContent = infoAwal;
+    pesanError('');
+  }
+
+  function buka() {
+    fokusSebelum = document.activeElement;
+    reset();
+    modal.hidden = false;
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    if (close) close.focus();
+  }
+
+  function tutup() {
+    modal.hidden = true;
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    reset();
+    if (fokusSebelum && typeof fokusSebelum.focus === 'function') fokusSebelum.focus();
+  }
+
+  trigger.addEventListener('click', buka);
+  if (close) close.addEventListener('click', tutup);
+  modal.addEventListener('click', function(e){
+    if (e.target === modal) tutup();
+  });
+  document.addEventListener('keydown', function(e){
+    if (!modal.hidden && e.key === 'Escape') tutup();
+  });
+
+  if (pilih && input) {
+    pilih.addEventListener('click', function(){ input.click(); });
+  }
+
+  if (input) {
+    input.addEventListener('change', function(){
+      pesanError('');
+      var file = input.files && input.files[0];
+      if (!file) {
+        reset();
+        return;
+      }
+      var tipe = ['image/jpeg', 'image/png', 'image/webp'];
+      if (file.type && tipe.indexOf(file.type) === -1) {
+        reset();
+        pesanError('Format file harus JPG, PNG, atau WEBP.');
+        return;
+      }
+      if (file.size > 2 * 1024 * 1024) {
+        reset();
+        pesanError('Ukuran foto maksimal 2MB.');
+        return;
+      }
+
+      var reader = new FileReader();
+      reader.onload = function(e){
+        if (preview) preview.src = String(e.target.result);
+      };
+      reader.onerror = function(){
+        reset();
+        pesanError('Foto tidak bisa dibaca. Coba file lain.');
+      };
+      reader.readAsDataURL(file);
+      if (info) info.textContent = 'Dipilih: ' + file.name;
+      if (simpan) simpan.disabled = false;
+    });
+  }
+
+  if (form) {
+    form.addEventListener('submit', function(){
+      if (simpan) {
+        simpan.disabled = true;
+        simpan.textContent = 'Menyimpan...';
+      }
+    });
+  }
+
+  if (hapusForm) {
+    hapusForm.addEventListener('submit', function(e){
+      if (!window.confirm('Hapus foto profil? Foto akan kembali ke avatar default.')) {
+        e.preventDefault();
+      }
+    });
+  }
+})();
+</script>
 <?php include __DIR__ . '/../app/includes/partial_lightbox.php'; ?>
 <?php include __DIR__ . '/../app/includes/footer.php'; ?>

@@ -150,7 +150,7 @@ Modul khusus untuk mendokumentasikan pencapaian/kejuaraan komunitas sebagai bukt
 •	Menampilkan status kelengkapan Pakta Integritas.
 •	Berfungsi sebagai rekam jejak kontribusi anggota.
 •	Anggota dapat mengubah username, email, dan kata sandi sendiri dengan verifikasi kata sandi lama.
-•	Anggota dapat mengganti foto profil sendiri (JPG, PNG, atau WEBP maksimal 2MB).
+•	Anggota dapat mengganti atau menghapus foto profil sendiri (JPG, PNG, atau WEBP maksimal 2MB).
 8.14 Upload Media (Baru)
 •	Mendukung unggah foto (karya, galeri, prestasi) dan video (dokumentasi/laporan kegiatan).
 •	Video laporan kegiatan dapat berdurasi lebih panjang (kurang lebih hingga 15–20 menit), berbeda dari video promosi singkat (1–4 menit); batas ukuran file video dibuat lebih besar dibanding foto.
