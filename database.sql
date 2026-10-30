@@ -15,7 +15,6 @@ CREATE TABLE anggota (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nama VARCHAR(120) NOT NULL,
   kelas VARCHAR(40) NOT NULL,
-  fokus VARCHAR(80) NOT NULL,
   kontak VARCHAR(60) DEFAULT NULL,
   deskripsi TEXT,
   foto VARCHAR(191) DEFAULT NULL,
@@ -287,13 +286,13 @@ CREATE TABLE pengaturan (
 -- DATA CONTOH (dummy, berbahasa Indonesia)
 -- =========================================================
 
-INSERT INTO anggota (id, nama, kelas, fokus, kontak, deskripsi, foto) VALUES
-(1,'Ahmad Fauzan Rizki','XI RPL 1','Robotika & AI','0812-3456-7890','Membina line follower dan sistem robot kompetisi sejak kelas X.','assets/img/avatar-1.svg'),
-(2,'Nabila Putri Salsabila','XI RPL 2','Internet of Things','0813-2200-1122','Fokus pada proyek monitoring berbasis sensor dan ESP32.','assets/img/avatar-2.svg'),
-(3,'Muhammad Rafi Ardiansyah','X TKJ 1','Elektronika','0852-9988-7766','Anggota baru yang aktif belajar rangkaian dasar dan Arduino.','assets/img/avatar-3.svg'),
-(4,'Siti Zahra Amelia','XI RPL 1','Programming','0812-7788-5544','Mengembangkan aplikasi pendukung untuk kegiatan komunitas.','assets/img/avatar-4.svg'),
-(5,'Bagas Dwi Prasetyo','X TKJ 2','Robotika','0853-6677-3322','Merakit dan menguji mekanisme lengan robot sortir.','assets/img/avatar-5.svg'),
-(6,'Keisha Ayu Lestari','XII RPL 1','AI & Data','0812-4433-2211','Mengembangkan model deteksi objek sederhana untuk robot.','assets/img/avatar-6.svg');
+INSERT INTO anggota (id, nama, kelas, kontak, deskripsi, foto) VALUES
+(1,'Ahmad Fauzan Rizki','XI RPL 1','0812-3456-7890','Membina line follower dan sistem robot kompetisi sejak kelas X.','assets/img/avatar-1.svg'),
+(2,'Nabila Putri Salsabila','XI RPL 2','0813-2200-1122','Fokus pada proyek monitoring berbasis sensor dan ESP32.','assets/img/avatar-2.svg'),
+(3,'Muhammad Rafi Ardiansyah','X TKJ 1','0852-9988-7766','Anggota baru yang aktif belajar rangkaian dasar dan Arduino.','assets/img/avatar-3.svg'),
+(4,'Siti Zahra Amelia','XI RPL 1','0812-7788-5544','Mengembangkan aplikasi pendukung untuk kegiatan komunitas.','assets/img/avatar-4.svg'),
+(5,'Bagas Dwi Prasetyo','X TKJ 2','0853-6677-3322','Merakit dan menguji mekanisme lengan robot sortir.','assets/img/avatar-5.svg'),
+(6,'Keisha Ayu Lestari','XII RPL 1','0812-4433-2211','Mengembangkan model deteksi objek sederhana untuk robot.','assets/img/avatar-6.svg');
 
 -- password untuk semua akun di bawah = "demo123"
 -- hash dibuat dengan password_hash('demo123', PASSWORD_DEFAULT)

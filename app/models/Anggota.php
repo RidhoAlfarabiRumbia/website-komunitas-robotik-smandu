@@ -3,7 +3,7 @@
 class Anggota extends Model
 {
     protected static string $table = 'anggota';
-    protected static array $fillable = ['nama', 'kelas', 'fokus', 'kontak', 'deskripsi', 'foto'];
+    protected static array $fillable = ['nama', 'kelas', 'kontak', 'deskripsi', 'foto'];
 
     /** Cari anggota berdasarkan nama (dan kelas bila diisi). */
     public static function cari(string $nama, string $kelas = ''): ?array

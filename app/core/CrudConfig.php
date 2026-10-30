@@ -17,15 +17,14 @@ function crud_config(): array
             'fields' => [
                 'nama' => ['label' => 'Nama', 'type' => 'text', 'required' => true],
                 'kelas' => ['label' => 'Kelas', 'type' => 'text', 'required' => true],
-                'fokus' => ['label' => 'Fokus', 'type' => 'text'],
                 'deskripsi' => ['label' => 'Deskripsi', 'type' => 'textarea'],
                 'foto' => ['label' => 'Foto', 'type' => 'file', 'subfolder' => 'anggota'],
                 'username' => ['label' => 'Username Login', 'type' => 'akun_username'],
                 'akun_email' => ['label' => 'Email Login', 'type' => 'akun_email'],
                 'password' => ['label' => 'Kata Sandi Login', 'type' => 'password'],
             ],
-            'list' => ['nama', 'kelas', 'fokus', 'username', 'akun_email'],
-            'search' => ['nama', 'kelas', 'fokus', 'kontak', 'deskripsi', '_cari_username', '_cari_email'],
+            'list' => ['nama', 'kelas', 'username', 'akun_email'],
+            'search' => ['nama', 'kelas', 'kontak', 'deskripsi', '_cari_username', '_cari_email'],
         ],
         'materi' => [
             'label' => 'Materi', 'model' => Materi::class,

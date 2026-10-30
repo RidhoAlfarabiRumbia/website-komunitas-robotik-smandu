@@ -141,7 +141,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
     </button>
     <div style="flex:1; min-width:200px;">
       <h1 style="font-size:20px;"><?= e($u['nama']) ?></h1>
-      <div class="meta" style="margin:4px 0 8px;"><?= e($u['kelas']) ?> · Fokus <?= e($u['fokus']) ?></div>
+      <div class="meta" style="margin:4px 0 8px;"><?= e($u['kelas']) ?></div>
       <p style="font-size:13.5px; color:var(--text-muted); max-width:60ch;"><?= e($u['deskripsi']) ?></p>
     </div>
     <div style="display:flex; gap:8px; flex-wrap:wrap;">

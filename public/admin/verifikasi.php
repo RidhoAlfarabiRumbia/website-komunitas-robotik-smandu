@@ -72,7 +72,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $anggotaId = (int) Anggota::create([
                 'nama' => $p['nama'],
                 'kelas' => $p['kelas'],
-                'fokus' => 'Robotika',
                 'kontak' => $p['kontak'],
                 'deskripsi' => $p['alasan'] ?: 'Anggota baru terdaftar lewat formulir pendaftaran.',
             ]);

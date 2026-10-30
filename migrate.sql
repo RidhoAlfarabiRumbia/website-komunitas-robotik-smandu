@@ -10,7 +10,7 @@ USE db_robotik;
 -- ---------------------------------------------------------
 SET @exist := (SELECT COUNT(*) FROM information_schema.COLUMNS
                WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'anggota' AND COLUMN_NAME = 'kontak');
-SET @sql := IF(@exist = 0, 'ALTER TABLE anggota ADD COLUMN kontak VARCHAR(60) DEFAULT NULL AFTER fokus', 'DO 0');
+SET @sql := IF(@exist = 0, 'ALTER TABLE anggota ADD COLUMN kontak VARCHAR(60) DEFAULT NULL AFTER kelas', 'DO 0');
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
 -- ---------------------------------------------------------

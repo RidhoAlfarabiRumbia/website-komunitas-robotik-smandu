@@ -156,7 +156,6 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
             <div>
               <div class="ttl"><?= e($a['nama']) ?></div>
               <div class="meta"><?= e($a['kelas']) ?></div>
-              <div class="meta"><?= e($a['fokus']) ?></div>
             </div>
           </a>
         <?php endforeach; ?>

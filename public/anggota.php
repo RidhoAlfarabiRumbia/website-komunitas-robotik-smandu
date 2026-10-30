@@ -21,7 +21,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
 ?>
 <div class="main">
   <div class="page-head">
-    <div><div class="eyebrow">KOMUNITAS</div><h1>Anggota Komunitas</h1><p class="desc">Kenali anggota komunitas beserta fokus dan kontribusinya.</p></div>
+    <div><div class="eyebrow">KOMUNITAS</div><h1>Anggota Komunitas</h1><p class="desc">Kenali anggota komunitas beserta kontribusinya.</p></div>
     <?php if (Auth::isAdmin() && !$crudForm): ?>
       <a class="btn btn-primary" href="?manage=anggota&amp;action=create"><i class="bi bi-plus-circle"></i> Tambah Anggota</a>
     <?php endif; ?>
