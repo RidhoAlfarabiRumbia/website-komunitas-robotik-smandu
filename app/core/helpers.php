@@ -544,6 +544,41 @@ function pakta_template(): array
 }
 
 /**
+ * Profil komunitas yang dapat diedit admin (PRD 8.16).
+ * Disimpan di tabel pengaturan agar tidak menambah tabel baru.
+ */
+function komunitas_profil(): array
+{
+    static $profil = null;
+    if ($profil !== null) {
+        return $profil;
+    }
+
+    $default = [
+        'komunitas_nama' => 'Komunitas Robotik SMA Negeri 2 Kota Ternate',
+        'komunitas_tagline' => 'Belajar, berkarya, dan berkompetisi.',
+        'komunitas_deskripsi' => 'Komunitas robotik SMA Negeri 2 Kota Ternate. Wadah belajar, berkarya, dan berkompetisi.',
+        'komunitas_visi' => '',
+        'komunitas_misi' => '',
+        'komunitas_lokasi' => '',
+        'komunitas_email' => '',
+        'komunitas_instagram' => '',
+        'pembina_nama' => '',
+        'pembina_jabatan' => '',
+        'pembina_bio' => '',
+        'pembina_foto' => '',
+    ];
+
+    $profil = [];
+    foreach ($default as $kunci => $nilai) {
+        $tersimpan = Pengaturan::nilai($kunci);
+        $profil[$kunci] = $tersimpan !== null ? trim($tersimpan) : $nilai;
+    }
+
+    return $profil;
+}
+
+/**
  * Status kunci pendaftaran anggota (PRD 8.12).
  *
  * Konfigurasi disimpan di tabel pengaturan:

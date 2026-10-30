@@ -23,6 +23,7 @@ if (!$sedangAdmin):
     <div class="footer-col">
       <h3>Komunitas</h3>
       <ul>
+        <li><a href="<?= base_url('komunitas.php') ?>">Profil Komunitas</a></li>
         <li><a href="<?= base_url('pelatihan.php') ?>">Pelatihan</a></li>
         <li><a href="<?= base_url('lomba.php') ?>">Lomba</a></li>
         <li><a href="<?= base_url('kegiatan.php') ?>">Kegiatan</a></li>
@@ -101,6 +102,31 @@ function bindDrawer(toggleId, panelId, openClass, closeId, backdropId){
 }
 bindDrawer('sidebarToggle','adminSidebar','sidebar-open','sidebarClose','sidebarBackdrop');
 bindDrawer('navToggle','navMenu','nav-open','navClose','navBackdrop');
+
+/* Menu profil di topbar: card muncul di bawah ikon, bukan pindah halaman. */
+function bindProfileMenu(){
+  var btn=document.getElementById('profileMenuToggle');
+  var menu=document.getElementById('profileMenu');
+  if(!btn||!menu)return;
+  function open(v){
+    menu.hidden=!v;
+    btn.setAttribute('aria-expanded',v?'true':'false');
+  }
+  btn.addEventListener('click',function(e){
+    e.stopPropagation();
+    open(menu.hidden);
+  });
+  menu.addEventListener('click',function(e){e.stopPropagation();});
+  document.addEventListener('click',function(){if(!menu.hidden)open(false);});
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'&&!menu.hidden){open(false);btn.focus();}
+  });
+  ['navToggle','sidebarToggle'].forEach(function(id){
+    var toggle=document.getElementById(id);
+    if(toggle)toggle.addEventListener('click',function(){open(false);});
+  });
+}
+bindProfileMenu();
 
 /* Scroll reveal — wajib gagal-aman.
    .reveal punya opacity:0 di CSS, jadi kalau observer ini tidak pernah memicu,

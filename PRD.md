@@ -1,6 +1,6 @@
 PRODUCT REQUIREMENTS DOCUMENT (PRD)
 Portal Komunitas Robotik SMA Negeri 2
-Revisi 1.2 — berdasarkan hasil wawancara pembina komunitas, Oktober 2026
+Revisi 1.4 — berdasarkan hasil wawancara pembina komunitas, Oktober 2026
 0. Riwayat Revisi
 Versi	Tanggal	Perubahan
 1.0	September 2026	Draft awal PRD berdasarkan diskusi awal tim.
@@ -14,6 +14,7 @@ Versi	Tanggal	Perubahan
 •	Penyesuaian hak akses, struktur navigasi, dan prioritas pengembangan
 1.2	Oktober 2026	Penambahan fitur lupa password via email, pengelolaan email akun, dan token reset sekali pakai.
 1.3	Oktober 2026	Penambahan kunci dan periode pendaftaran anggota (buka manual, tutup manual, atau jadwal tanggal WIT).
+1.4	Oktober 2026	Penambahan halaman Profil Komunitas: identitas, visi/misi, kontak, pembina, ringkasan prestasi, dan preview anggota.
 
 1. Informasi Produk
 Item	Keterangan
@@ -79,14 +80,14 @@ Anggota:
 •	Galeri
 •	Aktivitas: Kegiatan, Lomba
 •	Pengumuman
-•	Komunitas: Anggota
+•	Komunitas: Profil Komunitas, Anggota
 •	Profil Saya: Karya Saya, Pakta Integritas
 Admin:
 •	Seluruh menu anggota.
-•	Kelola: Anggota, Materi (termasuk panel Referensi), Karya, Pelatihan/Workshop (+ peserta), Prestasi, Galeri, Kegiatan, Lomba, Pengumuman.
+•	Kelola: Profil Komunitas, Anggota, Materi (termasuk panel Referensi), Karya, Pelatihan/Workshop (+ peserta), Prestasi, Galeri, Kegiatan, Lomba, Pengumuman.
 •	Moderasi: Pengajuan Karya, Peninjauan Prestasi (bila diperlukan).
 Pengunjung (tanpa login):
-•	Beranda, Prestasi, Galeri, Pengumuman, dan Pelatihan/Workshop yang ditandai terbuka untuk umum.
+•	Beranda, Profil Komunitas, Prestasi, Galeri, Pengumuman, dan Pelatihan/Workshop yang ditandai terbuka untuk umum.
 8. Kebutuhan Fitur
 8.1 Beranda
 •	Identitas dan deskripsi singkat komunitas.
@@ -162,6 +163,11 @@ Modul khusus untuk mendokumentasikan pencapaian/kejuaraan komunitas sebagai bukt
 •	Permintaan dibatasi per email dan per IP untuk mencegah spam.
 •	Respons halaman selalu generik agar tidak membocorkan apakah sebuah email terdaftar.
 •	Kata sandi baru minimal 8 karakter; setelah diubah, tautan reset lama tidak berlaku.
+8.16 Profil Komunitas (Baru)
+•	Halaman publik tanpa login yang menampilkan identitas komunitas, deskripsi, visi, misi, lokasi, email, dan Instagram melalui hero selebar area konten dengan slider foto yang sama seperti beranda sebagai latar; teks dan kartu statistik anggota/prestasi rata tengah di atas slider (overlay) tanpa mengubah isinya.
+•	Menampilkan tiga prestasi terbaru dalam kartu bergambar seperti di beranda, statistik anggota, serta preview anggota dengan tautan ke halaman lengkap.
+•	Menampilkan satu profil pembina berisi nama, jabatan, bio, dan foto.
+•	Admin dapat mengelola seluruh teks dan foto pembina melalui halaman pengaturan; data disimpan di tabel pengaturan tanpa perubahan skema.
 9. Perbedaan Galeri, Karya, Prestasi, dan Profil
 Fitur	Fokus
 Galeri	Apa yang dilakukan komunitas? Dokumentasi umum perjalanan dan aktivitas (latihan, workshop, demo, proses proyek).
@@ -181,6 +187,7 @@ Kegiatan	CRUD	Lihat	-
 Lomba	CRUD	Lihat	-
 Pengumuman	CRUD	Lihat	Lihat
 Anggota	CRUD + verifikasi pendaftaran	Lihat	-
+Profil Komunitas	Kelola	Lihat	Lihat
 Pakta Integritas	Verifikasi	Isi + Upload (saat pendaftaran)	-
 Profil	Kelola	Edit sendiri	-
 Akun	Kelola + atur email	Edit sendiri (username, email, sandi); lupa password via email	-

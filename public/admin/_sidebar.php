@@ -27,6 +27,7 @@ function admin_link(string $file, string $label, string $icon, string $current, 
   <?= admin_link('dashboard.php', 'Dashboard', 'bi-grid-1x2', $current) ?>
 
   <div class="side-label">Kelola Konten</div>
+  <?= admin_link('komunitas-pengaturan.php', 'Profil Komunitas', 'bi-buildings', $current) ?>
   <?= admin_link('crud.php', 'Anggota', 'bi-people', $current, $entity, 'anggota') ?>
   <?= admin_link('crud.php', 'Materi', 'bi-journal-bookmark', $current, $entity, 'materi') ?>
   <?= admin_link('crud.php', 'Karya', 'bi-cpu', $current, $entity, 'karya') ?>
