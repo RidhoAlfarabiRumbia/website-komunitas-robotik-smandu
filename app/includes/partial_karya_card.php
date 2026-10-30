@@ -16,7 +16,7 @@ $kartuDikelola = Auth::isAdmin() && ($crudItemEntity ?? '') === 'karya';
         <span class="tag"><?= e($t) ?></span>
       <?php endif; endforeach; ?>
     </div>
-    <div class="work-foot"><span class="work-meta"><i class="bi bi-person"></i> <?= e($k['pembuat_nama'] ?? '') ?></span></div>
+    <div class="work-foot"><span class="work-meta"><i class="bi bi-person"></i> <span class="work-author"><?= e($k['pembuat_nama'] ?? '') ?></span></span></div>
   </div>
 </a>
 <?php if ($kartuDikelola): $itemId = (int) $k['id']; include __DIR__ . '/partial_admin_actions.php'; endif; ?>

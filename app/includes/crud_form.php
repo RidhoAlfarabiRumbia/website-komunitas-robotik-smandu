@@ -96,11 +96,19 @@ $hasWhen = false;
           </select>
           <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Tahan Ctrl / Cmd untuk memilih beberapa. Materi hanya bisa diunduh peserta pelatihan ini.</div>
         <?php elseif ($f['type'] === 'anggota_multi'): ?>
-          <select name="<?= $key ?>[]" multiple size="5">
-            <?php foreach ($anggotaOptions as $a): ?>
-              <option value="<?= (int) $a['id'] ?>" <?= in_array((int) $a['id'], $terpilihAnggota, true) ? 'selected' : '' ?>><?= e($a['nama']) ?></option>
-            <?php endforeach; ?>
-          </select>
+          <?php if ($anggotaOptions): ?>
+            <div class="peraih-check-list">
+              <?php foreach ($anggotaOptions as $a): ?>
+                <label class="peraih-check-item">
+                  <input type="checkbox" name="<?= $key ?>[]" value="<?= (int) $a['id'] ?>" <?= in_array((int) $a['id'], $terpilihAnggota, true) ? 'checked' : '' ?>>
+                  <span><?= e($a['nama']) ?></span>
+                </label>
+              <?php endforeach; ?>
+            </div>
+            <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Centang satu atau lebih anggota.</div>
+          <?php else: ?>
+            <div style="font-size:12px; color:var(--text-muted);">Belum ada data anggota.</div>
+          <?php endif; ?>
         <?php elseif ($f['type'] === 'akun_username'): ?>
           <input name="<?= $key ?>" value="<?= e($val) ?>" required autocomplete="off">
         <?php elseif ($f['type'] === 'akun_email'): ?>
@@ -144,7 +152,7 @@ $hasWhen = false;
     <?php endif; ?>
     <div style="display:flex; gap:10px; margin-top:10px;">
       <button class="btn btn-primary" type="submit"><?= $editing ? 'Simpan Perubahan' : 'Tambah Data' ?></button>
-      <a class="btn btn-outline" href="<?= e($crudBase . $qs) ?>">Batal</a>
+      <a class="btn btn-outline" href="<?= e(base_url($crudBase . $qs)) ?>">Batal</a>
     </div>
   </div>
   <?php if (isset($crudCfg['fields']['foto']) && !($crudCfg['foto_inline'] ?? false)): $valFoto = $editing['foto'] ?? ''; ?>

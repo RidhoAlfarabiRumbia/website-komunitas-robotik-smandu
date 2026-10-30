@@ -58,7 +58,7 @@ function crud_config(): array
                 'deskripsi' => ['label' => 'Deskripsi', 'type' => 'textarea'],
                 'progres' => ['label' => 'Progres', 'type' => 'select', 'options' => ['Sedang Dikerjakan','Selesai']],
                 'publikasi' => ['label' => 'Publikasi', 'type' => 'select', 'options' => ['Menunggu','Disetujui','Ditolak']],
-                'pembuat_id' => ['label' => 'Pembuat', 'type' => 'anggota_select', 'required' => true],
+                'pembuat_id' => ['label' => 'Pembuat (bisa lebih dari satu)', 'type' => 'anggota_multi', 'required' => true],
                 'teknologi' => ['label' => 'Teknologi (pisahkan koma)', 'type' => 'text'],
                 // 'link' = wajib berupa tautan http/https (lihat crud_handle.php).
                 // Tanpa ini, admin bisa menyimpan javascript: yang dieksekusi

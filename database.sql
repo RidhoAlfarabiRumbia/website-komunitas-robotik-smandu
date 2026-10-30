@@ -140,6 +140,15 @@ CREATE TABLE karya (
   INDEX idx_publikasi (publikasi, dibuat_pada)
 ) ENGINE=InnoDB;
 
+CREATE TABLE karya_pembuat (
+  karya_id INT NOT NULL,
+  anggota_id INT NOT NULL,
+  PRIMARY KEY (karya_id, anggota_id),
+  FOREIGN KEY (karya_id) REFERENCES karya(id) ON DELETE CASCADE,
+  FOREIGN KEY (anggota_id) REFERENCES anggota(id) ON DELETE CASCADE,
+  INDEX idx_karya_pembuat_anggota (anggota_id)
+) ENGINE=InnoDB;
+
 -- ---------------------------------------------------------
 -- LOMBA (PRD 8.10)
 -- ---------------------------------------------------------
@@ -354,6 +363,9 @@ INSERT INTO karya (judul, deskripsi, progres, publikasi, pembuat_id, teknologi, 
 ('Sistem Keamanan Rumah berbasis Arduino','Rancangan sistem keamanan dengan sensor gerak dan notifikasi buzzer, masih tahap perencanaan komponen.','Sedang Dikerjakan','Menunggu',3,'Arduino Uno, PIR Sensor',NULL,'assets/img/karya-elektronika.svg',NULL,'2026-09-01'),
 ('Robot Pemadam Api Mini','Robot pemadam api skala kecil dengan sensor api dan kipas pemadam, tampil di pameran STEM sekolah.','Selesai','Disetujui',1,'Arduino Uno, Sensor Api, Kipas DC',NULL,'assets/img/karya-robot.svg',NULL,'2025-09-18'),
 ('Charger Otomatis untuk Robot Line Follower','Dudukan pengisian daya otomatis untuk robot line follower.','Sedang Dikerjakan','Ditolak',5,'Modul Charging, Relay',NULL,'assets/img/karya-elektronika.svg','Dokumentasi skema rangkaian belum lengkap, mohon dilengkapi dan diajukan kembali.','2026-06-30');
+
+INSERT INTO karya_pembuat (karya_id, anggota_id) VALUES
+(1,1),(2,2),(3,6),(4,5),(5,4),(6,3),(7,1),(8,5);
 
 INSERT INTO lomba (id, nama, penyelenggara, tanggal, lokasi, status, hasil) VALUES
 (1,'KRPAI 2025 Regional Sulut-Malut','Kemendikbudristek','2025-10-05','Manado','Selesai','Juara 2'),

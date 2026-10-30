@@ -329,6 +329,8 @@ body.sidebar-open .sidebar-backdrop, body.nav-open .sidebar-backdrop{opacity:1; 
 .work-tags{display:flex; gap:6px; flex-wrap:wrap;}
 .tag{font-size:10.5px; background:var(--surface-3); color:var(--text-muted); padding:3px 8px; border-radius:var(--radius-sm);}
 .work-foot{display:flex; justify-content:space-between; align-items:center; margin-top:4px;}
+.work-foot .work-meta{min-width:0;}
+.work-author{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
 
 .list-item{display:flex; gap:14px; padding:14px 0; border-bottom:1px solid var(--border);}
 .list-item-pad{padding:14px 18px;}
@@ -580,6 +582,32 @@ tr:last-child td{border-bottom:none;}
 .detail-hero > [data-lightbox]{display:block; width:100%; height:100%;}
 .two-col{display:grid; grid-template-columns:2fr 1fr; gap:28px;}
 @media (max-width:800px){ .two-col{grid-template-columns:1fr;} }
+
+/* Detail karya: foto besar di kiri, kartu info di kanan. Di layar kecil
+   keduanya menumpuk (foto di atas). */
+.karya-detail{display:grid; grid-template-columns:minmax(0,1.45fr) minmax(0,1fr); gap:28px; align-items:stretch; margin-bottom:32px;}
+.karya-detail-media{position:relative; border-radius:var(--radius-lg); overflow:hidden; background:var(--surface-2); box-shadow:var(--card-shadow); min-height:380px;}
+.karya-detail-media > [data-lightbox]{position:absolute; inset:0; display:block; cursor:zoom-in;}
+.karya-detail-media img{position:absolute; inset:0; display:block; width:100%; height:100%; object-fit:cover;}
+.karya-detail-card{display:flex; flex-direction:column; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:28px 30px; box-shadow:var(--card-shadow);}
+.karya-detail-card h1{font-size:clamp(22px,2.4vw,28px); line-height:1.25; margin:0 0 8px;}
+.karya-detail-author{font-size:14px; font-weight:600; margin-bottom:16px;}
+.karya-detail-author a{color:var(--teal);}
+.karya-detail-author a:hover{text-decoration:underline;}
+.karya-detail-author .kelas{color:var(--text-muted); font-weight:500;}
+.karya-detail-desc{font-size:14px; line-height:1.7; color:var(--text-muted); margin:0 0 18px;}
+.karya-detail-divider{border:0; border-top:1px solid var(--border); margin:auto 0 4px;}
+.karya-detail-rows{display:flex; flex-direction:column;}
+.karya-detail-row{display:flex; justify-content:space-between; gap:16px; padding:10px 0; border-bottom:1px solid var(--border); font-size:13px;}
+.karya-detail-row:last-child{border-bottom:0; padding-bottom:0;}
+.karya-detail-row .k{color:var(--text-muted);}
+.karya-detail-row .v{text-align:right; font-weight:500;}
+@media (max-width:900px){
+  .karya-detail{grid-template-columns:minmax(0,1fr);}
+  .karya-detail-media{min-width:0; min-height:0; aspect-ratio:4/3;}
+  .karya-detail-card{min-width:0; padding:22px 20px;}
+  .karya-detail-divider{margin-top:0;}
+}
 /* Beranda anggota: section daftar ditata grid 2 kolom — tiap baris berisi
    1 section kiri + 1 section kanan, sehingga puncak section di kedua kolom
    selalu sejajar walau jumlah isinya berbeda. Section yang lebar penuh
@@ -772,6 +800,17 @@ tr:last-child td{border-bottom:none;}
 @media (max-width:520px){
   .komunitas-stats{max-width:none;}
   .komunitas-hero-actions .btn{flex:1 1 100%; justify-content:center;}
+}
+
+/* Slider hero (beranda & profil komunitas): di mode gelap, teks di dalam
+   tombol dan kartu statistik tetap putih. Token mode gelap global tidak
+   dipakai di elemen ini supaya kontras teks putih tetap terjaga. */
+.dark .welcome-hero .btn-primary,
+.dark .komunitas-hero .btn-primary,
+.dark .komunitas-hero .komunitas-stat{
+  --teal:#2896fd;
+  --teal-hover:#10508f;
+  --on-teal:#fff;
 }
 
 .feature-card{gap:0; transition:box-shadow .15s ease;}

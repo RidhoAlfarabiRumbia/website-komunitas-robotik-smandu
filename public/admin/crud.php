@@ -6,7 +6,7 @@ Auth::requireRole('admin');
 // Logika CRUD + pengumpulan data: app/includes/crud_handle.php
 // (dipakai bersama dengan halaman fitur publik).
 $crudEntitas = $_GET['entity'] ?? 'anggota';
-$crudPath = 'crud.php';
+$crudPath = 'admin/crud.php';
 $crudReferensi = true;
 include __DIR__ . '/../../app/includes/crud_handle.php';
 

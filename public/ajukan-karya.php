@@ -10,9 +10,14 @@ $form = [
     'progres' => 'Sedang Dikerjakan',
     'teknologi' => '',
     'link_demo' => '',
+    'pembuat_lain' => [],
 ];
 
 $progresOpsi = ['Sedang Dikerjakan', 'Selesai'];
+$anggotaLain = array_values(array_filter(
+    Anggota::all('nama ASC'),
+    static fn(array $a): bool => (int) $a['id'] !== (int) $anggota['id']
+));
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Csrf::verify();
@@ -23,6 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'progres' => nilai_teks($_POST, 'progres'),
         'teknologi' => nilai_teks($_POST, 'teknologi'),
         'link_demo' => nilai_teks($_POST, 'link_demo'),
+        'pembuat_lain' => array_values(array_filter(array_map('intval', (array) ($_POST['pembuat_lain'] ?? [])))),
     ];
 
     if ($form['judul'] === '') $errors[] = 'Judul karya wajib diisi.';
@@ -40,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             redirect('ajukan-karya.php');
         }
 
-        Karya::create([
+        $karyaId = Karya::create([
             'judul' => $form['judul'],
             'deskripsi' => $form['deskripsi'],
             'progres' => $form['progres'],
@@ -50,6 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'link_demo' => $form['link_demo'] ?: null,
             'foto' => $foto ?: 'assets/img/karya-robot.svg',
         ]);
+        Karya::simpanPembuat($karyaId, array_merge([(int) $anggota['id']], $form['pembuat_lain']));
 
         flash_set('success', 'Karya berhasil diajukan dan menunggu review admin.');
         redirect('profil.php');
@@ -79,6 +86,22 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
         </select>
       </div>
       <div class="field field-full"><label>Deskripsi</label><textarea name="deskripsi" rows="4" required placeholder="Jelaskan singkat karya dan cara kerjanya"><?= e($form['deskripsi']) ?></textarea></div>
+      <div class="field field-full">
+        <label>Pembuat lain (opsional)</label>
+        <?php if ($anggotaLain): ?>
+          <div class="peraih-check-list">
+            <?php foreach ($anggotaLain as $a): ?>
+              <label class="peraih-check-item">
+                <input type="checkbox" name="pembuat_lain[]" value="<?= (int) $a['id'] ?>" <?= in_array((int) $a['id'], $form['pembuat_lain'], true) ? 'checked' : '' ?>>
+                <span><?= e($a['nama']) ?></span>
+              </label>
+            <?php endforeach; ?>
+          </div>
+          <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Centang anggota lain yang ikut membuat karya ini. Kamu otomatis tercatat sebagai pembuat.</div>
+        <?php else: ?>
+          <div style="font-size:12px; color:var(--text-muted);">Belum ada anggota lain.</div>
+        <?php endif; ?>
+      </div>
       <div class="field"><label>Teknologi yang digunakan</label><input name="teknologi" maxlength="255" value="<?= e($form['teknologi']) ?>" placeholder="Contoh: Arduino, Sensor Ultrasonik"></div>
       <div class="field"><label>Tautan proyek (opsional)</label><input name="link_demo" maxlength="191" value="<?= e($form['link_demo']) ?>" placeholder="https://..."></div>
       <div class="field field-full"><label>Foto/dokumentasi (JPG/PNG/WEBP, maks 2MB)</label><input type="file" name="foto" accept=".jpg,.jpeg,.png,.webp"></div>

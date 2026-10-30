@@ -136,10 +136,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Csrf::verify();
     $errors = [];
     foreach ($crudCfg['fields'] as $key => $f) {
-        if (!empty($f['required']) && !in_array($f['type'], array_merge(['file', 'doc_file'], $akunTypes))) {
-            $val = nilai_teks($_POST, $key);
-            if ($val === '') $errors[] = e($f['label']) . ' wajib diisi.';
+        if (empty($f['required'])) continue;
+        if (in_array($f['type'], ['anggota_multi', 'pelatihan_multi'], true)) {
+            $vals = $_POST[$key] ?? null;
+            if (!is_array($vals) || !array_filter($vals, static fn($v): bool => is_scalar($v) && (int) $v > 0)) {
+                $errors[] = e($f['label']) . ' wajib diisi.';
+            }
+            continue;
         }
+        if (in_array($f['type'], array_merge(['file', 'doc_file'], $akunTypes), true)) continue;
+        $val = nilai_teks($_POST, $key);
+        if ($val === '') $errors[] = e($f['label']) . ' wajib diisi.';
     }
 
     $isAkun = $crudEntitas === 'anggota';
@@ -226,6 +233,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    $pembuatKarya = [];
+    if ($crudEntitas === 'karya') {
+        $pembuatKarya = Karya::validPembuatIds($relasiMulti['anggota']);
+        if (!$pembuatKarya) {
+            flash_set('error', 'Pembuat karya wajib dipilih minimal satu.');
+            $backAction = $postId ? 'edit&id=' . $postId : 'create';
+            redirect($crudBase . '&action=' . $backAction . $qs);
+        }
+        $data['pembuat_id'] = $pembuatKarya[0];
+    }
+
     // Validasi nilai select terhadap opsi yang dikonfigurasi (anti-tampering).
     foreach ($crudCfg['fields'] as $key => $f) {
         if ($f['type'] !== 'select' || !isset($data[$key])) continue;
@@ -257,6 +275,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $anggotaIds = array_values(array_filter(array_map('intval', (array) ($_POST['anggota_ids'] ?? []))));
             Prestasi::simpanTim((int) $savedId, $anggotaIds);
         }
+    }
+    if ($crudEntitas === 'karya') {
+        Karya::simpanPembuat((int) $savedId, $pembuatKarya);
     }
     if ($isAkun) {
         $akun = User::findByAnggota($savedId);
@@ -320,6 +341,12 @@ if ($editing) {
         $peraihManualTeks = implode(', ', $manualNames);
         if (!$terpilihAnggota && $manualNames) $peraihMode = 'manual';
     }
+    if ($crudEntitas === 'karya') {
+        $terpilihAnggota = array_values(array_filter(array_map('intval', array_column(Karya::pembuat((int) $editing['id']), 'id'))));
+        if (!$terpilihAnggota && !empty($editing['pembuat_id'])) {
+            $terpilihAnggota = [(int) $editing['pembuat_id']];
+        }
+    }
 }
 $akunUsername = '';
 $akunEmail = '';
@@ -351,9 +378,9 @@ if (!$showForm && !$refPanel && $searchCols && $q !== '') {
         unset($row);
     }
     if ($crudEntitas === 'karya') {
-        $namaAnggota = array_column($anggotaOptions, 'nama', 'id');
+        $petaPembuat = Karya::pembuatMap(array_column($rows, 'id'));
         foreach ($rows as &$row) {
-            $row['_cari_pembuat'] = $namaAnggota[(int) ($row['pembuat_id'] ?? 0)] ?? '';
+            $row['_cari_pembuat'] = $petaPembuat[(int) $row['id']] ?? '';
         }
         unset($row);
     }

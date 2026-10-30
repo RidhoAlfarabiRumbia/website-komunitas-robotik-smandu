@@ -11,7 +11,6 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
   <div class="empty">Anggota tidak ditemukan.</div>
 <?php else:
   $karyaAnggota = array_filter(Karya::byPembuat($id), fn($k) => $k['publikasi'] === 'Disetujui');
-  foreach ($karyaAnggota as &$kk) { $kk['pembuat_nama'] = $a['nama']; } unset($kk);
   $lombaAnggota = Anggota::lombaDiikuti($id);
   $prestasi = count(array_filter($lombaAnggota, fn($l) => $l['hasil'] && str_starts_with($l['hasil'], 'Juara')));
 ?>
