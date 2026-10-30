@@ -6,7 +6,7 @@ $heroData = Hero::getSliderData();
 $semuaAnggota = Anggota::all('nama ASC');
 $semuaPrestasi = Prestasi::tayang();
 $anggotaTampil = array_slice($semuaAnggota, 0, 6);
-$prestasiTampil = array_slice($semuaPrestasi, 0, 3);
+$prestasiTampil = $semuaPrestasi;
 
 $misi = array_values(array_filter(
     array_map('trim', preg_split('/\r\n|\r|\n/', $profil['komunitas_misi']) ?: []),
@@ -127,17 +127,22 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
       <a class="see-all" href="<?= base_url('prestasi.php') ?>">Lihat semua prestasi <i class="bi bi-arrow-right"></i></a>
     </div>
     <?php if ($prestasiTampil): ?>
-      <div class="grid grid-3 grid-stagger">
-        <?php foreach ($prestasiTampil as $p): ?>
-          <a href="prestasi-detail.php?id=<?= (int) $p['id'] ?>" class="work-card">
-            <span class="work-thumb" data-lightbox="<?= base_url(e($p['foto'] ?? 'assets/img/galeri-prestasi.svg')) ?>" tabindex="0" role="button" aria-label="Perbesar foto prestasi: <?= e($p['nama']) ?>"><img src="<?= base_url(e($p['foto'] ?? 'assets/img/galeri-prestasi.svg')) ?>" alt="<?= e($p['nama']) ?>" loading="lazy" decoding="async"></span>
-            <div class="work-body">
-              <span class="badge badge-amber"><i class="bi bi-trophy"></i> <?= e($p['hasil']) ?></span>
-              <div class="work-title" style="font-size:14px;"><?= e($p['nama']) ?></div>
-              <div class="work-meta"><?= e($p['lomba_nama'] ?? '-') ?> &middot; <?= tanggal_indo($p['tanggal']) ?></div>
-            </div>
-          </a>
-        <?php endforeach; ?>
+      <div class="card-carousel" data-carousel>
+        <div class="carousel-viewport">
+          <div class="carousel-track grid-stagger">
+            <?php foreach ($prestasiTampil as $p): ?>
+              <a href="prestasi-detail.php?id=<?= (int) $p['id'] ?>" class="work-card">
+                <span class="work-thumb" data-lightbox="<?= base_url(e($p['foto'] ?? 'assets/img/galeri-prestasi.svg')) ?>" tabindex="0" role="button" aria-label="Perbesar foto prestasi: <?= e($p['nama']) ?>"><img src="<?= base_url(e($p['foto'] ?? 'assets/img/galeri-prestasi.svg')) ?>" alt="<?= e($p['nama']) ?>" loading="lazy" decoding="async"></span>
+                <div class="work-body">
+                  <span class="badge badge-amber"><i class="bi bi-trophy"></i> <?= e($p['hasil']) ?></span>
+                  <div class="work-title" style="font-size:14px;"><?= e($p['nama']) ?></div>
+                  <div class="work-meta"><?= e($p['lomba_nama'] ?? '-') ?> &middot; <?= tanggal_indo($p['tanggal']) ?></div>
+                </div>
+              </a>
+            <?php endforeach; ?>
+          </div>
+        </div>
+        <?php include __DIR__ . '/../app/includes/partial_carousel_arrows.php'; ?>
       </div>
     <?php else: ?>
       <div class="card"><div class="empty">Belum ada prestasi yang tercatat.</div></div>

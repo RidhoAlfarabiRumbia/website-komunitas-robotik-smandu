@@ -163,6 +163,34 @@ bindProfileMenu();
 setTimeout(tampilkanYangSudahDilihat,1200);
 window.addEventListener('pageshow',tampilkanYangSudahDilihat);
 })();
+
+(function(){
+  var roots=document.querySelectorAll('.card-carousel[data-carousel]');
+  Array.prototype.forEach.call(roots,function(root){
+    var track=root.querySelector('.carousel-track');
+    var prev=root.querySelector('.carousel-arrow.prev');
+    var next=root.querySelector('.carousel-arrow.next');
+    if(!track||!prev||!next)return;
+    function langkah(){
+      var item=track.firstElementChild;
+      if(!item)return track.clientWidth;
+      var gaya=window.getComputedStyle(track);
+      var gap=parseFloat(gaya.columnGap||gaya.gap)||0;
+      return item.getBoundingClientRect().width+gap;
+    }
+    function perbarui(){
+      var sisa=track.scrollWidth-track.clientWidth-1;
+      var statis=sisa<=1;
+      prev.disabled=statis||track.scrollLeft<=1;
+      next.disabled=statis||track.scrollLeft>=sisa;
+    }
+    prev.addEventListener('click',function(){track.scrollBy({left:-langkah(),behavior:'smooth'});});
+    next.addEventListener('click',function(){track.scrollBy({left:langkah(),behavior:'smooth'});});
+    track.addEventListener('scroll',perbarui,{passive:true});
+    window.addEventListener('resize',perbarui);
+    perbarui();
+  });
+})();
 </script>
 </body>
 </html>

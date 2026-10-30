@@ -22,15 +22,15 @@ if ($crudAktif) {
 $heroData = Hero::getSliderData();
 
 // Konten publik (PRD 8.3)
-$galeriTerbaru = Galeri::all('tanggal DESC', 3);
+$galeriTerbaru = Galeri::all('tanggal DESC');
 $pengumumanTerbaru = Pengumuman::all('tanggal DESC', 3);
 $pelatihanTerbaru = Pelatihan::untukPengunjung(3);
-$prestasiTerbaru = Prestasi::tayang(3);
+$prestasiTerbaru = Prestasi::tayang();
 
 // Konten khusus anggota & admin
 // Karya yang sudah tayang (Disetujui) ditampilkan juga untuk tamu —
 // halaman karya.php kini juga publik.
-$karyaTerbaru = Karya::approved(3);
+$karyaTerbaru = Karya::approved();
 // Lomba & agenda kegiatan ditampilkan juga untuk tamu di beranda (ringkasan
 // 3 terbaru); halaman penuhnya (lomba.php, kegiatan.php) kini juga publik.
 $kegiatanTerbaru = Kegiatan::all('tanggal DESC', 3);
@@ -187,17 +187,22 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
       <a class="see-all" href="<?= base_url('prestasi.php') ?>">Lihat semua prestasi <i class="bi bi-arrow-right"></i></a>
     </div>
     <?php if ($prestasiTerbaru): ?>
-      <div class="grid grid-3 grid-stagger">
-        <?php foreach ($prestasiTerbaru as $p): ?>
-          <a href="prestasi-detail.php?id=<?= (int) $p['id'] ?>" class="work-card">
-            <span class="work-thumb" data-lightbox="<?= base_url(e($p['foto'] ?? 'assets/img/galeri-prestasi.svg')) ?>" tabindex="0" role="button" aria-label="Perbesar foto prestasi: <?= e($p['nama']) ?>"><img src="<?= base_url(e($p['foto'] ?? 'assets/img/galeri-prestasi.svg')) ?>" alt="<?= e($p['nama']) ?>" loading="lazy" decoding="async"></span>
-            <div class="work-body">
-              <span class="badge badge-amber"><i class="bi bi-trophy"></i> <?= e($p['hasil']) ?></span>
-              <div class="work-title" style="font-size:14px;"><?= e($p['nama']) ?></div>
-              <div class="work-meta"><?= e($p['lomba_nama'] ?? '-') ?> · <?= tanggal_indo($p['tanggal']) ?></div>
-            </div>
-          </a>
-        <?php endforeach; ?>
+      <div class="card-carousel" data-carousel>
+        <div class="carousel-viewport">
+          <div class="carousel-track grid-stagger">
+            <?php foreach ($prestasiTerbaru as $p): ?>
+              <a href="prestasi-detail.php?id=<?= (int) $p['id'] ?>" class="work-card">
+                <span class="work-thumb" data-lightbox="<?= base_url(e($p['foto'] ?? 'assets/img/galeri-prestasi.svg')) ?>" tabindex="0" role="button" aria-label="Perbesar foto prestasi: <?= e($p['nama']) ?>"><img src="<?= base_url(e($p['foto'] ?? 'assets/img/galeri-prestasi.svg')) ?>" alt="<?= e($p['nama']) ?>" loading="lazy" decoding="async"></span>
+                <div class="work-body">
+                  <span class="badge badge-amber"><i class="bi bi-trophy"></i> <?= e($p['hasil']) ?></span>
+                  <div class="work-title" style="font-size:14px;"><?= e($p['nama']) ?></div>
+                  <div class="work-meta"><?= e($p['lomba_nama'] ?? '-') ?> · <?= tanggal_indo($p['tanggal']) ?></div>
+                </div>
+              </a>
+            <?php endforeach; ?>
+          </div>
+        </div>
+        <?php include __DIR__ . '/../app/includes/partial_carousel_arrows.php'; ?>
       </div>
     <?php else: ?>
       <div class="card"><div class="empty">Belum ada prestasi tercatat.</div></div>
@@ -238,10 +243,15 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
       <a class="see-all" href="<?= base_url('karya.php') ?>">Lihat semua karya <i class="bi bi-arrow-right"></i></a>
     </div>
     <?php if ($karyaTerbaru): ?>
-      <div class="grid grid-3 grid-stagger">
-        <?php foreach ($karyaTerbaru as $k): ?>
-          <?php include __DIR__ . '/../app/includes/partial_karya_card.php'; ?>
-        <?php endforeach; ?>
+      <div class="card-carousel" data-carousel>
+        <div class="carousel-viewport">
+          <div class="carousel-track grid-stagger">
+            <?php foreach ($karyaTerbaru as $k): ?>
+              <?php include __DIR__ . '/../app/includes/partial_karya_card.php'; ?>
+            <?php endforeach; ?>
+          </div>
+        </div>
+        <?php include __DIR__ . '/../app/includes/partial_carousel_arrows.php'; ?>
       </div>
     <?php else: ?>
       <div class="card"><div class="empty">Belum ada karya yang tayang. Jadilah yang pertama!</div></div>
@@ -256,10 +266,15 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
       <a class="see-all" href="<?= base_url('galeri.php') ?>">Lihat semua galeri <i class="bi bi-arrow-right"></i></a>
     </div>
     <?php if ($galeriTerbaru): ?>
-      <div class="grid grid-3 grid-stagger">
-        <?php foreach ($galeriTerbaru as $g): ?>
-          <?php include __DIR__ . '/../app/includes/partial_galeri_card.php'; ?>
-        <?php endforeach; ?>
+      <div class="card-carousel" data-carousel>
+        <div class="carousel-viewport">
+          <div class="carousel-track grid-stagger">
+            <?php foreach ($galeriTerbaru as $g): ?>
+              <?php include __DIR__ . '/../app/includes/partial_galeri_card.php'; ?>
+            <?php endforeach; ?>
+          </div>
+        </div>
+        <?php include __DIR__ . '/../app/includes/partial_carousel_arrows.php'; ?>
       </div>
     <?php else: ?>
       <div class="card"><div class="empty">Belum ada dokumentasi galeri.</div></div>
