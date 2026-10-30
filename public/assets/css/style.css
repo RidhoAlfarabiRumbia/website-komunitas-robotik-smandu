@@ -748,7 +748,9 @@ tr:last-child td{border-bottom:none;}
 
 .komunitas-hero{position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center;
   min-height:clamp(420px,50vh,500px); margin:0 0 96px; padding:clamp(28px,3.6vw,48px);
-  border-radius:28px; background:var(--surface-3); box-shadow:var(--shadow-3);}
+  border-radius:28px; background:var(--surface-3);
+  -webkit-mask-image:-webkit-linear-gradient(#000,#000);
+  mask-image:linear-gradient(#000,#000);}
 .dark .komunitas-hero{background:#0e0e0e;}
 .komunitas-hero-copy{position:relative; z-index:2; display:flex; flex-direction:column; align-items:center;
   justify-content:center; width:100%; min-width:0; max-width:860px; text-align:center; color:#fff;}
@@ -764,6 +766,11 @@ tr:last-child td{border-bottom:none;}
 .komunitas-stat strong{font-family:var(--font-head); font-size:27px; line-height:1; color:var(--on-teal);}
 .komunitas-stat span{font-size:12.5px; line-height:1.35; color:var(--on-teal); opacity:.82;}
 .komunitas-hero-actions{display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-top:24px;}
+.komunitas-hero-copy .eyebrow{animation:heroRise .7s cubic-bezier(.22,.61,.36,1) .04s both;}
+.komunitas-hero-copy h1{animation:heroRise .7s cubic-bezier(.22,.61,.36,1) .08s both;}
+.komunitas-hero-copy p{animation:heroRise .7s cubic-bezier(.22,.61,.36,1) .32s both;}
+.komunitas-stats{animation:heroRise .7s cubic-bezier(.22,.61,.36,1) .4s both;}
+.komunitas-hero-actions{animation:heroRise .7s cubic-bezier(.22,.61,.36,1) .46s both;}
 .komunitas-hero-actions .btn-outline{background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.5); color:#fff;}
 .komunitas-hero-actions .btn-outline:hover{background:rgba(255,255,255,.22); border-color:#fff; color:#fff;}
 .komunitas-hero-media{position:absolute; inset:0; min-width:0; min-height:0; overflow:hidden;

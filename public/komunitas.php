@@ -28,6 +28,7 @@ include __DIR__ . '/../app/includes/header.php';
 include __DIR__ . '/../app/includes/navbar_anggota.php';
 ?>
 <div class="main">
+  <div class="hero-frame">
   <section class="komunitas-hero">
     <div class="komunitas-hero-media">
       <?php $sliderAdminHref = null; include __DIR__ . '/../app/includes/partial_hero_slider.php'; ?>
@@ -58,6 +59,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
       </div>
     <?php endif; ?>
   </section>
+  </div>
 
   <section class="section reveal">
     <div class="section-head"><h2>Tentang komunitas</h2></div>
