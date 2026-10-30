@@ -128,6 +128,39 @@ function bindProfileMenu(){
 }
 bindProfileMenu();
 
+/* Tombol mata untuk semua input kata sandi. Input yang sudah dibungkus
+   .password-wrap (mis. halaman masuk) dilewati agar tidak dobel. */
+(function(){
+  var inputs=document.querySelectorAll('input[type="password"]');
+  Array.prototype.forEach.call(inputs,function(input){
+    if(input.closest('.password-wrap'))return;
+    var wrap=document.createElement('div');
+    wrap.className='password-wrap';
+    input.parentNode.insertBefore(wrap,input);
+    wrap.appendChild(input);
+
+    var btn=document.createElement('button');
+    btn.type='button';
+    btn.className='password-toggle';
+    btn.setAttribute('aria-label','Tampilkan kata sandi');
+    btn.setAttribute('aria-pressed','false');
+    btn.title='Tampilkan kata sandi';
+    btn.innerHTML='<i class="bi bi-eye" aria-hidden="true"></i>';
+    wrap.appendChild(btn);
+
+    btn.addEventListener('click',function(){
+      var tampil=input.type==='password';
+      input.type=tampil?'text':'password';
+      var icon=btn.querySelector('i');
+      if(icon)icon.className='bi '+(tampil?'bi-eye-slash':'bi-eye');
+      btn.setAttribute('aria-pressed',tampil?'true':'false');
+      btn.setAttribute('aria-label',tampil?'Sembunyikan kata sandi':'Tampilkan kata sandi');
+      btn.title=tampil?'Sembunyikan kata sandi':'Tampilkan kata sandi';
+      input.focus();
+    });
+  });
+})();
+
 /* Scroll reveal — wajib gagal-aman.
    .reveal punya opacity:0 di CSS, jadi kalau observer ini tidak pernah memicu,
    area konten terlihat BLANK (hanya header & footer). Karena itu:
