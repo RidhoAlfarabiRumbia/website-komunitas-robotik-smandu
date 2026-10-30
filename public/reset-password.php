@@ -12,22 +12,19 @@ header('X-Robots-Tag: noindex, nofollow');
 $token = $_SERVER['REQUEST_METHOD'] === 'POST'
     ? nilai_teks($_POST, 'token')
     : nilai_teks($_GET, 'token');
-$errors = [];
-$reset = null;
-$akun = null;
 
-if ($token !== '') {
-    $reset = PasswordReset::cariValid(hash('sha256', $token));
-    if ($reset && !empty($reset['user_id'])) {
-        $akun = User::find((int) $reset['user_id']);
-    }
-    if (!$reset || !$akun) {
-        $reset = null;
-        $errors[] = 'Tautan reset tidak valid atau sudah kedaluwarsa. Silakan minta tautan baru.';
-    }
-} else {
-    $errors[] = 'Tautan reset tidak ditemukan. Silakan minta tautan baru.';
+if ($token === '') {
+    redirect('error.php?code=token');
 }
+
+$reset = PasswordReset::cariValid(hash('sha256', $token));
+$akun = ($reset && !empty($reset['user_id'])) ? User::find((int) $reset['user_id']) : null;
+
+if (!$reset || !$akun) {
+    redirect('error.php?code=token');
+}
+
+$errors = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $reset) {
     Csrf::verify();
@@ -52,10 +49,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $reset) {
     if (!$errors) {
         $errors[] = 'Kata sandi gagal diubah. Silakan coba lagi.';
     }
-}
-
-if ($errors && !$reset) {
-    http_response_code(400);
 }
 
 $pageTitle = 'Reset Kata Sandi';
