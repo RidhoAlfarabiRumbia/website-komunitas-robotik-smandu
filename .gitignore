@@ -30,3 +30,10 @@ Thumbs.db
 # ===== TESTING (future) =====
 .phpunit.result.cache
 coverage/
+
+# test desain di figcraft
+design/
+
+# test erd
+erd_mysql_workbench.sql
+erd_oracle_data_modeler.sql
