@@ -745,13 +745,15 @@ tr:last-child td{border-bottom:none;}
 .dark .welcome-scrim{background:radial-gradient(ellipse at 50% 48%, rgba(0,0,0,.55), rgba(0,0,0,.74) 100%),
              linear-gradient(180deg, rgba(0,0,0,.28), rgba(0,0,0,.42));}
 .welcome-copy{position:relative; z-index:2; min-width:0; max-width:860px; margin:0 auto; color:#fff;}
+.welcome-hero-admin{position:absolute; right:18px; bottom:18px; z-index:3; display:flex; justify-content:flex-end;}
+.welcome-hero-admin .chip-admin{position:static;}
 .welcome-copy .eyebrow{color:rgba(255,255,255,.84);}
 .welcome-meta{display:inline-flex; align-items:center; gap:7px; margin-top:16px; padding:6px 13px; border:1px solid rgba(255,255,255,.35); border-radius:999px; background:rgba(255,255,255,.12); color:#fff; font-size:12.5px; font-weight:600; backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);}
 .welcome-actions{display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin-top:26px;}
 .welcome-actions .btn{flex:0 1 auto; min-width:0; padding:11px 20px; font-size:14px; white-space:nowrap;}
 .welcome-hero .btn-outline{background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.5); color:#fff;}
 .welcome-hero .btn-outline:hover{background:rgba(255,255,255,.22); border-color:#fff; color:#fff;}
-@media (max-width:820px){ .welcome-hero{min-height:520px; padding:64px 20px 96px; border-radius:20px;} }
+@media (max-width:820px){ .welcome-hero{min-height:520px; padding:64px 20px 96px; border-radius:20px;} .welcome-hero-admin{right:12px; bottom:12px;} }
 
 /* Welcome hero — entrance: teks fade-up bertahap; foto fade di dalam .slide
    (bukan di .welcome-media, supaya dots/chip "Kelola Slider" tidak ikut

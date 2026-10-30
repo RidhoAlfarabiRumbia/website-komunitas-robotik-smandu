@@ -76,8 +76,13 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
   <div class="hero-frame">
   <section class="welcome-hero">
     <div class="welcome-media hero-media">
-      <?php $sliderAdminHref = $isAdmin ? '?manage=hero' : null; include __DIR__ . '/../app/includes/partial_hero_slider.php'; ?>
+      <?php $sliderAdminHref = null; include __DIR__ . '/../app/includes/partial_hero_slider.php'; ?>
     </div>
+    <?php if ($isAdmin): ?>
+      <div class="welcome-hero-admin">
+        <a class="chip-admin" href="<?= e($crudQs) ?>" title="Kelola gambar slider"><i class="bi bi-pencil-square"></i> Kelola Slider</a>
+      </div>
+    <?php endif; ?>
     <div class="welcome-scrim" aria-hidden="true"></div>
     <div class="welcome-copy">
       <?php
