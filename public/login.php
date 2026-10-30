@@ -60,10 +60,35 @@ include __DIR__ . '/../app/includes/header.php';
           <input type="text" name="username" id="usernameField" required>
         </div>
 
-        <div class="field"><label>Kata sandi</label><input type="password" name="password" required></div>
+        <div class="field">
+          <label for="passwordField">Kata sandi</label>
+          <div class="password-wrap">
+            <input type="password" name="password" id="passwordField" required>
+            <button type="button" class="password-toggle" id="togglePassword" aria-label="Tampilkan kata sandi" aria-pressed="false" title="Tampilkan kata sandi">
+              <i class="bi bi-eye" id="passwordIcon"></i>
+            </button>
+          </div>
+        </div>
         <p style="font-size:12.5px; margin:-4px 0 14px; text-align:right;"><a href="<?= base_url('lupa-password.php') ?>" style="color:var(--teal); text-decoration:none;">Lupa password?</a></p>
         <button class="btn btn-primary" style="width:100%;" type="submit">Masuk ke portal <i class="bi bi-arrow-right"></i></button>
       </form>
+      <script>
+      (function () {
+        var input = document.getElementById('passwordField');
+        var toggle = document.getElementById('togglePassword');
+        var icon = document.getElementById('passwordIcon');
+        if (!input || !toggle || !icon) return;
+        toggle.addEventListener('click', function () {
+          var tampil = input.type === 'password';
+          input.type = tampil ? 'text' : 'password';
+          icon.className = 'bi ' + (tampil ? 'bi-eye-slash' : 'bi-eye');
+          toggle.setAttribute('aria-pressed', tampil ? 'true' : 'false');
+          toggle.setAttribute('aria-label', tampil ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi');
+          toggle.title = tampil ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi';
+          input.focus();
+        });
+      })();
+      </script>
       <p style="font-size:12px; margin-top:12px;"><a href="<?= base_url('beranda.php') ?>" style="color:var(--teal); text-decoration:none;"><i class="bi bi-arrow-left"></i> Kembali ke Beranda</a></p>
     </div>
   </div>

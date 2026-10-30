@@ -424,6 +424,11 @@ tr:last-child td{border-bottom:none;}
 .field input::placeholder, .field textarea::placeholder{color:var(--text-dim);}
 .field select:focus, .field input:focus, .field textarea:focus{border-color:var(--teal); box-shadow:0 0 0 3px var(--ring); outline:none;}
 .field :focus-visible{outline:none;}
+.password-wrap{position:relative;}
+.password-wrap input{padding-right:44px;}
+.password-toggle{position:absolute; top:50%; right:6px; transform:translateY(-50%); display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; padding:0; border:0; border-radius:var(--radius-sm); background:transparent; color:var(--text-muted); cursor:pointer;}
+.password-toggle:hover{color:var(--teal); background:var(--surface-2);}
+.password-toggle:focus-visible{outline:2px solid var(--teal); outline-offset:1px;}
 .field input[type=checkbox], .field input[type=radio]{width:auto; padding:0; border:0; box-shadow:none; background:none;}
 .field label.peraih-check-item{display:flex; align-items:center; gap:8px; font-size:13px; font-weight:400; color:var(--text); margin-bottom:0; cursor:pointer;}
 .peraih-mode-row label{margin-bottom:0;}
