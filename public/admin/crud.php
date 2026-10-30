@@ -29,7 +29,7 @@ include __DIR__ . '/../../app/includes/header.php';
 </div></div>
 <div class="admin-body">
   <?php include __DIR__ . '/_sidebar.php'; ?>
-  <div class="admin-main">
+  <div class="admin-main admin-main-crud">
     <div class="page-head">
       <?php if ($refPanel): ?>
         <div><div class="eyebrow">MATERI</div><h1>Kelola Referensi Belajar</h1><p class="desc">Tautan sumber belajar yang tampil di halaman Materi untuk seluruh anggota.</p></div>

@@ -52,7 +52,9 @@
   --radius-sm:10px; --radius-md:14px; --radius-lg:18px;
   --font-head:'Poppins',sans-serif; --font-body:'Inter',sans-serif;
 
-  /* Lebar bungkus konten — dipakai topbar, .main, dan footer supaya sejajar */
+  /* Lebar bungkus konten — dipakai topbar, .main, dan footer supaya sejajar.
+     Di layar lebar bungkus ikut melebar (maks 2200px) agar tidak menyisakan
+     ruang kosong besar di kanan. */
   --wrap:1320px;
 
   /* Latar halaman: lapisan gradasi glow (pola titik sudah dihapus) */
@@ -121,6 +123,11 @@
     radial-gradient(1300px 800px at 50% 125%, var(--glow-bottom), transparent 74%);
   --bg-scene-size:auto, auto, auto, auto;
   --bg-scene-repeat:no-repeat, no-repeat, no-repeat, no-repeat;
+}
+
+/* Layar lebar (1440px ke atas): bungkus konten melebar proporsional. */
+@media (min-width:1440px){
+  :root{--wrap:min(2200px, 96vw);}
 }
 
 /* Mode gelap: matikan bayangan yang ditulis langsung (bukan lewat token).
@@ -224,6 +231,8 @@ img{max-width:100%; display:block;}
 .profile-menu-logout{color:var(--red);}
 .profile-menu-logout:hover{color:var(--red); background:var(--red-dim);}
 .main{max-width:var(--wrap); margin:0 auto; padding:30px 24px 72px;}
+.main > .card{margin-left:auto; margin-right:auto;}
+.form-wrap{margin-left:auto; margin-right:auto;}
 
 .admin-body{display:flex; width:100%; align-items:stretch;}
 .sidebar{width:220px; flex-shrink:0; background:var(--surface); border-right:1px solid var(--border); min-height:calc(100vh - 60px); padding:18px 12px;}
@@ -237,7 +246,7 @@ body.sidebar-open .sidebar-backdrop, body.nav-open .sidebar-backdrop{opacity:1; 
 .side-link:hover{background:var(--surface-2); color:var(--text);}
 .side-link.active{background:var(--teal-dim); color:var(--teal); font-weight:600;}
 .badge-count{margin-left:auto; background:var(--amber); color:var(--on-amber); font-size:10.5px; font-weight:700; padding:1px 6px; border-radius:20px;}
-.admin-main{flex:1; padding:32px 36px 72px; max-width:1080px;}
+.admin-main{flex:1; padding:32px 36px 72px; max-width:none; min-width:0;}
 
 /* Components */
 .page-head{display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:26px; gap:16px; flex-wrap:wrap;}
@@ -574,10 +583,13 @@ tr:last-child td{border-bottom:none;}
 @media (prefers-reduced-motion: reduce){
   .notif-modal, .notif-card{animation:none;}
 }
-/* Form CRUD: kartu isian di kiri, panel gambar di luar kartu (sebelah kanan) */
-.crud-form{display:flex; gap:18px; align-items:flex-start; flex-wrap:wrap; max-width:978px;}
-.crud-form-main{flex:1 1 440px; min-width:0; max-width:680px;}
+/* Form CRUD: kartu isian mengisi lebar yang tersedia, panel gambar di kanan */
+.crud-form{display:flex; gap:18px; align-items:flex-start; flex-wrap:wrap; width:100%; max-width:none;}
+.crud-form-main{flex:1 1 440px; min-width:0; max-width:none;}
 .crud-form-foto{flex:0 0 280px; width:280px;}
+@media (min-width:641px){
+  .crud-form-main .form-grid{grid-template-columns:repeat(auto-fit,minmax(280px,1fr));}
+}
 @media (max-width:860px){
   .crud-form-main{max-width:none;}
   .crud-form-foto{flex:1 1 100%; width:100%;}
@@ -1004,6 +1016,19 @@ h1, h2, h3, h4, p, span, a, div {
 @keyframes slideLeft {
   from { opacity: 0; transform: translateX(16px); }
   to { opacity: 1; transform: translateX(0); }
+}
+
+/* 6b. Admin CRUD — entrance seperti kartu login */
+.admin-main-crud {
+  animation: slideUp .6s cubic-bezier(.22,.61,.36,1) backwards;
+}
+.admin-main-crud > .page-head {
+  animation: slideRight .55s cubic-bezier(.22,.61,.36,1) .05s backwards;
+}
+.admin-main-crud > .crud-form,
+.admin-main-crud > .table-wrap,
+.admin-main-crud > .card {
+  animation: slideLeft .55s cubic-bezier(.22,.61,.36,1) .15s backwards;
 }
 
 /* 7. Hero section entrance */
