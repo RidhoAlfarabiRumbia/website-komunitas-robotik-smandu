@@ -53,6 +53,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'komunitas_lokasi' => nilai_teks($_POST, 'komunitas_lokasi'),
         'komunitas_email' => nilai_teks($_POST, 'komunitas_email'),
         'komunitas_instagram' => nilai_teks($_POST, 'komunitas_instagram'),
+        'komunitas_facebook' => nilai_teks($_POST, 'komunitas_facebook'),
+        'komunitas_youtube' => nilai_teks($_POST, 'komunitas_youtube'),
+        'komunitas_tiktok' => nilai_teks($_POST, 'komunitas_tiktok'),
         'pembina_nama' => nilai_teks($_POST, 'pembina_nama'),
         'pembina_jabatan' => nilai_teks($_POST, 'pembina_jabatan'),
         'pembina_bio' => trim(nilai_teks($_POST, 'pembina_bio', false)),
@@ -85,13 +88,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($data['komunitas_email'] !== '' && strlen($data['komunitas_email']) > 120) {
         $errors[] = 'Email maksimal 120 karakter.';
     }
-    if (strlen($data['komunitas_instagram']) > 255) {
-        $errors[] = 'URL Instagram maksimal 255 karakter.';
-    } elseif ($data['komunitas_instagram'] !== '') {
-        $skema = strtolower((string) parse_url($data['komunitas_instagram'], PHP_URL_SCHEME));
-        if (filter_var($data['komunitas_instagram'], FILTER_VALIDATE_URL) === false
-            || !in_array($skema, ['http', 'https'], true)) {
-            $errors[] = 'URL Instagram harus berupa alamat http atau https yang valid.';
+    $sosialFields = [
+        'komunitas_instagram' => 'Instagram',
+        'komunitas_facebook' => 'Facebook',
+        'komunitas_youtube' => 'YouTube',
+        'komunitas_tiktok' => 'TikTok',
+    ];
+    foreach ($sosialFields as $kunci => $label) {
+        if (strlen($data[$kunci]) > 255) {
+            $errors[] = 'URL ' . $label . ' maksimal 255 karakter.';
+        } elseif ($data[$kunci] !== '' && !url_http_aman($data[$kunci])) {
+            $errors[] = 'URL ' . $label . ' harus berupa alamat http atau https yang valid.';
         }
     }
     if (strlen($data['pembina_nama']) > 120) {
@@ -158,7 +165,7 @@ include __DIR__ . '/../../app/includes/header.php';
       <div>
         <div class="eyebrow">KOMUNITAS</div>
         <h1>Profil Komunitas</h1>
-        <p class="desc">Kelola identitas, visi dan misi, kontak, serta profil pembina yang tampil di halaman publik.</p>
+        <p class="desc">Kelola identitas, visi dan misi, kontak, media sosial, serta profil pembina yang tampil di halaman publik.</p>
       </div>
       <a class="btn btn-outline" href="<?= base_url('komunitas.php') ?>" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right"></i> Lihat Halaman</a>
     </div>
@@ -214,10 +221,27 @@ include __DIR__ . '/../../app/includes/header.php';
           <input type="email" id="komunitas_email" name="komunitas_email" maxlength="120" value="<?= e($form['komunitas_email']) ?>" placeholder="nama@contoh.com">
         </div>
       </div>
+      <h3 style="font-size:14px; margin:20px 0 12px;"><i class="bi bi-share"></i> Media Sosial</h3>
+      <div class="grid grid-2">
+        <div class="field">
+          <label for="komunitas_instagram">URL Instagram</label>
+          <input type="url" id="komunitas_instagram" name="komunitas_instagram" maxlength="255" value="<?= e($form['komunitas_instagram']) ?>" placeholder="https://www.instagram.com/...">
+        </div>
+        <div class="field">
+          <label for="komunitas_facebook">URL Facebook</label>
+          <input type="url" id="komunitas_facebook" name="komunitas_facebook" maxlength="255" value="<?= e($form['komunitas_facebook']) ?>" placeholder="https://www.facebook.com/...">
+        </div>
+        <div class="field">
+          <label for="komunitas_youtube">URL YouTube</label>
+          <input type="url" id="komunitas_youtube" name="komunitas_youtube" maxlength="255" value="<?= e($form['komunitas_youtube']) ?>" placeholder="https://www.youtube.com/@...">
+        </div>
+        <div class="field">
+          <label for="komunitas_tiktok">URL TikTok</label>
+          <input type="url" id="komunitas_tiktok" name="komunitas_tiktok" maxlength="255" value="<?= e($form['komunitas_tiktok']) ?>" placeholder="https://www.tiktok.com/@...">
+        </div>
+      </div>
       <div class="field">
-        <label for="komunitas_instagram">URL Instagram</label>
-        <input type="url" id="komunitas_instagram" name="komunitas_instagram" maxlength="255" value="<?= e($form['komunitas_instagram']) ?>" placeholder="https://www.instagram.com/...">
-        <span class="hint">Gunakan alamat lengkap yang diawali https://.</span>
+        <span class="hint">Kosongkan tautan yang tidak digunakan. Hanya tautan http/https yang tampil di footer.</span>
       </div>
 
       <h3 style="font-size:14px; margin:20px 0 12px;"><i class="bi bi-person-badge"></i> Pembina</h3>

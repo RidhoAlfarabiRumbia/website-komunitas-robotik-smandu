@@ -168,6 +168,7 @@ Modul khusus untuk mendokumentasikan pencapaian/kejuaraan komunitas sebagai bukt
 •	Menampilkan tiga prestasi terbaru dalam kartu bergambar seperti di beranda, statistik anggota, serta preview anggota dengan tautan ke halaman lengkap.
 •	Menampilkan satu profil pembina berisi nama, jabatan, bio, dan foto.
 •	Admin dapat mengelola seluruh teks dan foto pembina melalui halaman pengaturan; data disimpan di tabel pengaturan tanpa perubahan skema.
+•	Admin juga dapat mengelola tautan Instagram, Facebook, YouTube, dan TikTok; tautan yang valid dan tidak kosong ditampilkan di footer.
 9. Perbedaan Galeri, Karya, Prestasi, dan Profil
 Fitur	Fokus
 Galeri	Apa yang dilakukan komunitas? Dokumentasi umum perjalanan dan aktivitas (latihan, workshop, demo, proses proyek).

@@ -4,6 +4,18 @@
 $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
 $sedangAdmin = str_ends_with($scriptDir, '/admin');
 if (!$sedangAdmin):
+    $profilFooter = komunitas_profil();
+    $sosialFooter = [];
+    foreach ([
+        'Instagram' => ['bi-instagram', $profilFooter['komunitas_instagram']],
+        'Facebook' => ['bi-facebook', $profilFooter['komunitas_facebook']],
+        'YouTube' => ['bi-youtube', $profilFooter['komunitas_youtube']],
+        'TikTok' => ['bi-tiktok', $profilFooter['komunitas_tiktok']],
+    ] as $label => [$icon, $url]) {
+        if (url_http_aman($url)) {
+            $sosialFooter[] = ['label' => $label, 'icon' => $icon, 'url' => $url];
+        }
+    }
 ?>
 <footer class="footer">
   <div class="footer-main">
@@ -37,12 +49,13 @@ if (!$sedangAdmin):
         <li><a href="<?= base_url('daftar.php') ?>">Daftar Anggota</a></li>
         <li><a href="<?= base_url('login.php') ?>">Masuk Portal</a></li>
       </ul>
-      <div class="footer-social">
-        <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
-        <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
-        <a href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
-        <a href="https://www.tiktok.com/" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><i class="bi bi-tiktok"></i></a>
-      </div>
+      <?php if ($sosialFooter): ?>
+        <div class="footer-social">
+          <?php foreach ($sosialFooter as $sosial): ?>
+            <a href="<?= e($sosial['url']) ?>" target="_blank" rel="noopener noreferrer" aria-label="<?= e($sosial['label']) ?>"><i class="bi <?= e($sosial['icon']) ?>"></i></a>
+          <?php endforeach; ?>
+        </div>
+      <?php endif; ?>
     </div>
   </div>
   <div class="footer-bottom">

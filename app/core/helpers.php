@@ -544,6 +544,19 @@ function pakta_template(): array
 }
 
 /**
+ * Validasi URL yang aman ditampilkan sebagai tautan (http/https saja).
+ */
+function url_http_aman(?string $url): bool
+{
+    $url = trim((string) $url);
+    if ($url === '' || filter_var($url, FILTER_VALIDATE_URL) === false) {
+        return false;
+    }
+    $skema = strtolower((string) parse_url($url, PHP_URL_SCHEME));
+    return in_array($skema, ['http', 'https'], true);
+}
+
+/**
  * Profil komunitas yang dapat diedit admin (PRD 8.16).
  * Disimpan di tabel pengaturan agar tidak menambah tabel baru.
  */
@@ -563,16 +576,19 @@ function komunitas_profil(): array
         'komunitas_lokasi' => '',
         'komunitas_email' => '',
         'komunitas_instagram' => '',
+        'komunitas_facebook' => '',
+        'komunitas_youtube' => '',
+        'komunitas_tiktok' => '',
         'pembina_nama' => '',
         'pembina_jabatan' => '',
         'pembina_bio' => '',
         'pembina_foto' => '',
     ];
 
+    $tersimpan = Pengaturan::nilaiBanyak(array_keys($default));
     $profil = [];
     foreach ($default as $kunci => $nilai) {
-        $tersimpan = Pengaturan::nilai($kunci);
-        $profil[$kunci] = $tersimpan !== null ? trim($tersimpan) : $nilai;
+        $profil[$kunci] = array_key_exists($kunci, $tersimpan) ? trim($tersimpan[$kunci]) : $nilai;
     }
 
     return $profil;
