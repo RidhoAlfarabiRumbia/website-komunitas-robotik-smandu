@@ -1018,18 +1018,41 @@ h1, h2, h3, h4, p, span, a, div {
   to { opacity: 1; transform: translateX(0); }
 }
 
-/* 6b. Admin CRUD — entrance seperti kartu login */
-.admin-main-crud {
-  animation: slideUp .6s cubic-bezier(.22,.61,.36,1) backwards;
+/* 6b. Entrance halaman admin — seragam seperti dashboard:
+   isi memudar bertahap, lalu kartu di dalam grid naik satu per satu.
+   Transform hanya dipakai pada isi grid (bukan .admin-body) supaya sidebar
+   tetap fixed dan scrollbar tidak berkedip. */
+.admin-main > *:not(.sidebar) {
+  animation: fadeInAdmin .55s cubic-bezier(.22,.61,.36,1) backwards;
 }
-.admin-main-crud > .page-head {
-  animation: slideRight .55s cubic-bezier(.22,.61,.36,1) .05s backwards;
+.admin-main > *:not(.sidebar):nth-child(1) { animation-delay: .05s; }
+.admin-main > *:not(.sidebar):nth-child(2) { animation-delay: .1s; }
+.admin-main > *:not(.sidebar):nth-child(3) { animation-delay: .15s; }
+.admin-main > *:not(.sidebar):nth-child(4) { animation-delay: .2s; }
+.admin-main > *:not(.sidebar):nth-child(5) { animation-delay: .25s; }
+.admin-main > *:not(.sidebar):nth-child(6) { animation-delay: .3s; }
+
+.admin-main .card,
+.admin-main .table-wrap,
+.admin-main .alert,
+.admin-main .admin-form {
+  animation: fadeInAdmin .5s cubic-bezier(.22,.61,.36,1) both;
 }
-.admin-main-crud > .crud-form,
-.admin-main-crud > .table-wrap,
-.admin-main-crud > .card {
-  animation: slideLeft .55s cubic-bezier(.22,.61,.36,1) .15s backwards;
+
+.admin-main .grid > * {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: staggerUp .5s cubic-bezier(.22,.61,.36,1) both;
 }
+.admin-main .grid > *:nth-child(1) { animation-delay: .05s; }
+.admin-main .grid > *:nth-child(2) { animation-delay: .12s; }
+.admin-main .grid > *:nth-child(3) { animation-delay: .19s; }
+.admin-main .grid > *:nth-child(4) { animation-delay: .26s; }
+.admin-main .grid > *:nth-child(5) { animation-delay: .33s; }
+.admin-main .grid > *:nth-child(6) { animation-delay: .4s; }
+.admin-main .grid > *:nth-child(7) { animation-delay: .47s; }
+.admin-main .grid > *:nth-child(8) { animation-delay: .54s; }
+.admin-main .grid > *:nth-child(9) { animation-delay: .61s; }
 
 /* 7. Hero section entrance */
 .hero-left {
@@ -1136,6 +1159,12 @@ a:focus-visible, button:focus-visible {
 @keyframes staggerUp {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* 19. Card anggota — slide up dari bawah (tanpa margin) */
+.grid-stagger .card,
+.card-wrap .card {
+  animation: slideUp .5s cubic-bezier(.22,.61,.36,1) both;
 }
 
 /* Reduced motion */
