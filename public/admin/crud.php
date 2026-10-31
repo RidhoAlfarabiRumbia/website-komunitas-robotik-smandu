@@ -60,7 +60,7 @@ include __DIR__ . '/../../app/includes/header.php';
             <?php foreach ($rows as $row): ?>
               <tr>
                 <?php if ($listHasFoto): ?>
-                  <td><?php if (!empty($row['foto'])): ?><img src="<?= base_url(e($row['foto'])) ?>" alt="" loading="lazy" decoding="async" style="display:block; width:96px; height:96px; object-fit:cover; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface-2);"><?php else: ?><span style="color:var(--text-dim); font-size:12px;">-</span><?php endif; ?></td>
+                  <td><?php if (!empty($row['foto'])): ?><img src="<?= base_url(e($row['foto'])) ?>" alt="" loading="lazy" decoding="async" style="display:block; width:96px; height:96px; object-fit:cover; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface-2);"><?php else: ?><img src="<?= base_url('assets/img/avatar-1.svg') ?>" alt="" style="display:block; width:96px; height:96px; object-fit:cover; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface-2);"><?php endif; ?></td>
                 <?php endif; ?>
                 <?php foreach ($crudCfg['list'] as $col): ?>
                   <td><?php
