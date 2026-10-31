@@ -120,7 +120,6 @@ include __DIR__ . '/../../app/includes/header.php';
       </div>
       <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i> Cari</button>
       <?php if ($q !== ''): ?><a class="btn btn-outline" href="?id=<?= (int) $id ?>&status=<?= e($filterStatus) ?>">Reset</a><?php endif; ?>
-      <span class="cari-meta"><?= $q === '' ? e($totalPeserta . ' data') : e('Menampilkan ' . count($peserta) . ' dari ' . $totalPeserta . ' data') ?></span>
     </form>
 
     <?php if ($pelatihan): ?>
@@ -133,6 +132,8 @@ include __DIR__ . '/../../app/includes/header.php';
         </div>
       </div>
     <?php endif; ?>
+
+    <div class="cari-info"><?= $q === '' ? e($totalPeserta . ' data') : e('Menampilkan ' . count($peserta) . ' dari ' . $totalPeserta . ' data') ?></div>
 
     <div class="table-wrap">
       <table>

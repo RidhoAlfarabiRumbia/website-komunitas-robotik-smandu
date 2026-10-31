@@ -58,3 +58,18 @@ $current = basename($_SERVER['SCRIPT_NAME']);
     </div>
   </div>
 </div>
+<script>
+(function(){
+  var topbar = document.querySelector('.topbar');
+  if (!topbar) return;
+  function syncTopbar(){
+    document.documentElement.style.setProperty('--topbar-h', topbar.getBoundingClientRect().height + 'px');
+  }
+  syncTopbar();
+  if (window.ResizeObserver) {
+    new ResizeObserver(syncTopbar).observe(topbar);
+  } else {
+    window.addEventListener('resize', syncTopbar);
+  }
+})();
+</script>

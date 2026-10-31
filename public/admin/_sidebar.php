@@ -60,3 +60,50 @@ function admin_link(string $file, string $label, string $icon, string $current, 
   <div class="side-label">Akun</div>
   <?= admin_link('profil.php', 'Profil &amp; Kata Sandi', 'bi-person-gear', $current) ?>
 </div>
+<script>
+(function(){
+  var sidebar = document.getElementById('adminSidebar');
+  if (!sidebar) return;
+  var key = 'adminSidebarScroll';
+  function simpan(){
+    try { sessionStorage.setItem(key, String(sidebar.scrollTop)); } catch(e) {}
+  }
+  function pulihkan(){
+    var tersimpan = null;
+    try { tersimpan = sessionStorage.getItem(key); } catch(e) {}
+    if (tersimpan !== null) {
+      var posisi = parseInt(tersimpan, 10);
+      if (!isNaN(posisi)) sidebar.scrollTop = posisi;
+    }
+    var aktif = sidebar.querySelector('.side-link.active');
+    if (!aktif) return;
+    var kotak = sidebar.getBoundingClientRect();
+    var tautan = aktif.getBoundingClientRect();
+    var atas = tautan.top - kotak.top + sidebar.scrollTop;
+    var bawah = atas + tautan.height;
+    var jeda = 12;
+    if (atas < sidebar.scrollTop + jeda) {
+      sidebar.scrollTop = Math.max(0, atas - jeda);
+    } else if (bawah > sidebar.scrollTop + sidebar.clientHeight - jeda) {
+      sidebar.scrollTop = bawah - sidebar.clientHeight + jeda;
+    }
+  }
+  sidebar.addEventListener('click', function(e){
+    if (e.target && e.target.closest('a')) simpan();
+  }, true);
+  window.addEventListener('pagehide', simpan);
+  pulihkan();
+
+  var topbar = document.querySelector('.topbar');
+  if (!topbar) return;
+  function syncTopbar(){
+    document.documentElement.style.setProperty('--topbar-h', topbar.getBoundingClientRect().height + 'px');
+  }
+  syncTopbar();
+  if (window.ResizeObserver) {
+    new ResizeObserver(syncTopbar).observe(topbar);
+  } else {
+    window.addEventListener('resize', syncTopbar);
+  }
+})();
+</script>

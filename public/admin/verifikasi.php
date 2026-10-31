@@ -233,9 +233,9 @@ include __DIR__ . '/../../app/includes/header.php';
           </div>
           <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i> Cari</button>
           <?php if ($q !== ''): ?><a class="btn btn-outline" href="?status=<?= e($filter) ?>">Reset</a><?php endif; ?>
-          <span class="cari-meta"><?= $q === '' ? e($totalDaftar . ' data') : e('Menampilkan ' . count($daftar) . ' dari ' . $totalDaftar . ' data') ?></span>
         </div>
       </form>
+      <div class="cari-info"><?= $q === '' ? e($totalDaftar . ' data') : e('Menampilkan ' . count($daftar) . ' dari ' . $totalDaftar . ' data') ?></div>
 
       <div class="table-wrap">
         <table>

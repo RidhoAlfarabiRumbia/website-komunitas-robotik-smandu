@@ -69,7 +69,7 @@ include __DIR__ . '/../../app/includes/header.php';
       <?php if ($pending): foreach ($pending as $k): ?>
         <div class="list-item list-item-pad">
           <div class="list-thumb"><img src="<?= base_url(e($k['foto'] ?? 'assets/img/karya-robot.svg')) ?>" alt="" loading="lazy" decoding="async"></div>
-          <div class="grow"><div class="ttl"><?= e($k['judul']) ?></div><div class="meta">oleh <?= e($k['pembuat_nama']) ?> Â· <?= tanggal_indo($k['dibuat_pada']) ?></div></div>
+          <div class="grow"><div class="ttl"><?= e($k['judul']) ?></div><div class="meta">oleh <?= e($k['pembuat_nama']) ?> · <?= tanggal_indo($k['dibuat_pada']) ?></div></div>
           <a class="btn btn-outline btn-sm" href="moderasi.php">Review</a>
         </div>
       <?php endforeach; else: ?>
