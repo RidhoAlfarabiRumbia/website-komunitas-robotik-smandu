@@ -18,10 +18,39 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
   <div class="empty"><i class="bi bi-exclamation-circle" style="font-size:24px;"></i><p>Karya tidak ditemukan.</p></div>
 <?php else:
   $teknologi = array_filter(array_map('trim', explode(',', $k['teknologi'] ?? '')));
+  $foto = !empty($k['foto']) ? (string) $k['foto'] : 'assets/img/karya-robot.svg';
+  $fotoRel = ltrim(str_replace('\\', '/', $foto), '/');
+  if ($fotoRel === '' || str_contains($fotoRel, '..')) {
+      $fotoRel = 'assets/img/karya-robot.svg';
+  }
+  $pakaiDefault = $fotoRel === 'assets/img/karya-robot.svg';
+  $fotoAbs = realpath(__DIR__ . '/../public/' . $fotoRel);
+  $fotoW = 0;
+  $fotoH = 0;
+  if ($fotoAbs && is_file($fotoAbs)) {
+      $info = @getimagesize($fotoAbs);
+      if ($info) {
+          $fotoW = (int) $info[0];
+          $fotoH = (int) $info[1];
+      } elseif (strtolower(pathinfo($fotoAbs, PATHINFO_EXTENSION)) === 'svg') {
+          $svg = @file_get_contents($fotoAbs);
+          if ($svg && preg_match('/viewBox\s*=\s*["\']\s*[-\d.]+\s+[-\d.]+\s+([\d.]+)\s+([\d.]+)\s*["\']/i', $svg, $m)) {
+              $fotoW = (int) round((float) $m[1]);
+              $fotoH = (int) round((float) $m[2]);
+          }
+      }
+  }
+  if ($fotoW <= 0 || $fotoH <= 0) {
+      $fotoW = 400;
+      $fotoH = 300;
+  }
+  $lebarMaks = (int) round(min($fotoW, 520 * $fotoW / $fotoH));
+  $mediaClass = 'karya-detail-media' . ($pakaiDefault ? ' is-default' : '');
+  $mediaStyle = $pakaiDefault ? '' : ' style="width:min(100%, ' . $lebarMaks . 'px); aspect-ratio: ' . $fotoW . ' / ' . $fotoH . ';"';
 ?>
-  <div class="karya-detail">
-    <div class="karya-detail-media">
-      <span data-lightbox="<?= base_url(e($k['foto'] ?? 'assets/img/karya-robot.svg')) ?>" tabindex="0" role="button" aria-label="Perbesar foto karya"><img src="<?= base_url(e($k['foto'] ?? 'assets/img/karya-robot.svg')) ?>" alt="<?= e($k['judul']) ?>" fetchpriority="high" decoding="async"></span>
+  <div class="karya-detail<?= $pakaiDefault ? ' karya-detail-default' : '' ?>">
+    <div class="<?= $mediaClass ?>"<?= $mediaStyle ?>>
+      <span data-lightbox="<?= base_url(e($fotoRel)) ?>" tabindex="0" role="button" aria-label="Perbesar foto karya"><img src="<?= base_url(e($fotoRel)) ?>" alt="<?= e($k['judul']) ?>" fetchpriority="high" decoding="async"></span>
     </div>
     <div class="karya-detail-card">
       <h1><?= e($k['judul']) ?></h1>

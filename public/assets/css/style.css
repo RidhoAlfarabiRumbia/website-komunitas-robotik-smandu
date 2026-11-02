@@ -661,10 +661,14 @@ tr:last-child td{border-bottom:none;}
 
 /* Detail karya: foto besar di kiri, kartu info di kanan. Di layar kecil
    keduanya menumpuk (foto di atas). */
-.karya-detail{display:grid; grid-template-columns:minmax(0,1.45fr) minmax(0,1fr); gap:28px; align-items:stretch; margin-bottom:32px;}
-.karya-detail-media{position:relative; border-radius:var(--radius-lg); overflow:hidden; background:var(--surface-2); box-shadow:var(--card-shadow); min-height:380px;}
-.karya-detail-media > [data-lightbox]{position:absolute; inset:0; display:block; cursor:zoom-in;}
-.karya-detail-media img{position:absolute; inset:0; display:block; width:100%; height:100%; object-fit:cover;}
+.karya-detail{display:grid; grid-template-columns:minmax(0,1.45fr) minmax(0,1fr); gap:28px; align-items:start; margin-bottom:32px;}
+.karya-detail-media{position:relative; justify-self:center; max-width:100%; border-radius:var(--radius-lg); overflow:hidden; background:var(--surface-2); box-shadow:var(--card-shadow);}
+.karya-detail-media > [data-lightbox]{display:block; width:100%; height:100%; line-height:0; cursor:zoom-in;}
+.karya-detail-media img{display:block; width:100%; height:100%; object-fit:contain;}
+.karya-detail-default{align-items:stretch;}
+.karya-detail-media.is-default{justify-self:stretch; min-height:380px;}
+.karya-detail-media.is-default > [data-lightbox]{position:absolute; inset:0; width:auto; height:auto;}
+.karya-detail-media.is-default img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover;}
 .karya-detail-card{display:flex; flex-direction:column; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:28px 30px; box-shadow:var(--card-shadow);}
 .karya-detail-card h1{font-size:clamp(22px,2.4vw,28px); line-height:1.25; margin:0 0 8px;}
 .karya-detail-author{font-size:14px; font-weight:600; margin-bottom:16px;}
@@ -680,7 +684,8 @@ tr:last-child td{border-bottom:none;}
 .karya-detail-row .v{text-align:right; font-weight:500;}
 @media (max-width:900px){
   .karya-detail{grid-template-columns:minmax(0,1fr);}
-  .karya-detail-media{min-width:0; min-height:0; aspect-ratio:4/3;}
+  .karya-detail-media{min-width:0;}
+  .karya-detail-media.is-default{min-height:0; aspect-ratio:4/3;}
   .karya-detail-card{min-width:0; padding:22px 20px;}
   .karya-detail-divider{margin-top:0;}
 }
