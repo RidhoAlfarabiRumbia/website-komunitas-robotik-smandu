@@ -338,7 +338,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
   <?php $secPelatihan = ob_get_clean(); ?>
 
   <?php ob_start(); ?>
-  <section class="section reveal home-span">
+  <section class="section reveal">
     <div class="section-head">
       <h2>Pengumuman terbaru</h2>
       <a class="see-all" href="<?= base_url('pengumuman.php') ?>">Lihat semua pengumuman <i class="bi bi-arrow-right"></i></a>
@@ -367,20 +367,20 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
    kiri + 1 section kanan, jadi puncak kedua kolom selalu sejajar walau tinggi
    isi section berbeda. Section lebar penuh tetap berada di luar grid. -->
   <div class="home-cols">
+    <?= $secPengumuman ?>
+    <?= $secAgenda ?>
     <?= $secPelatihan ?>
     <?= $secLomba ?>
-    <?= $secPrestasi ?>
-    <?= $secAgenda ?>
-    <?= $secPengumuman ?>
   </div>
-  <?= $secGaleri ?>
+  <?= $secPrestasi ?>
   <?= $secKarya ?>
+  <?= $secGaleri ?>
   <?php else: ?>
   <!-- Urutan beranda tamu -->
   <?= $secPrestasi ?>
   <?= $secLomba ?>
-  <?= $secKarya ?>
   <?= $secGaleri ?>
+  <?= $secKarya ?>
   <?= $secAgenda ?>
   <?= $secPelatihan ?>
   <?= $secPengumuman ?>
@@ -411,12 +411,13 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
   </section>
   <?php endif; ?>
 
+  <?php if (!$isAnggota): ?>
   <section class="section reveal">
     <div class="section-head">
-      <h2><?= $isAnggota ? 'Cara Berkarya' : 'Cara bergabung' ?></h2>
+      <h2>Cara bergabung</h2>
     </div>
     <div class="steps">
-      <?php foreach (($isAnggota ? $langkahAnggota : $langkah) as $i => [$judul, $deskripsi]): ?>
+      <?php foreach ($langkah as $i => [$judul, $deskripsi]): ?>
         <div class="step">
           <div class="n"><?= $i + 1 ?></div>
           <div class="f-ttl"><?= e($judul) ?></div>
@@ -425,6 +426,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
       <?php endforeach; ?>
     </div>
   </section>
+  <?php endif; ?>
 
   <section class="cta-panel reveal">
     <div>

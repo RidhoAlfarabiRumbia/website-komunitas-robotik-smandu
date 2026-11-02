@@ -13,12 +13,12 @@ include __DIR__ . '/../app/includes/header.php';
 include __DIR__ . '/../app/includes/navbar_anggota.php';
 ?>
 <div class="main">
+  <a class="back-link" href="karya.php"><i class="bi bi-arrow-left"></i> Kembali ke daftar karya</a>
 <?php if (!$k): ?>
   <div class="empty"><i class="bi bi-exclamation-circle" style="font-size:24px;"></i><p>Karya tidak ditemukan.</p></div>
 <?php else:
   $teknologi = array_filter(array_map('trim', explode(',', $k['teknologi'] ?? '')));
 ?>
-  <div class="breadcrumb"><a href="karya.php">Karya</a> / <?= e($k['judul']) ?></div>
   <div class="karya-detail">
     <div class="karya-detail-media">
       <span data-lightbox="<?= base_url(e($k['foto'] ?? 'assets/img/karya-robot.svg')) ?>" tabindex="0" role="button" aria-label="Perbesar foto karya"><img src="<?= base_url(e($k['foto'] ?? 'assets/img/karya-robot.svg')) ?>" alt="<?= e($k['judul']) ?>" fetchpriority="high" decoding="async"></span>

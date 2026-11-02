@@ -689,7 +689,7 @@ tr:last-child td{border-bottom:none;}
    selalu sejajar walau jumlah isinya berbeda. Section yang lebar penuh
    (class .home-span) membentang 2 kolom; Galeri/Karya/Materi tetap di luar
    grid. Jarak antar section memakai gap grid, bukan margin bawah. */
-.home-cols{display:grid; grid-template-columns:1fr 1fr; gap:34px 26px; align-items:start; margin-bottom:38px;}
+.home-cols{display:grid; grid-template-columns:1fr 1fr; gap:34px 40px; align-items:start; margin-bottom:38px;}
 .home-cols > .section{margin-bottom:0;}
 .home-cols > .home-span{grid-column:1 / -1;}
 /* Judul section di dalam kolom rata kiri dengan tautan "lihat semua" di kanan
