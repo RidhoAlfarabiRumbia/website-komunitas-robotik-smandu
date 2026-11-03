@@ -76,3 +76,31 @@ require_once __DIR__ . '/../config/env.php';
 require_once __DIR__ . '/../config/autoload.php';
 require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/../core/helpers.php';
+
+function arahkan_error_server(): void
+{
+    if (PHP_SAPI === 'cli' || headers_sent()) {
+        return;
+    }
+    if (basename($_SERVER['SCRIPT_NAME'] ?? '') === 'error.php') {
+        return;
+    }
+    header('Location: ' . base_url('error.php?code=500'), true, 302);
+}
+
+set_exception_handler(static function (Throwable $e): void {
+    error_log('[UNCAUGHT] ' . get_class($e) . ': ' . $e->getMessage()
+        . ' in ' . $e->getFile() . ':' . $e->getLine());
+    arahkan_error_server();
+    exit;
+});
+
+register_shutdown_function(static function (): void {
+    $error = error_get_last();
+    if ($error === null
+        || !in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR], true)) {
+        return;
+    }
+    error_log('[FATAL] ' . $error['message'] . ' in ' . $error['file'] . ':' . $error['line']);
+    arahkan_error_server();
+});

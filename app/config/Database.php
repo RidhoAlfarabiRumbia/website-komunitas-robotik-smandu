@@ -22,6 +22,11 @@ class Database
                 // Jangan pernah menampilkan detail koneksi ke pengunjung:
                 // pesan PDO membocorkan host, nama database, dan nama user.
                 error_log('[DB] ' . $e->getMessage());
+                $diHalamanError = basename($_SERVER['SCRIPT_NAME'] ?? '') === 'error.php';
+                if (PHP_SAPI !== 'cli' && !headers_sent() && !$diHalamanError && function_exists('base_url')) {
+                    header('Location: ' . base_url('error.php?code=503'), true, 302);
+                    exit;
+                }
                 http_response_code(503);
                 die('Layanan sedang tidak tersedia. Silakan coba beberapa saat lagi.');
             }

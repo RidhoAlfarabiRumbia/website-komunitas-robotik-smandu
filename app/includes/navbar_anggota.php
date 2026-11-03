@@ -2,13 +2,13 @@
 $navItems = [
     'beranda.php' => 'Beranda',
     'komunitas.php' => 'Komunitas',
+    'prestasi.php' => 'Prestasi',
     'karya.php' => 'Karya',
     'galeri.php' => 'Galeri',
     'pelatihan.php' => 'Pelatihan',
     'lomba.php' => 'Lomba',
     'kegiatan.php' => 'Kegiatan',
     'materi.php' => 'Materi',
-    'prestasi.php' => 'Prestasi',
     'pengumuman.php' => 'Pengumuman',
     'anggota.php' => 'Anggota',
 ];

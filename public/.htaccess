@@ -15,6 +15,16 @@
 Options -Indexes
 
 # =====================================================================
+# Halaman error aplikasi: path yang tidak ada diarahkan ke error.php.
+# =====================================================================
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ error.php?code=404 [L,QSA]
+</IfModule>
+
+# =====================================================================
 # Performa: kompresi transport (mod_deflate)
 # =====================================================================
 <IfModule mod_deflate.c>
