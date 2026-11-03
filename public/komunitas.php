@@ -132,7 +132,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
           <div class="carousel-track grid-stagger">
             <?php foreach ($prestasiTampil as $p): ?>
               <a href="prestasi-detail.php?id=<?= (int) $p['id'] ?>" class="work-card">
-                <span class="work-thumb" data-lightbox="<?= base_url(e($p['foto'] ?? 'assets/img/galeri-prestasi.svg')) ?>" tabindex="0" role="button" aria-label="Perbesar foto prestasi: <?= e($p['nama']) ?>"><img src="<?= base_url(e($p['foto'] ?? 'assets/img/galeri-prestasi.svg')) ?>" alt="<?= e($p['nama']) ?>" loading="lazy" decoding="async"></span>
+                <span class="work-thumb" data-lightbox="<?= base_url(e(!empty($p['foto']) ? $p['foto'] : 'assets/img/galeri-prestasi.svg')) ?>" tabindex="0" role="button" aria-label="Perbesar foto prestasi: <?= e($p['nama']) ?>"><img src="<?= base_url(e(!empty($p['foto']) ? $p['foto'] : 'assets/img/galeri-prestasi.svg')) ?>" alt="<?= e($p['nama']) ?>" loading="lazy" decoding="async"></span>
                 <div class="work-body">
                   <span class="badge badge-amber"><i class="bi bi-trophy"></i> <?= e($p['hasil']) ?></span>
                   <div class="work-title" style="font-size:14px;"><?= e($p['nama']) ?></div>

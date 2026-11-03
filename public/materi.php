@@ -95,7 +95,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
     <div class="empty">Belum ada materi pembelajaran.</div>
   <?php endif; ?>
 
-  <div class="section-head" id="referensi" style="margin-top:38px; scroll-margin-top:86px;">
+  <div class="section-head" id="referensi" style="margin-top:38px; scroll-margin-top:86px; justify-content:flex-start; text-align:left; align-items:flex-start;">
     <div>
       <div class="eyebrow">BELAJAR</div>
       <h2>Referensi Belajar</h2>

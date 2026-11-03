@@ -3,10 +3,11 @@
 // Tombol Ubah/Hapus hanya muncul untuk admin, dan hanya pada halaman yang
 // memang mengelola galeri di sana ($crudItemEntity = 'galeri').
 $kartuDikelola = Auth::isAdmin() && ($crudItemEntity ?? '') === 'galeri';
+$fotoGaleri = !empty($g['foto']) ? (string) $g['foto'] : 'assets/img/galeri-latihan.svg';
 ?>
 <div class="card-wrap">
 <div class="work-card">
-  <span class="work-thumb" data-lightbox="<?= base_url(e($g['foto'] ?? 'assets/img/galeri-latihan.svg')) ?>" tabindex="0" role="button" aria-label="Perbesar foto galeri: <?= e($g['judul']) ?>"><img src="<?= base_url(e($g['foto'] ?? 'assets/img/galeri-latihan.svg')) ?>" alt="<?= e($g['judul']) ?>" loading="lazy" decoding="async"></span>
+  <span class="work-thumb" data-lightbox="<?= base_url(e($fotoGaleri)) ?>" tabindex="0" role="button" aria-label="Perbesar foto galeri: <?= e($g['judul']) ?>"><img src="<?= base_url(e($fotoGaleri)) ?>" alt="<?= e($g['judul']) ?>" loading="lazy" decoding="async"></span>
   <div class="work-body">
     <span class="badge badge-blue"><?= e($g['kategori']) ?></span>
     <div class="work-title" style="font-size:14px;"><?= e($g['judul']) ?></div>

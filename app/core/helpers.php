@@ -17,6 +17,48 @@ function trunc(?string $text, int $length = 80, string $suffix = '...'): string
     return strlen($text) > $length ? substr($text, 0, $length) . $suffix : $text;
 }
 
+function foto_relatif(?string $foto, string $default = 'assets/img/karya-robot.svg'): string
+{
+    $foto = trim((string) $foto);
+    if ($foto === '') return $default;
+    $rel = ltrim(str_replace('\\', '/', $foto), '/');
+    if ($rel === '' || str_contains($rel, '..')) return $default;
+    return $rel;
+}
+
+function foto_dimensi(string $rel): array
+{
+    $abs = realpath(dirname(__DIR__, 2) . '/public/' . ltrim(str_replace('\\', '/', $rel), '/'));
+    $w = 0;
+    $h = 0;
+    if ($abs && is_file($abs)) {
+        $info = @getimagesize($abs);
+        if ($info) {
+            $w = (int) $info[0];
+            $h = (int) $info[1];
+        } elseif (strtolower(pathinfo($abs, PATHINFO_EXTENSION)) === 'svg') {
+            $svg = @file_get_contents($abs);
+            if ($svg && preg_match('/viewBox\s*=\s*["\']\s*[-\d.]+\s+[-\d.]+\s+([\d.]+)\s+([\d.]+)\s*["\']/i', $svg, $m)) {
+                $w = (int) round((float) $m[1]);
+                $h = (int) round((float) $m[2]);
+            } elseif ($svg && preg_match('/<svg\b[^>]*\bwidth\s*=\s*["\']([\d.]+)(?:px)?["\'][^>]*\bheight\s*=\s*["\']([\d.]+)(?:px)?["\']/i', $svg, $m)) {
+                $w = (int) round((float) $m[1]);
+                $h = (int) round((float) $m[2]);
+            }
+        }
+    }
+    if ($w <= 0 || $h <= 0) {
+        return [400, 300];
+    }
+    return [$w, $h];
+}
+
+function lebar_foto_maks(int $w, int $h, int $tinggiMaks = 520): int
+{
+    if ($w <= 0 || $h <= 0) return 400;
+    return (int) round(min($w, $tinggiMaks * $w / $h));
+}
+
 function redirect(string $path): void
 {
     header('Location: ' . base_url($path));

@@ -3,6 +3,18 @@ require_once __DIR__ . '/../app/includes/bootstrap.php';
 
 $id = nilai_int($_GET, 'id');
 $k = Karya::detail($id);
+
+$kembaliHref = base_url('karya.php');
+$kembaliLabel = 'Kembali ke daftar karya';
+if (($_GET['dari'] ?? '') === 'moderasi' && Auth::isAdmin()) {
+    $statusKembali = nilai_teks($_GET, 'status') ?: 'Menunggu';
+    if (!in_array($statusKembali, ['Menunggu', 'Disetujui', 'Ditolak'], true)) {
+        $statusKembali = 'Menunggu';
+    }
+    $qKembali = cari_kunci($_GET['q'] ?? '');
+    $kembaliHref = base_url('admin/moderasi.php?status=' . urlencode($statusKembali) . cari_qs($qKembali));
+    $kembaliLabel = 'Kembali ke moderasi';
+}
 // Karya yang belum tayang hanya boleh dilihat admin atau pembuatnya sendiri
 // (Karya::bolehDilihat); pengunjung umum dan anggota lain hanya Disetujui.
 if (!Karya::bolehDilihat($k, Auth::anggotaId(), Auth::isAdmin())) {
@@ -13,38 +25,15 @@ include __DIR__ . '/../app/includes/header.php';
 include __DIR__ . '/../app/includes/navbar_anggota.php';
 ?>
 <div class="main">
-  <a class="back-link" href="karya.php"><i class="bi bi-arrow-left"></i> Kembali ke daftar karya</a>
+  <a class="back-link" href="<?= e($kembaliHref) ?>"><i class="bi bi-arrow-left"></i> <?= e($kembaliLabel) ?></a>
 <?php if (!$k): ?>
   <div class="empty"><i class="bi bi-exclamation-circle" style="font-size:24px;"></i><p>Karya tidak ditemukan.</p></div>
 <?php else:
   $teknologi = array_filter(array_map('trim', explode(',', $k['teknologi'] ?? '')));
-  $foto = !empty($k['foto']) ? (string) $k['foto'] : 'assets/img/karya-robot.svg';
-  $fotoRel = ltrim(str_replace('\\', '/', $foto), '/');
-  if ($fotoRel === '' || str_contains($fotoRel, '..')) {
-      $fotoRel = 'assets/img/karya-robot.svg';
-  }
+  $fotoRel = foto_relatif($k['foto'] ?? null, 'assets/img/karya-robot.svg');
   $pakaiDefault = $fotoRel === 'assets/img/karya-robot.svg';
-  $fotoAbs = realpath(__DIR__ . '/../public/' . $fotoRel);
-  $fotoW = 0;
-  $fotoH = 0;
-  if ($fotoAbs && is_file($fotoAbs)) {
-      $info = @getimagesize($fotoAbs);
-      if ($info) {
-          $fotoW = (int) $info[0];
-          $fotoH = (int) $info[1];
-      } elseif (strtolower(pathinfo($fotoAbs, PATHINFO_EXTENSION)) === 'svg') {
-          $svg = @file_get_contents($fotoAbs);
-          if ($svg && preg_match('/viewBox\s*=\s*["\']\s*[-\d.]+\s+[-\d.]+\s+([\d.]+)\s+([\d.]+)\s*["\']/i', $svg, $m)) {
-              $fotoW = (int) round((float) $m[1]);
-              $fotoH = (int) round((float) $m[2]);
-          }
-      }
-  }
-  if ($fotoW <= 0 || $fotoH <= 0) {
-      $fotoW = 400;
-      $fotoH = 300;
-  }
-  $lebarMaks = (int) round(min($fotoW, 520 * $fotoW / $fotoH));
+  [$fotoW, $fotoH] = foto_dimensi($fotoRel);
+  $lebarMaks = lebar_foto_maks($fotoW, $fotoH);
   $mediaClass = 'karya-detail-media' . ($pakaiDefault ? ' is-default' : '');
   $mediaStyle = $pakaiDefault ? '' : ' style="width:min(100%, ' . $lebarMaks . 'px); aspect-ratio: ' . $fotoW . ' / ' . $fotoH . ';"';
 ?>

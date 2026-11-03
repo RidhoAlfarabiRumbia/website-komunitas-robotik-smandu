@@ -136,7 +136,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
 
   <div class="card" style="display:flex; gap:20px; align-items:center; margin-bottom:28px; flex-wrap:wrap;">
     <button type="button" class="avatar-btn" id="fotoProfilTrigger" aria-label="Ubah foto profil" aria-haspopup="dialog" aria-controls="fotoProfilModal">
-      <span class="avatar" style="width:64px; height:64px;"><img src="<?= base_url(e($u['foto'] ?? 'assets/img/avatar-1.svg')) ?>" alt="Foto profil <?= e($u['nama']) ?>"></span>
+      <span class="avatar" style="width:64px; height:64px;"><img src="<?= base_url(e(!empty($u['foto']) ? $u['foto'] : 'assets/img/avatar-1.svg')) ?>" alt="Foto profil <?= e($u['nama']) ?>"></span>
       <span class="avatar-badge" aria-hidden="true"><i class="bi bi-camera"></i></span>
     </button>
     <div style="flex:1; min-width:200px;">
@@ -165,7 +165,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
   <div class="table-wrap">
     <?php if ($karyaSaya): foreach ($karyaSaya as $k): ?>
       <div class="list-item list-item-pad">
-        <div class="list-thumb"><img src="<?= base_url(e($k['foto'] ?? 'assets/img/karya-robot.svg')) ?>" alt="" loading="lazy" decoding="async"></div>
+        <div class="list-thumb"><img src="<?= base_url(e(!empty($k['foto']) ? $k['foto'] : 'assets/img/karya-robot.svg')) ?>" alt="" loading="lazy" decoding="async"></div>
         <div class="grow">
           <a href="karya-detail.php?id=<?= (int) $k['id'] ?>" class="ttl"><?= e($k['judul']) ?></a>
           <div class="meta">Diajukan <?= tanggal_indo($k['dibuat_pada']) ?></div>
@@ -298,7 +298,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
     <button type="button" class="foto-close" id="fotoProfilClose" aria-label="Tutup pengaturan foto profil"><i class="bi bi-x-lg"></i></button>
     <div class="foto-head">
       <div class="foto-avatar">
-        <img id="fotoProfilPreview" src="<?= base_url(e($u['foto'] ?? 'assets/img/avatar-1.svg')) ?>" data-current-src="<?= base_url(e($u['foto'] ?? 'assets/img/avatar-1.svg')) ?>" alt="Foto profil saat ini">
+        <img id="fotoProfilPreview" src="<?= base_url(e(!empty($u['foto']) ? $u['foto'] : 'assets/img/avatar-1.svg')) ?>" data-current-src="<?= base_url(e(!empty($u['foto']) ? $u['foto'] : 'assets/img/avatar-1.svg')) ?>" alt="Foto profil saat ini">
       </div>
       <h2 id="fotoProfilJudul">Foto Profil</h2>
       <p class="foto-desc"><?= empty($u['foto']) ? 'Belum ada foto profil. Pilih foto untuk mulai.' : 'Pilih foto baru untuk mengganti foto profil saat ini.' ?></p>

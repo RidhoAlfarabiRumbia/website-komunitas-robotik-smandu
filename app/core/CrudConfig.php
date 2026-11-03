@@ -25,6 +25,7 @@ function crud_config(): array
             ],
             'list' => ['nama', 'kelas', 'username', 'akun_email'],
             'search' => ['nama', 'kelas', 'kontak', 'deskripsi', '_cari_username', '_cari_email'],
+            'foto_default' => 'assets/img/avatar-1.svg',
         ],
         'materi' => [
             'label' => 'Materi', 'model' => Materi::class,
@@ -68,12 +69,13 @@ function crud_config(): array
             ],
             'list' => ['judul', 'progres', 'publikasi'],
             'search' => ['judul', 'deskripsi', 'teknologi', '_cari_pembuat'],
+            'foto_default' => 'assets/img/karya-robot.svg',
         ],
         'galeri' => [
             'label' => 'Galeri', 'model' => Galeri::class,
             'fields' => [
                 'judul' => ['label' => 'Judul', 'type' => 'text', 'required' => true],
-                'kategori' => ['label' => 'Kategori', 'type' => 'select', 'options' => ['Latihan','Workshop','Lomba','Prestasi','Pameran','Demo Robot','Proses Proyek']],
+                'kategori' => ['label' => 'Kategori', 'type' => 'select', 'options' => ['Latihan','Workshop','Lomba','Prestasi','Pameran','Demo Robot','Proses Proyek','Lainnya']],
                 'deskripsi' => ['label' => 'Deskripsi', 'type' => 'textarea'],
                 'tanggal' => ['label' => 'Tanggal', 'type' => 'date', 'required' => true],
                 'foto' => ['label' => 'Foto', 'type' => 'file', 'subfolder' => 'galeri'],
@@ -81,6 +83,7 @@ function crud_config(): array
             ],
             'list' => ['judul', 'kategori', 'tanggal'],
             'search' => ['judul', 'kategori', 'deskripsi'],
+            'foto_default' => 'assets/img/galeri-latihan.svg',
             // Foto dirender di dalam kartu form utama (lebar penuh), bukan
             // panel terpisah di kanan — lihat crud.php.
             'foto_inline' => true,
@@ -94,6 +97,7 @@ function crud_config(): array
             // Slider hanya berisi foto: tidak ada kolom teks, jadi kotak
             // pencarian disembunyikan (lihat crud.php, $cfg['search']).
             'search' => [],
+            'foto_default' => 'assets/img/hero-illustration.svg',
             // Slider hanya punya 1 field (foto), jadi foto dirender di dalam
             // kartu utama — bukan panel terpisah di kanan (lihat crud.php).
             'foto_inline' => true,
@@ -173,6 +177,7 @@ function crud_config(): array
             'list' => ['nama', 'lomba_nama', 'tingkat', 'hasil', 'tanggal', 'status'],
             'search' => ['nama', 'lomba_teks', 'lomba_nama', 'hasil', 'deskripsi'],
             'column_labels' => ['lomba_nama' => 'Lomba'],
+            'foto_default' => 'assets/img/galeri-prestasi.svg',
         ],
     ];
 }

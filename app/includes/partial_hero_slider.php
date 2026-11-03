@@ -8,7 +8,7 @@ $sliderAdminHref = $sliderAdminHref ?? null;
   <div class="slider">
     <?php foreach ($heroSlides as $i => $h): ?>
       <?php
-        $foto = $h['img'] ?? 'assets/img/hero-illustration.svg';
+        $foto = !empty($h['img']) ? (string) $h['img'] : 'assets/img/hero-illustration.svg';
         $fotoKiri = $h['kiri'] ?? $foto;
         $fotoKanan = $h['kanan'] ?? $foto;
         if ($i > 0) continue;
@@ -21,22 +21,19 @@ $sliderAdminHref = $sliderAdminHref ?? null;
         </span>
       </div>
     <?php endforeach; ?>
-    <?php if ($sliderAdminHref || $nSlides > 1): ?>
+    <?php if ($nSlides > 1): ?>
       <div class="dots">
-        <?php if ($sliderAdminHref): ?>
-          <a class="chip-admin" href="<?= e($sliderAdminHref) ?>" title="Kelola gambar slider"><i class="bi bi-gear"></i> Kelola Slider</a>
-        <?php endif; ?>
-        <?php if ($nSlides > 1): ?>
-          <?php for ($i = 0; $i < $nSlides; $i++): ?><button type="button" class="<?= $i === 0 ? 'active' : '' ?>" aria-label="Ke slide <?= $i + 1 ?>"></button><?php endfor; ?>
-        <?php endif; ?>
+        <?php for ($i = 0; $i < $nSlides; $i++): ?><button type="button" class="<?= $i === 0 ? 'active' : '' ?>" aria-label="Ke slide <?= $i + 1 ?>"></button><?php endfor; ?>
       </div>
     <?php endif; ?>
   </div>
 <?php else: ?>
   <div class="hero-illustration"><img src="<?= base_url('assets/img/hero-illustration.svg') ?>" alt="Ilustrasi robot"></div>
 <?php endif; ?>
-<?php if ($sliderAdminHref && !$heroSlides): ?>
-  <a class="chip-admin" href="<?= e($sliderAdminHref) ?>" title="Kelola gambar slider"><i class="bi bi-gear"></i> Kelola Slider</a>
+<?php if ($sliderAdminHref): ?>
+  <div class="welcome-hero-admin">
+    <a class="chip-admin" href="<?= e($sliderAdminHref) ?>" title="Kelola gambar slider"><i class="bi bi-pencil-square"></i> Kelola Slider</a>
+  </div>
 <?php endif; ?>
 <?php if (!empty($heroTunda)): ?>
 <script type="application/json" id="hero-slides-data"><?= json_encode(['total' => $nSlides, 'slides' => $heroTunda], JSON_HEX_TAG | JSON_HEX_AMP) ?></script>

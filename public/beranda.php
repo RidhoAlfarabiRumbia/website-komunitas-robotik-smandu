@@ -6,19 +6,6 @@ $isAnggota = Auth::role() === 'anggota';
 // Admin juga melihat konten anggota di beranda (PRD 7: seluruh menu anggota).
 $kontenAnggota = $isAnggota || $isAdmin;
 
-// ---- Mode kelola admin: tambah / ubah / sembunyikan gambar slider beranda ----
-$crudEntitas = 'hero';
-$crudItemEntity = 'hero';                           // tombol Ubah/Hapus di tiap slide
-$crudQs = '?manage=hero';
-$crudAktif = $isAdmin && (($_GET['manage'] ?? $_POST['manage'] ?? '') === $crudEntitas);
-$crudForm = false;
-if ($crudAktif) {
-    $crudPath = 'beranda.php';
-    $crudParam = 'manage';
-    include __DIR__ . '/../app/includes/crud_handle.php';
-    $crudForm = $showForm;
-}
-
 $heroData = Hero::getSliderData();
 
 // Konten publik (PRD 8.3)
@@ -76,13 +63,8 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
   <div class="hero-frame">
   <section class="welcome-hero">
     <div class="welcome-media hero-media">
-      <?php $sliderAdminHref = null; include __DIR__ . '/../app/includes/partial_hero_slider.php'; ?>
+      <?php $sliderAdminHref = $isAdmin ? base_url('admin/crud.php?entity=hero') : null; include __DIR__ . '/../app/includes/partial_hero_slider.php'; ?>
     </div>
-    <?php if ($isAdmin): ?>
-      <div class="welcome-hero-admin">
-        <a class="chip-admin" href="<?= e($crudQs) ?>" title="Kelola gambar slider"><i class="bi bi-pencil-square"></i> Kelola Slider</a>
-      </div>
-    <?php endif; ?>
     <div class="welcome-scrim" aria-hidden="true"></div>
     <div class="welcome-copy">
       <?php
@@ -115,53 +97,6 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
       </div>
     </section>
   </div>
-
-  <?php if ($crudAktif): ?>
-    <?php if ($msg = flash_get()): ?><div class="alert <?= flash_alert_class($msg['type']) ?>"><?= e($msg['text']) ?></div><?php endif; ?>
-    <section class="section">
-      <div class="section-head">
-        <div>
-          <div class="eyebrow">KELOLA</div>
-          <h2><?= $crudForm ? ($editing ? 'Ubah' : 'Tambah') . ' Gambar Slider' : 'Gambar Slider Beranda' ?></h2>
-          <p class="desc">Gambar slider yang tampil di bagian atas beranda. Slide yang disembunyikan tidak muncul untuk pengunjung.</p>
-        </div>
-        <?php if (!$crudForm): ?>
-          <a class="btn btn-primary" href="?manage=hero&amp;action=create"><i class="bi bi-plus-circle"></i> Tambah Gambar</a>
-        <?php endif; ?>
-      </div>
-
-      <?php if ($crudForm): ?>
-        <?php include __DIR__ . '/../app/includes/crud_form.php'; ?>
-      <?php elseif ($rows): ?>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th style="width:140px;">Gambar</th><th>Status</th><th style="width:150px;">Aksi</th></tr></thead>
-            <tbody>
-              <?php foreach ($rows as $row): $tampil = ($row['status'] ?? '') === 'Tampil'; ?>
-                <tr>
-                  <td><img src="<?= base_url(e($row['foto'] ?? 'assets/img/hero-illustration.svg')) ?>" alt="" loading="lazy" decoding="async" style="display:block; width:120px; height:68px; object-fit:cover; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface-2);"></td>
-                  <td><span class="badge <?= $tampil ? 'badge-teal' : 'badge-muted' ?>"><?= $tampil ? 'Tampil' : 'Disembunyikan' ?></span></td>
-                  <td>
-                    <div class="row-actions">
-                      <form method="post" action="<?= e($crudQs) ?>&amp;action=toggle_status&amp;id=<?= (int) $row['id'] ?>" style="display:flex;">
-                        <?= Csrf::field() ?>
-                        <button type="submit" class="icon-btn<?= $tampil ? ' is-on' : '' ?>" title="<?= $tampil ? 'Sembunyikan dari beranda' : 'Tampilkan di beranda' ?>">
-                          <i class="bi <?= $tampil ? 'bi-eye' : 'bi-eye-slash' ?>"></i>
-                        </button>
-                      </form>
-                      <?php $itemId = (int) $row['id']; include __DIR__ . '/../app/includes/partial_admin_actions.php'; ?>
-                    </div>
-                  </td>
-                </tr>
-              <?php endforeach; ?>
-            </tbody>
-          </table>
-        </div>
-      <?php else: ?>
-        <div class="empty">Belum ada gambar slider. Klik "Tambah Gambar" untuk mengunggah.</div>
-      <?php endif; ?>
-    </section>
-  <?php endif; ?>
 
   <?php if (!$isAnggota): ?>
   <section class="section reveal">
@@ -197,7 +132,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
           <div class="carousel-track grid-stagger">
             <?php foreach ($prestasiTerbaru as $p): ?>
               <a href="prestasi-detail.php?id=<?= (int) $p['id'] ?>" class="work-card">
-                <span class="work-thumb" data-lightbox="<?= base_url(e($p['foto'] ?? 'assets/img/galeri-prestasi.svg')) ?>" tabindex="0" role="button" aria-label="Perbesar foto prestasi: <?= e($p['nama']) ?>"><img src="<?= base_url(e($p['foto'] ?? 'assets/img/galeri-prestasi.svg')) ?>" alt="<?= e($p['nama']) ?>" loading="lazy" decoding="async"></span>
+                <span class="work-thumb" data-lightbox="<?= base_url(e(!empty($p['foto']) ? $p['foto'] : 'assets/img/galeri-prestasi.svg')) ?>" tabindex="0" role="button" aria-label="Perbesar foto prestasi: <?= e($p['nama']) ?>"><img src="<?= base_url(e(!empty($p['foto']) ? $p['foto'] : 'assets/img/galeri-prestasi.svg')) ?>" alt="<?= e($p['nama']) ?>" loading="lazy" decoding="async"></span>
                 <div class="work-body">
                   <span class="badge badge-amber"><i class="bi bi-trophy"></i> <?= e($p['hasil']) ?></span>
                   <div class="work-title" style="font-size:14px;"><?= e($p['nama']) ?></div>
