@@ -17,6 +17,43 @@ function trunc(?string $text, int $length = 80, string $suffix = '...'): string
     return strlen($text) > $length ? substr($text, 0, $length) . $suffix : $text;
 }
 
+/**
+ * Escape teks lalu ubah URL http/https menjadi tautan yang dapat diklik.
+ */
+function linkify(?string $teks): string
+{
+    $teks = $teks ?? '';
+    $bagian = preg_split('~(https?://[^\s<>"\']+)~i', $teks, -1, PREG_SPLIT_DELIM_CAPTURE);
+    if ($bagian === false) {
+        return e($teks);
+    }
+
+    $hasil = '';
+    foreach ($bagian as $i => $potongan) {
+        if ($i % 2 === 0) {
+            $hasil .= e($potongan);
+            continue;
+        }
+
+        $url = $potongan;
+        $akhir = '';
+        while ($url !== '' && str_contains('.,;:!?', substr($url, -1))) {
+            $akhir = substr($url, -1) . $akhir;
+            $url = substr($url, 0, -1);
+        }
+
+        $skema = strtolower((string) parse_url($url, PHP_URL_SCHEME));
+        if ($url === '' || filter_var($url, FILTER_VALIDATE_URL) === false || !in_array($skema, ['http', 'https'], true)) {
+            $hasil .= e($potongan);
+            continue;
+        }
+
+        $hasil .= '<a href="' . e($url) . '" style="color:var(--blue);" target="_blank" rel="noopener noreferrer">' . e($url) . '</a>' . e($akhir);
+    }
+
+    return $hasil;
+}
+
 function foto_relatif(?string $foto, string $default = 'assets/img/karya-robot.svg'): string
 {
     $foto = trim((string) $foto);

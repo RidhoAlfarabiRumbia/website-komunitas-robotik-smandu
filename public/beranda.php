@@ -31,11 +31,11 @@ $materiTerbaru = $kontenAnggota
 $fitur = [
     ['bi-people', 'teal', 'Profil Komunitas', 'Kenali cerita, visi, misi, pembina, dan anggota komunitas robotik.', 'komunitas.php', 'Lihat Profil'],
     ['bi-mortarboard', 'teal', 'Pelatihan & Workshop', 'Jadwal pelatihan terjadwal dengan mode daring/luring dan persetujuan peserta.', 'pelatihan.php', 'Lihat Pelatihan'],
-    ['bi-award', 'amber', 'Prestasi Anggota', 'Jeak juara dan penghargaan yang dicapai anggota komunitas.', 'prestasi.php', 'Lihat Prestasi'],
+    ['bi-award', 'amber', 'Prestasi Anggota', 'Jejak juara dan penghargaan yang dicapai anggota komunitas.', 'prestasi.php', 'Lihat Prestasi'],
     ['bi-images', 'blue', 'Galeri Kegiatan', 'Dokumentasi latihan, workshop, lomba, dan pameran karya komunitas.', 'galeri.php', 'Buka Galeri'],
     ['bi-megaphone', 'red', 'Pengumuman', 'Informasi terbaru soal pendaftaran, jadwal, dan pengumuman resmi komunitas.', 'pengumuman.php', 'Baca Pengumuman'],
     ['bi-journal-bookmark', 'teal', 'Materi Terstruktur', 'Materi pelatihan bagi peserta yang telah disetujui admin.', 'materi.php', 'Lihat Materi'],
-    ['bi-cpu', 'amber', 'Karya Anggota', 'Karya robot, IoT, AI, dan elektronika karya anggota yang sudah tayang.', 'karya.php', 'Jelajahi Karya'],
+    ['bi-cpu', 'amber', 'Karya Anggota', 'Karya anggota yang sudah tayang.', 'karya.php', 'Jelajahi Karya'],
     ['bi-calendar-event', 'blue', 'Agenda Kegiatan', 'Rangkaian kegiatan komunitas beserta tanggal, waktu, dan lokasinya.', 'kegiatan.php', 'Lihat Agenda'],
     ['bi-trophy', 'red', 'Lomba & Kompetisi', 'Jadwal lomba, informasi pendaftaran, dan informasi kompetisi.', 'lomba.php', 'Lihat Lomba'],
     ['bi-link-45deg', 'teal', 'Referensi Belajar', 'Sumber eksternal yang biasa dipakai anggota untuk belajar dan mengerjakan proyek.', 'materi.php#referensi', 'Lihat Referensi'],
@@ -286,7 +286,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
             <div class="grow">
               <div class="ttl"><?= e($p['judul']) ?></div>
               <div class="meta"><?= tanggal_indo($p['tanggal']) ?></div>
-              <div style="font-size:13px; color:var(--text-muted); margin-top:6px;"><?= e(trunc($p['isi'], 90)) ?></div>
+              <div style="font-size:13px; color:var(--text-muted); margin-top:6px;"><?= linkify(trunc($p['isi'], 90)) ?></div>
             </div>
           </div>
         <?php endforeach; ?>

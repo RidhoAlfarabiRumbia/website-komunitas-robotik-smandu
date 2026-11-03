@@ -12,7 +12,6 @@ $misi = array_values(array_filter(
     array_map('trim', preg_split('/\r\n|\r|\n/', $profil['komunitas_misi']) ?: []),
     static fn(string $baris): bool => $baris !== ''
 ));
-$gate = pendaftaran_gate();
 $fotoPembina = $profil['pembina_foto'];
 $adaFotoPembina = $fotoPembina !== '' && storage_path($fotoPembina) !== null;
 $emailKomunitas = trim($profil['komunitas_email']);
@@ -42,14 +41,9 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
         <div class="komunitas-stat"><strong><?= count($semuaAnggota) ?></strong><span>Anggota komunitas</span></div>
         <div class="komunitas-stat"><strong><?= count($semuaPrestasi) ?></strong><span>Prestasi tayang</span></div>
       </div>
-      <?php if ($gate['buka'] || $emailAman): ?>
+      <?php if ($emailAman): ?>
         <div class="komunitas-hero-actions">
-          <?php if ($gate['buka']): ?>
-            <a class="btn btn-primary" href="<?= base_url('daftar.php') ?>"><i class="bi bi-person-plus"></i> Daftar Anggota</a>
-          <?php endif; ?>
-          <?php if ($emailAman): ?>
-            <a class="btn btn-outline" href="mailto:<?= e($emailKomunitas) ?>"><i class="bi bi-envelope"></i> Hubungi Kami</a>
-          <?php endif; ?>
+          <a class="btn btn-outline" href="mailto:<?= e($emailKomunitas) ?>"><i class="bi bi-envelope"></i> Hubungi Kami</a>
         </div>
       <?php endif; ?>
     </div>
@@ -182,9 +176,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
       <p>Belajar bersama, mengerjakan proyek, dan tampilkan pencapaianmu bersama komunitas robotik.</p>
     </div>
     <div class="cta-actions">
-      <?php if ($gate['buka']): ?>
-        <a class="btn btn-light" href="<?= base_url('daftar.php') ?>"><i class="bi bi-person-plus"></i> Daftar Anggota</a>
-      <?php elseif ($emailAman): ?>
+      <?php if ($emailAman): ?>
         <a class="btn btn-light" href="mailto:<?= e($emailKomunitas) ?>"><i class="bi bi-envelope"></i> Hubungi Kami</a>
       <?php endif; ?>
       <a class="btn btn-light" href="<?= base_url('anggota.php') ?>"><i class="bi bi-people"></i> Kenali Anggota</a>
