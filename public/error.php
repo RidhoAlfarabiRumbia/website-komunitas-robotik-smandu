@@ -33,6 +33,12 @@ $daftar = [
         'pesan' => 'Anda tidak memiliki izin untuk membuka halaman ini.',
         'ikon' => 'shield-lock',
     ],
+    'csrf' => [
+        'status' => 403,
+        'judul' => 'Sesi Tidak Valid',
+        'pesan' => 'Token keamanan tidak cocok atau sesi sudah berakhir. Muat ulang halaman lalu coba lagi.',
+        'ikon' => 'shield-exclamation',
+    ],
     '404' => [
         'status' => 404,
         'judul' => 'Halaman Tidak Ditemukan',
