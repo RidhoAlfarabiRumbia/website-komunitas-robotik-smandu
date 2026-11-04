@@ -123,7 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ->execute([$daftarKey, $now, $now]);
         }
 
-        flash_set('success', 'Pendaftaran terkirim. Admin akan memverifikasi Pakta Integritas kamu sebelum akun diaktifkan.');
+        flash_set('success', 'Pendaftaran terkirim. Admin akan memverifikasi Pakta Integritas kamu sebelum akun diaktifkan. Admin/pembina akan menghubungimu melalui WhatsApp.');
         redirect('daftar.php?terkirim=1');
     }
 
@@ -153,7 +153,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
         <div style="font-size:44px; color:var(--teal); margin-bottom:12px;"><i class="bi bi-check-circle"></i></div>
         <h2 style="font-size:20px; margin-bottom:10px;">Pendaftaran Terkirim</h2>
         <p style="color:var(--text-muted); max-width:460px; margin:0 auto 20px;">
-          Terima kasih. Admin akan memeriksa Pakta Integritas kamu. Proses ini biasanya memerlukan waktu 1-3 hari kerja.
+          Terima kasih. Admin akan memeriksa Pakta Integritas kamu. Proses ini biasanya memerlukan waktu 1-3 hari kerja. Admin/pembina akan menghubungimu melalui WhatsApp.
         </p>
         <a class="btn btn-outline" href="beranda.php">Kembali ke Beranda</a>
       </div>
