@@ -17,7 +17,7 @@
 // Menghasilkan variabel untuk form/daftar: $crudQs (query action per item),
 // $crudBase (URL kembali lengkap), $crudCfg, $crudModel, $rows, $editing,
 // $showForm, $refPanel, $q, $qs, $searchCols, $totalRows, $listHasFoto,
-// $akunList, $akunUsername, $akunEmail, $akunEmailList, $anggotaOptions, $pelatihanOptions, $terpilihPelatihan,
+// $akunList, $akunUsername, $akunEmail, $akunEmailList, $paktaList, $anggotaOptions, $pelatihanOptions, $terpilihPelatihan,
 // $terpilihAnggota, $peraihMode, $peraihManualTeks.
 
 // Halaman fitur publik boleh diakses semua orang, tapi partial ini hanya untuk
@@ -362,6 +362,11 @@ if ($crudEntitas === 'anggota') {
             $akunEmailList[(int) $u['anggota_id']] = $u['email'];
         }
     }
+}
+
+$paktaList = [];
+if ($crudEntitas === 'anggota' && !$showForm && !$refPanel) {
+    $paktaList = Pendaftaran::paktaPerAnggota(array_column($rows, 'id'));
 }
 
 $listHasFoto = isset($crudCfg['fields']['foto']);

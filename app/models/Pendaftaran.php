@@ -50,6 +50,44 @@ class Pendaftaran extends Model
         ]);
     }
 
+    /**
+     * Pakta Integritas terbaru yang tersimpan untuk tiap anggota.
+     * Dipakai admin untuk membuka kembali dokumen dari daftar Anggota.
+     *
+     * @param int[] $anggotaIds
+     * @return array<int,array>
+     */
+    public static function paktaPerAnggota(array $anggotaIds): array
+    {
+        $ids = array_values(array_unique(array_filter(
+            array_map('intval', $anggotaIds),
+            static fn(int $id): bool => $id > 0
+        )));
+        if (!$ids) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $stmt = self::db()->prepare(
+            "SELECT id, anggota_id, pakta_integritas, nama_berkas, status, dibuat_pada, diverifikasi_pada
+             FROM pendaftaran
+             WHERE anggota_id IN ($placeholders)
+               AND pakta_integritas IS NOT NULL
+               AND pakta_integritas <> ''
+             ORDER BY dibuat_pada DESC, id DESC"
+        );
+        $stmt->execute($ids);
+
+        $hasil = [];
+        foreach ($stmt->fetchAll() as $row) {
+            $anggotaId = (int) $row['anggota_id'];
+            if (!isset($hasil[$anggotaId])) {
+                $hasil[$anggotaId] = $row;
+            }
+        }
+        return $hasil;
+    }
+
     /** Apakah anggota sudah punya Pakta Integritas terverifikasi? */
     public static function sudahTerverifikasiUntuk(int $anggotaId): bool
     {

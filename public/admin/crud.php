@@ -68,6 +68,14 @@ include __DIR__ . '/../../app/includes/header.php';
                         echo e($akunList[(int) $row['id']] ?? '-');
                     } elseif ($col === 'akun_email') {
                         echo e(trunc((string) ($akunEmailList[(int) $row['id']] ?? '-'), 40));
+                    } elseif ($col === 'pakta') {
+                        $pakta = $paktaList[(int) $row['id']] ?? null;
+                        if ($pakta) {
+                            $namaPakta = (string) ($pakta['nama_berkas'] ?: 'dokumen');
+                            echo '<a class="btn btn-outline btn-sm" href="' . e(base_url('berkas.php?jenis=pakta&id=' . (int) $pakta['id'] . '&lihat=1')) . '" target="_blank" rel="noopener" title="Buka Pakta Integritas: ' . e($namaPakta) . '">Lihat</a>';
+                        } else {
+                            echo '<span style="color:var(--text-muted);">-</span>';
+                        }
                     } else {
                         echo e(trunc((string) ($row[$col] ?? '-'), 60));
                     }
