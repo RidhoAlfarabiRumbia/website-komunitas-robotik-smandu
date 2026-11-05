@@ -399,8 +399,8 @@ body.sidebar-open .sidebar-backdrop, body.nav-open .sidebar-backdrop{opacity:1; 
 .karya-grid > .card-wrap{height:100%;}
 .karya-grid .work-card{height:100%;}
 .karya-grid .work-thumb{flex:0 0 210px;}
-.karya-grid .work-title{line-height:1.35; min-height:2.7em; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden;}
-.karya-grid .work-desc{flex:0 0 auto; line-height:1.5; min-height:3em; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden;}
+.karya-grid .work-title{line-height:1.35; min-height:2.7em; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; line-clamp:2; overflow:hidden;}
+.karya-grid .work-desc{flex:0 0 auto; line-height:1.5; min-height:3em; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; line-clamp:2; overflow:hidden;}
 .karya-grid .work-tags{height:22px; overflow:hidden; flex-wrap:nowrap;}
 .karya-grid .tag{white-space:nowrap;}
 .karya-grid .work-foot{margin-top:auto; min-height:18px;}
