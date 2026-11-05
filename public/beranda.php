@@ -11,7 +11,7 @@ $heroData = Hero::getSliderData();
 // Konten publik (PRD 8.3)
 $galeriTerbaru = Galeri::all('tanggal DESC');
 $pengumumanTerbaru = Pengumuman::all('tanggal DESC', 3);
-$pelatihanTerbaru = Pelatihan::untukPengunjung(3);
+$pelatihanTerbaru = array_slice(Pelatihan::semua(), 0, 3);
 $prestasiTerbaru = Prestasi::tayang();
 
 // Konten khusus anggota & admin
@@ -164,8 +164,8 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
             <div class="grow">
               <div class="ttl"><?= e($l['nama']) ?></div>
               <div class="meta"><?= tanggal_indo($l['tanggal']) ?> · <?= e($l['lokasi']) ?></div>
+              <?php if ($l['hasil']): ?><div class="lomba-hasil"><span class="badge badge-amber"><i class="bi bi-trophy"></i> <?= e($l['hasil']) ?></span></div><?php endif; ?>
             </div>
-            <?php if ($l['hasil']): ?><span class="badge badge-amber"><i class="bi bi-trophy"></i> <?= e($l['hasil']) ?></span><?php endif; ?>
             <span class="badge <?= $l['status'] === 'Selesai' ? 'badge-muted' : ($l['status'] === 'Akan Datang' ? 'badge-blue' : 'badge-teal') ?>"><?= e($l['status']) ?></span>
           </div>
         <?php endforeach; ?>
@@ -262,7 +262,10 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
               <a href="<?= base_url('pelatihan-detail.php?id=' . (int) $p['id']) ?>" class="ttl"><?= e($p['nama']) ?></a>
               <div class="meta"><?= e(tanggal_rentang($p['tanggal_mulai'], $p['tanggal_selesai'])) ?> · <?= e($p['lokasi'] ?: '-') ?></div>
             </div>
-            <span class="badge <?= $p['akses'] === 'Umum' ? 'badge-blue' : 'badge-amber' ?>"><?= $p['akses'] === 'Umum' ? 'Terbuka Umum' : 'Khusus Anggota' ?></span>
+            <div class="list-badges">
+              <span class="badge <?= $p['akses'] === 'Umum' ? 'badge-blue' : 'badge-amber' ?>"><?= $p['akses'] === 'Umum' ? 'Terbuka Umum' : 'Khusus Anggota' ?></span>
+              <?php if (!Pelatihan::aktif($p)): ?><span class="badge badge-muted">Selesai</span><?php endif; ?>
+            </div>
           </div>
         <?php endforeach; ?>
       </div>

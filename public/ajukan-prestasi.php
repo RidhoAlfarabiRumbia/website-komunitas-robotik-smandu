@@ -50,8 +50,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($old['nama'] === '') {
         $errors['nama'] = 'Nama prestasi wajib diisi.';
-    } elseif (mb_strlen($old['nama']) > 160) {
-        $errors['nama'] = 'Maksimal 160 karakter.';
     }
 
     if ($old['tanggal'] === '') {
@@ -72,8 +70,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($old['hasil'] === '') {
         $errors['hasil'] = 'Hasil wajib diisi, misalnya Juara 1.';
-    } elseif (mb_strlen($old['hasil']) > 80) {
-        $errors['hasil'] = 'Maksimal 80 karakter.';
     }
 
     $idLombaValid = array_map('intval', array_column($lombaList, 'id'));
@@ -150,7 +146,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
 
         <div class="field" style="grid-column:1/-1;">
           <label for="nama">Nama Prestasi <span class="req">*</span></label>
-          <input type="text" id="nama" name="nama" value="<?= e($old['nama']) ?>" required maxlength="160" class="<?= isset($errors['nama']) ? 'invalid' : '' ?>">
+          <input type="text" id="nama" name="nama" value="<?= e($old['nama']) ?>" required class="<?= isset($errors['nama']) ? 'invalid' : '' ?>">
           <?php if (isset($errors['nama'])): ?><span class="err"><?= e($errors['nama']) ?></span><?php endif; ?>
         </div>
 
@@ -185,7 +181,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
 
         <div class="field">
           <label for="hasil">Hasil <span class="req">*</span></label>
-          <input type="text" id="hasil" name="hasil" value="<?= e($old['hasil']) ?>" required maxlength="80" placeholder="Juara 1, Podium 2, Finalis..." class="<?= isset($errors['hasil']) ? 'invalid' : '' ?>">
+          <input type="text" id="hasil" name="hasil" value="<?= e($old['hasil']) ?>" required placeholder="Juara 1, Podium 2, Finalis..." class="<?= isset($errors['hasil']) ? 'invalid' : '' ?>">
           <?php if (isset($errors['hasil'])): ?><span class="err"><?= e($errors['hasil']) ?></span><?php endif; ?>
         </div>
 

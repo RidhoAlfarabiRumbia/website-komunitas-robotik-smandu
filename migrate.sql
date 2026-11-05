@@ -59,11 +59,11 @@ CREATE TABLE IF NOT EXISTS materi_pelatihan (
 -- ---------------------------------------------------------
 CREATE TABLE IF NOT EXISTS prestasi (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  nama VARCHAR(180) NOT NULL,
+  nama TEXT NOT NULL,
   lomba_id INT DEFAULT NULL,
   tanggal DATE NOT NULL,
   tingkat ENUM('Sekolah','Kota','Provinsi','Nasional','Internasional') NOT NULL DEFAULT 'Sekolah',
-  hasil VARCHAR(120) DEFAULT NULL,
+  hasil TEXT DEFAULT NULL,
   deskripsi TEXT,
   foto VARCHAR(191) DEFAULT NULL,
   sertifikat VARCHAR(191) DEFAULT NULL,
