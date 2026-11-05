@@ -87,10 +87,20 @@ if ($crudReferensi && $_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['sub_form
         redirect($refBack);
     }
     if ($refId) {
-        Referensi::update($refId, $refData);
+        if (!Referensi::find($refId)) {
+            flash_set('error', 'Referensi tidak ditemukan.');
+            redirect($crudBaseMateri . '&sub=referensi' . $qs);
+        }
+        if (!Referensi::update($refId, $refData)) {
+            flash_set('error', 'Referensi gagal diperbarui.');
+            redirect($refBack);
+        }
         flash_set('success', 'Referensi berhasil diperbarui.');
     } else {
-        Referensi::create($refData);
+        if (Referensi::create($refData) <= 0) {
+            flash_set('error', 'Referensi gagal ditambahkan.');
+            redirect($refBack);
+        }
         flash_set('success', 'Referensi berhasil ditambahkan.');
     }
     redirect($crudBaseMateri . '&sub=referensi' . $qs);
@@ -101,10 +111,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'toggle_status' && $id)
     Csrf::verify();
     if ($crudEntitas === 'hero' && !empty($crudCfg['toggle_status'])) {
         $row = $crudModel::find($id);
-        if ($row) {
+        if (!$row) {
+            flash_set('error', 'Data slider tidak ditemukan.');
+        } else {
             $baru = ($row['status'] ?? '') === 'Tampil' ? 'Sembunyi' : 'Tampil';
-            $crudModel::update($id, ['status' => $baru]);
-            flash_set('success', 'Status slider diubah jadi ' . $baru . '.');
+            if ($crudModel::update($id, ['status' => $baru])) {
+                flash_set('success', 'Status slider diubah jadi ' . $baru . '.');
+            } else {
+                flash_set('error', 'Status slider gagal diubah.');
+            }
         }
     }
     redirect($crudBase . $qs);
@@ -117,17 +132,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'toggle_status' && $id)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'delete' && $id) {
     Csrf::verify();
     if ($refPanel) {
-        Referensi::delete($id);
-        flash_set('success', 'Referensi berhasil dihapus.');
-redirect($crudBaseMateri . '&sub=referensi' . $qs);
+        if (Referensi::delete($id)) {
+            flash_set('success', 'Referensi berhasil dihapus.');
+        } else {
+            flash_set('error', 'Referensi gagal dihapus.');
+        }
+        redirect($crudBaseMateri . '&sub=referensi' . $qs);
     }
     // Akun login ikut dihapus (lapisan pengaman: users.anggota_id sudah memakai
     // ON DELETE CASCADE di database).
     if ($crudEntitas === 'anggota') {
         User::deleteByAnggota($id);
     }
-    $crudModel::delete($id);
-    flash_set($crudCfg['label'] . ' berhasil dihapus.');
+    if ($crudModel::delete($id)) {
+        flash_set($crudCfg['label'] . ' berhasil dihapus.');
+    } else {
+        flash_set('error', $crudCfg['label'] . ' gagal dihapus atau sudah tidak ada.');
+    }
     redirect($crudBase . $qs);
 }
 
@@ -158,6 +179,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($isAkun) {
         $akun = $postId ? User::findByAnggota($postId) : null;
         if ($username === '') $errors[] = 'Username wajib diisi.';
+        elseif (mb_strlen($username) > 60) $errors[] = 'Username maksimal 60 karakter.';
         elseif (User::usernameTaken($username, (int) ($akun['id'] ?? 0))) $errors[] = 'Username sudah dipakai akun lain.';
         if ($akunEmail === '') $errors[] = 'Email login wajib diisi.';
         elseif (strlen($akunEmail) > 120 || !filter_var($akunEmail, FILTER_VALIDATE_EMAIL)) $errors[] = 'Format email login tidak valid.';
@@ -210,21 +232,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         if ($f['type'] === 'file') {
+            $adaFile = !empty($_FILES[$key]['name']);
             $path = handle_upload($key, $f['subfolder'] ?? $crudEntitas);
-            if ($path) $data[$key] = $path;
+            if ($adaFile && $path === null) {
+                $errors[] = e($f['label']) . ' gagal diunggah.';
+            } elseif ($path) {
+                $data[$key] = $path;
+            }
         } elseif ($f['type'] === 'video') {
+            $adaFile = !empty($_FILES[$key . '_file']['name']);
             $path = handle_video_upload($key . '_file', $f['subfolder'] ?? $crudEntitas);
-            // Kalau tidak ada file, pakai URL yang diketik admin.
-            $data[$key] = $path ?: nilai_teks($_POST, $key);
+            if ($adaFile && $path === null) {
+                $errors[] = e($f['label']) . ' gagal diunggah.';
+            } else {
+                // Kalau tidak ada file, pakai URL yang diketik admin.
+                $data[$key] = $path ?: nilai_teks($_POST, $key);
+            }
         } elseif ($f['type'] === 'doc_file') {
             // Field bertanda restricted (mis. materi) disimpan DI LUAR document
             // root agar tidak bisa diunduh dengan menebak URL-nya; hanya bisa
             // diambil lewat berkas.php yang memeriksa hak akses.
             $sub = $f['subfolder'] ?? $crudEntitas;
+            $adaFile = !empty($_FILES[$key]['name']);
             $path = !empty($f['restricted'])
                 ? handle_restricted_upload($key, $sub, ['pdf', 'ppt', 'pptx', 'doc', 'docx', 'xls', 'xlsx', 'txt', 'zip'], 10 * 1024 * 1024, 'PDF, PPT, DOC, XLS, TXT, atau ZIP', '10MB')
                 : handle_doc_upload($key, $sub);
-            if ($path) $data[$key] = $path;
+            if ($adaFile && $path === null) {
+                $errors[] = e($f['label']) . ' gagal diunggah.';
+            } elseif ($path) {
+                $data[$key] = $path;
+            }
         } elseif (in_array($f['type'], ['pelatihan_multi', 'anggota_multi', 'peraih'], true)) {
             // 'peraih' bukan kolom tabel — diproses khusus saat simpanTim prestasi.
             continue;
@@ -244,6 +281,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $data['pembuat_id'] = $pembuatKarya[0];
     }
 
+    if ($errors) {
+        flash_set('error', implode(' ', $errors));
+        $backAction = $postId ? 'edit&id=' . $postId : 'create';
+        redirect($crudBase . '&action=' . $backAction . $qs);
+    }
+
     // Validasi nilai select terhadap opsi yang dikonfigurasi (anti-tampering).
     foreach ($crudCfg['fields'] as $key => $f) {
         if ($f['type'] !== 'select' || !isset($data[$key])) continue;
@@ -253,41 +296,73 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    if ($postId > 0) {
-        $savedId = $postId;
-        $crudModel::update($savedId, $data);
-        flash_set('success', $crudCfg['label'] . ' berhasil diperbarui.');
-    } else {
-        $savedId = $crudModel::create($data);
-        flash_set('success', $crudCfg['label'] . ' berhasil ditambahkan.');
+    if ($postId > 0 && !$data) {
+        // Model::update() tidak bisa membentuk UPDATE tanpa kolom.
+        flash_set('error', 'Tidak ada perubahan untuk disimpan.');
+        redirect($crudBase . '&action=edit&id=' . $postId . $qs);
     }
 
-    // Simpan relasi many-to-many bila ada
-    if ($crudEntitas === 'materi') {
-        Materi::simpanPelatihan((int) $savedId, $relasiMulti['pelatihan']);
+    if ($postId > 0 && !$crudModel::find($postId)) {
+        flash_set('error', $crudCfg['label'] . ' tidak ditemukan. Mungkin sudah dihapus.');
+        redirect($crudBase . $qs);
     }
-    if ($crudEntitas === 'prestasi') {
-        // Mode peraih: 'anggota' (checkbox) atau 'manual' (teks pisah koma).
-        if (($_POST['peraih_mode'] ?? 'anggota') === 'manual') {
-            $manualNames = array_values(array_filter(array_map('trim', explode(',', nilai_teks($_POST, 'peraih_manual')))));
-            Prestasi::simpanTim((int) $savedId, [], $manualNames);
+
+    $dbSimpan = Database::connect();
+    try {
+        $dbSimpan->beginTransaction();
+
+        if ($postId > 0) {
+            $savedId = $postId;
+            if (!$crudModel::update($savedId, $data)) {
+                throw new RuntimeException('Update ' . $crudEntitas . ' gagal.');
+            }
         } else {
-            $anggotaIds = array_values(array_filter(array_map('intval', (array) ($_POST['anggota_ids'] ?? []))));
-            Prestasi::simpanTim((int) $savedId, $anggotaIds);
+            $savedId = (int) $crudModel::create($data);
+            if ($savedId <= 0) {
+                throw new RuntimeException('Create ' . $crudEntitas . ' gagal.');
+            }
         }
-    }
-    if ($crudEntitas === 'karya') {
-        Karya::simpanPembuat((int) $savedId, $pembuatKarya);
-    }
-    if ($isAkun) {
-        $akun = User::findByAnggota($savedId);
-        if ($akun) {
-            $userData = ['username' => $username, 'email' => $akunEmail];
-            if ($password !== '') $userData['password_hash'] = password_hash($password, PASSWORD_DEFAULT);
-            User::update((int) $akun['id'], $userData);
-        } else {
-            User::createForAnggota($savedId, $username, $password, $akunEmail);
+
+        // Simpan relasi many-to-many bila ada
+        if ($crudEntitas === 'materi') {
+            Materi::simpanPelatihan((int) $savedId, $relasiMulti['pelatihan']);
         }
+        if ($crudEntitas === 'prestasi') {
+            // Mode peraih: 'anggota' (checkbox) atau 'manual' (teks pisah koma).
+            if (($_POST['peraih_mode'] ?? 'anggota') === 'manual') {
+                $manualNames = array_values(array_filter(array_map('trim', explode(',', nilai_teks($_POST, 'peraih_manual')))));
+                Prestasi::simpanTim((int) $savedId, [], $manualNames);
+            } else {
+                $anggotaIds = array_values(array_filter(array_map('intval', (array) ($_POST['anggota_ids'] ?? []))));
+                Prestasi::simpanTim((int) $savedId, $anggotaIds);
+            }
+        }
+        if ($crudEntitas === 'karya') {
+            Karya::simpanPembuat((int) $savedId, $pembuatKarya);
+        }
+        if ($isAkun) {
+            $akun = User::findByAnggota($savedId);
+            if ($akun) {
+                $userData = ['username' => $username, 'email' => $akunEmail];
+                if ($password !== '') $userData['password_hash'] = password_hash($password, PASSWORD_DEFAULT);
+                if (!User::update((int) $akun['id'], $userData)) {
+                    throw new RuntimeException('Update akun anggota gagal.');
+                }
+            } elseif (User::createForAnggota($savedId, $username, $password, $akunEmail) <= 0) {
+                throw new RuntimeException('Create akun anggota gagal.');
+            }
+        }
+
+        $dbSimpan->commit();
+        flash_set('success', $crudCfg['label'] . ($postId > 0 ? ' berhasil diperbarui.' : ' berhasil ditambahkan.'));
+    } catch (Throwable $e) {
+        if ($dbSimpan->inTransaction()) {
+            $dbSimpan->rollBack();
+        }
+        error_log('[CRUD] ' . $e->getMessage());
+        flash_set('error', $crudCfg['label'] . ' gagal disimpan. Silakan coba lagi.');
+        $kembali = $postId > 0 ? 'edit&id=' . $postId : 'create';
+        redirect($crudBase . '&action=' . $kembali . $qs);
     }
 
     // Karya hanya tampil di halaman publik bila publikasinya Disetujui. Kalau admin
@@ -391,3 +466,9 @@ if (!$showForm && !$refPanel && $searchCols && $q !== '') {
     }
     $rows = cari_filter($rows, $searchCols, $q);
 }
+
+$totalRows = count($rows);
+$perHalaman = 20;
+$totalHalaman = max(1, (int) ceil($totalRows / $perHalaman));
+$halaman = max(1, min($totalHalaman, nilai_int($_GET, 'page')));
+$rows = array_slice($rows, ($halaman - 1) * $perHalaman, $perHalaman);

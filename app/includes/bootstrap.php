@@ -10,11 +10,11 @@
  * strict    : hanya terima ID sesi yang punya data di server (anti session fixation).
  * secure    : hanya via HTTPS bila situs dijalankan di HTTPS.
  */
-if (session_status() !== PHP_SESSION_ACTIVE) {
-    $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-        || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https')
-        || (int) ($_SERVER['SERVER_PORT'] ?? 0) === 443;
+$https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+    || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https')
+    || (int) ($_SERVER['SERVER_PORT'] ?? 0) === 443;
 
+if (session_status() !== PHP_SESSION_ACTIVE) {
     ini_set('session.use_strict_mode', '1');
     ini_set('session.use_only_cookies', '1');
     ini_set('session.cookie_httponly', '1');
@@ -30,32 +30,32 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 
     session_name('ROBOTIKSESSID');
     session_start();
+}
 
-    /* ---------- 2. Header keamanan ----------
-     * HSTS hanya dikirim bila lewat HTTPS, agar tidak merusak pengembangan lokal.
-     */
-    if (!headers_sent()) {
-        header('X-Content-Type-Options: nosniff');
-        header('X-Frame-Options: DENY');
-        header('Referrer-Policy: strict-origin-when-cross-origin');
-        header('Permissions-Policy: geolocation=(), microphone=(), camera=()');
-        /* Content-Security-Policy konservatif (diperlukan 'unsafe-inline'
-         * karena halaman masih memakai <script> inline & atribut style/onclick).
-         * Larang resource dari domain tak dikenal; future hardening: pindahkan
-         * inline script ke file eksternal lalu hapus 'unsafe-inline'. */
-        header("Content-Security-Policy: default-src 'self'; "
-            . "script-src 'self' 'unsafe-inline'; "
-            . "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; "
-            . "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; "
-            . "img-src 'self' data:; "
-            . "object-src 'none'; "
-            . "base-uri 'self'; "
-            . "frame-ancestors 'none'; "
-            . "form-action 'self'");
-        header_remove('X-Powered-By');
-        if ($https) {
-            header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
-        }
+/* ---------- 2. Header keamanan ----------
+ * HSTS hanya dikirim bila lewat HTTPS, agar tidak merusak pengembangan lokal.
+ */
+if (!headers_sent()) {
+    header('X-Content-Type-Options: nosniff');
+    header('X-Frame-Options: DENY');
+    header('Referrer-Policy: strict-origin-when-cross-origin');
+    header('Permissions-Policy: geolocation=(), microphone=(), camera=()');
+    /* Content-Security-Policy konservatif (diperlukan 'unsafe-inline'
+     * karena halaman masih memakai <script> inline & atribut style/onclick).
+     * Larang resource dari domain tak dikenal; future hardening: pindahkan
+     * inline script ke file eksternal lalu hapus 'unsafe-inline'. */
+    header("Content-Security-Policy: default-src 'self'; "
+        . "script-src 'self' 'unsafe-inline'; "
+        . "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; "
+        . "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; "
+        . "img-src 'self' data:; "
+        . "object-src 'none'; "
+        . "base-uri 'self'; "
+        . "frame-ancestors 'none'; "
+        . "form-action 'self'");
+    header_remove('X-Powered-By');
+    if ($https) {
+        header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
     }
 }
 

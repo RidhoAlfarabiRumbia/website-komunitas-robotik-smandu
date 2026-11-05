@@ -15,6 +15,7 @@ if ($crudAktif) {
 }
 
 $lomba = Lomba::all('tanggal DESC');
+$pesertaLomba = Lomba::pesertaMap(array_column($lomba, 'id'));
 $pageTitle = 'Lomba';
 include __DIR__ . '/../app/includes/header.php';
 include __DIR__ . '/../app/includes/navbar_anggota.php';
@@ -34,7 +35,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
   <?php endif; ?>
   <?php if ($lomba): ?>
     <div class="grid grid-2 grid-stagger reveal">
-      <?php foreach ($lomba as $l): $peserta = Lomba::peserta($l['id']); ?>
+      <?php foreach ($lomba as $l): $peserta = $pesertaLomba[(int) $l['id']] ?? []; ?>
       <div class="card<?= Auth::isAdmin() && ($crudItemEntity ?? '') === 'lomba' ? ' card-admin' : '' ?>">
         <?php if ($crudItemEntity === 'lomba'): $itemId = (int) $l['id']; include __DIR__ . '/../app/includes/partial_admin_actions.php'; endif; ?>
         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">

@@ -21,6 +21,7 @@ if ($crudAktif) {
 }
 
 $daftar = Prestasi::tayang();
+$timPrestasi = Prestasi::timMap(array_column($daftar, 'id'));
 
 $pageTitle = 'Prestasi';
 include __DIR__ . '/../app/includes/header.php';
@@ -51,7 +52,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
   <?php if ($daftar): ?>
     <div class="grid grid-3 grid-stagger reveal">
       <?php foreach ($daftar as $p):
-        $tim = Prestasi::tim((int) $p['id']);
+        $tim = $timPrestasi[(int) $p['id']] ?? [];
       ?>
         <div class="card<?= Auth::isAdmin() && ($crudItemEntity ?? '') === 'prestasi' ? ' card-admin' : '' ?>">
           <?php if ($crudItemEntity === 'prestasi'): $itemId = (int) $p['id']; include __DIR__ . '/../app/includes/partial_admin_actions.php'; endif; ?>

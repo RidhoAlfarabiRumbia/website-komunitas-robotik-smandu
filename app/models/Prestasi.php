@@ -54,12 +54,34 @@ class Prestasi extends Model
     public static function tim(int $id): array
     {
         $stmt = self::db()->prepare(
-            'SELECT pp.*, a.foto FROM prestasi_peserta pp
+            'SELECT pp.*, a.foto, a.kelas FROM prestasi_peserta pp
              LEFT JOIN anggota a ON a.id = pp.anggota_id
              WHERE pp.prestasi_id = ? ORDER BY pp.nama ASC'
         );
         $stmt->execute([$id]);
         return $stmt->fetchAll();
+    }
+
+    /** Peraih beberapa prestasi sekaligus, dikelompokkan per prestasi_id. */
+    public static function timMap(array $prestasiIds): array
+    {
+        $ids = array_values(array_unique(array_filter(array_map('intval', $prestasiIds), fn(int $id): bool => $id > 0)));
+        if (!$ids) return [];
+
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $stmt = self::db()->prepare(
+            'SELECT pp.*, a.foto, a.kelas FROM prestasi_peserta pp
+             LEFT JOIN anggota a ON a.id = pp.anggota_id
+             WHERE pp.prestasi_id IN (' . $placeholders . ')
+             ORDER BY pp.prestasi_id ASC, pp.nama ASC'
+        );
+        $stmt->execute($ids);
+
+        $map = [];
+        foreach ($stmt->fetchAll() as $row) {
+            $map[(int) $row['prestasi_id']][] = $row;
+        }
+        return $map;
     }
 
     /** Prestasi yang dicapai seorang anggota (untuk halaman profil). */
@@ -79,25 +101,34 @@ class Prestasi extends Model
 /** Simpan anggota terpilih + nama peraih manual sebagai penerima prestasi. */
     public static function simpanTim(int $prestasiId, array $anggotaIds, array $manualNames = []): void
     {
+        $ids = array_values(array_unique(array_filter(array_map('intval', $anggotaIds), static fn(int $id): bool => $id > 0)));
+        $namaAnggota = [];
+        if ($ids) {
+            $in = implode(',', array_fill(0, count($ids), '?'));
+            $stmtNama = self::db()->prepare('SELECT id, nama FROM anggota WHERE id IN (' . $in . ')');
+            $stmtNama->execute($ids);
+            foreach ($stmtNama->fetchAll() as $row) {
+                $namaAnggota[(int) $row['id']] = (string) $row['nama'];
+            }
+        }
+
         self::db()->prepare('DELETE FROM prestasi_peserta WHERE prestasi_id = ?')->execute([$prestasiId]);
         $stmt = self::db()->prepare('INSERT INTO prestasi_peserta (prestasi_id, anggota_id, nama) VALUES (?, ?, ?)');
-        foreach ($anggotaIds as $id) {
-            $id = (int) $id;
-            if ($id <= 0) continue;
-            $nama = Anggota::find($id)['nama'] ?? 'Anggota';
-            $stmt->execute([$prestasiId, $id, $nama]);
+        foreach ($ids as $id) {
+            $stmt->execute([$prestasiId, $id, $namaAnggota[$id] ?? 'Anggota']);
         }
         foreach ($manualNames as $nama) {
-            $nama = trim((string) $nama);
+            if (!is_scalar($nama)) continue;
+            $nama = trunc(trim((string) $nama), 120, '');
             if ($nama === '') continue;
-            $stmt->execute([$prestasiId, null, mb_substr($nama, 0, 120)]);
+            $stmt->execute([$prestasiId, null, $nama]);
         }
     }
 
     /** Post-moderation: admin menyembunyikan atau menampilkan kembali. */
-    public static function setStatus(int $id, string $status): void
+    public static function setStatus(int $id, string $status): bool
     {
-        if (!in_array($status, ['Tayang', 'Disembunyikan'], true)) return;
-        self::update($id, ['status' => $status]);
+        if (!in_array($status, ['Tayang', 'Disembunyikan'], true) || !self::find($id)) return false;
+        return self::update($id, ['status' => $status]);
     }
 }

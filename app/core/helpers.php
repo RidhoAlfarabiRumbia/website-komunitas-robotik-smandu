@@ -14,7 +14,13 @@ function trunc(?string $text, int $length = 80, string $suffix = '...'): string
     if (function_exists('mb_strimwidth')) {
         return mb_strimwidth($text, 0, $length, $suffix);
     }
-    return strlen($text) > $length ? substr($text, 0, $length) . $suffix : $text;
+    $chars = preg_split('//u', $text, -1, PREG_SPLIT_NO_EMPTY);
+    if (is_array($chars)) {
+        return count($chars) > $length
+            ? implode('', array_slice($chars, 0, max(0, $length))) . $suffix
+            : $text;
+    }
+    return strlen($text) > $length ? substr($text, 0, max(0, $length)) . $suffix : $text;
 }
 
 /**
@@ -122,9 +128,17 @@ function app_url(string $path = ''): string
     if ($base === '') {
         $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
             || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
-        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+        $host = (string) ($_SERVER['SERVER_NAME'] ?? 'localhost');
+        if (!preg_match('/^[A-Za-z0-9.\-]+$/', $host)) {
+            $host = 'localhost';
+        }
+        $port = (int) ($_SERVER['SERVER_PORT'] ?? 0);
+        $portSuffix = '';
+        if ($port > 0 && !(($https && $port === 443) || (!$https && $port === 80))) {
+            $portSuffix = ':' . $port;
+        }
         $script = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '/index.php');
-        $base = ($https ? 'https' : 'http') . '://' . $host . rtrim(dirname($script), '/');
+        $base = ($https ? 'https' : 'http') . '://' . $host . $portSuffix . rtrim(dirname($script), '/');
     }
     return rtrim($base, '/') . '/' . ltrim($path, '/');
 }
@@ -342,6 +356,28 @@ function cari_form(array $params, string $q, string $placeholder, ?int $tampil =
         $html .= '<span class="cari-meta">' . e($ringkasan) . '</span>';
     }
     return $html . '</form>';
+}
+
+function paginasi_bar(int $halaman, int $totalHalaman, array $params = []): string
+{
+    if ($totalHalaman <= 1) {
+        return '';
+    }
+    $halaman = max(1, min($halaman, $totalHalaman));
+    $params = array_filter($params, static fn($v): bool => $v !== null && $v !== '');
+    $tautan = static function (int $target) use ($params): string {
+        $params['page'] = $target;
+        return '?' . http_build_query($params);
+    };
+    $html = '<nav class="paginasi" aria-label="Navigasi halaman" style="display:flex;gap:8px;justify-content:center;align-items:center;margin-top:16px;flex-wrap:wrap;">';
+    if ($halaman > 1) {
+        $html .= '<a class="btn btn-outline btn-sm" href="' . e($tautan($halaman - 1)) . '">Sebelumnya</a>';
+    }
+    $html .= '<span style="font-size:13px;color:var(--text-muted);">Halaman ' . $halaman . ' dari ' . $totalHalaman . '</span>';
+    if ($halaman < $totalHalaman) {
+        $html .= '<a class="btn btn-outline btn-sm" href="' . e($tautan($halaman + 1)) . '">Berikutnya</a>';
+    }
+    return $html . '</nav>';
 }
 
 /**
@@ -831,6 +867,9 @@ function kirim_berkas(string $absPath, string $downloadName, bool $inline = fals
         'txt' => 'text/plain',
     ][$ext] ?? 'application/octet-stream';
 
+    header('Cache-Control: private, no-store, no-cache, must-revalidate, max-age=0');
+    header('Pragma: no-cache');
+    header('Expires: 0');
     header('Content-Type: ' . $mime);
     header('Content-Length: ' . filesize($absPath));
     header('Content-Disposition: ' . ($inline ? 'inline' : 'attachment') . '; filename="' . rawurlencode($downloadName) . '"');

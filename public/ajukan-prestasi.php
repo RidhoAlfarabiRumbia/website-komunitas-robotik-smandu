@@ -56,6 +56,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($old['tanggal'] === '') {
         $errors['tanggal'] = 'Tanggal wajib diisi.';
+    } else {
+        $tanggal = DateTimeImmutable::createFromFormat('!Y-m-d', $old['tanggal']);
+        $tanggalError = DateTimeImmutable::getLastErrors();
+        if (!$tanggal
+            || ($tanggalError !== false && ($tanggalError['warning_count'] > 0 || $tanggalError['error_count'] > 0))
+            || $tanggal->format('Y-m-d') !== $old['tanggal']) {
+            $errors['tanggal'] = 'Tanggal tidak valid.';
+        }
     }
 
     if (!in_array($old['tingkat'], $tingkatOpsi, true)) {
@@ -90,6 +98,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $sertifikat = simpan_upload('sertifikat', 'sertifikat', ['pdf', 'jpg', 'jpeg', 'png'], 2 * 1024 * 1024, 'PDF atau gambar', '2MB');
         $foto = simpan_upload('foto', 'content', ['jpg', 'jpeg', 'png', 'webp'], 2 * 1024 * 1024, 'JPG, PNG, atau WEBP', '2MB');
 
+        if ($sertifikat === null && !empty($_FILES['sertifikat']['name'])) {
+            $errors['sertifikat'] = 'Sertifikat gagal diunggah. Coba lagi.';
+        }
+        if ($foto === null && !empty($_FILES['foto']['name'])) {
+            $errors['foto'] = 'Foto gagal diunggah. Coba lagi.';
+        }
+    }
+
+    if (!$errors) {
         $idBaru = Prestasi::create([
             'nama' => $old['nama'],
             'lomba_id' => $old['lomba_id'] ?: null,

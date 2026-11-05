@@ -39,10 +39,10 @@ class Pendaftaran extends Model
     }
 
     /** Catat hasil verifikasi admin. */
-    public static function verifikasi(int $id, string $status, string $catatan = '', ?int $anggotaId = null): void
+    public static function verifikasi(int $id, string $status, string $catatan = '', ?int $anggotaId = null): bool
     {
-        if (!in_array($status, ['Diverifikasi', 'Ditolak'], true)) return;
-        self::update($id, [
+        if (!in_array($status, ['Diverifikasi', 'Ditolak'], true)) return false;
+        return self::update($id, [
             'status' => $status,
             'catatan' => $catatan !== '' ? $catatan : null,
             'anggota_id' => $anggotaId,

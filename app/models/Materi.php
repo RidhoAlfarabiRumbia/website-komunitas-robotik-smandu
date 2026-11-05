@@ -60,10 +60,38 @@ class Materi extends Model
              WHERE mp.materi_id = ?
                AND pp.anggota_id = ?
                AND pp.status = "Disetujui"
+               AND (p.tanggal_mulai IS NULL OR p.tanggal_mulai = "" OR p.tanggal_mulai <= CURDATE())
                AND (p.tanggal_selesai IS NULL OR p.tanggal_selesai = "" OR p.tanggal_selesai >= CURDATE())'
         );
         $stmt->execute([$materiId, $anggotaId]);
         return (int) $stmt->fetchColumn() > 0;
+    }
+
+    /**
+     * Akses beberapa materi sekaligus dalam satu query, dikembalikan sebagai
+     * map id materi => true untuk yang boleh dibuka.
+     */
+    public static function aksesMap(array $materiIds, ?int $anggotaId, bool $isAdmin = false): array
+    {
+        $ids = array_values(array_unique(array_filter(array_map('intval', $materiIds), fn(int $id): bool => $id > 0)));
+        if (!$ids) return [];
+        if ($isAdmin) return array_fill_keys($ids, true);
+        if (!$anggotaId) return [];
+
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $stmt = self::db()->prepare(
+            'SELECT DISTINCT mp.materi_id FROM materi_pelatihan mp
+             JOIN pelatihan p ON p.id = mp.pelatihan_id
+             JOIN pelatihan_peserta pp ON pp.pelatihan_id = p.id
+             WHERE mp.materi_id IN (' . $placeholders . ')
+               AND pp.anggota_id = ?
+               AND pp.status = "Disetujui"
+               AND (p.tanggal_mulai IS NULL OR p.tanggal_mulai = "" OR p.tanggal_mulai <= CURDATE())
+               AND (p.tanggal_selesai IS NULL OR p.tanggal_selesai = "" OR p.tanggal_selesai >= CURDATE())'
+        );
+        $stmt->execute(array_merge($ids, [$anggotaId]));
+
+        return array_fill_keys(array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN)), true);
     }
 
     /** Keterangan singkat untuk ditampilkan pada kartu yang terkunci. */
@@ -73,6 +101,7 @@ class Materi extends Model
             'SELECT p.nama, p.tanggal_selesai FROM materi_pelatihan mp
              JOIN pelatihan p ON p.id = mp.pelatihan_id
              WHERE mp.materi_id = ?
+               AND (p.tanggal_mulai IS NULL OR p.tanggal_mulai = "" OR p.tanggal_mulai <= CURDATE())
                AND (p.tanggal_selesai IS NULL OR p.tanggal_selesai = "" OR p.tanggal_selesai >= CURDATE())
              ORDER BY p.tanggal_mulai ASC'
         );

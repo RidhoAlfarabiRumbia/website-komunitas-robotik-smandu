@@ -165,12 +165,12 @@ class Karya extends Model
         return self::jumlahByStatus('Menunggu');
     }
 
-    public static function moderasi(int $id, string $status, ?string $alasan = null): void
+    public static function moderasi(int $id, string $status, ?string $alasan = null): bool
     {
-        if (!in_array($status, ['Disetujui', 'Ditolak'], true)) {
-            return;
+        if (!in_array($status, ['Disetujui', 'Ditolak'], true) || !self::find($id)) {
+            return false;
         }
-        self::update($id, [
+        return self::update($id, [
             'publikasi' => $status,
             'alasan_tolak' => $status === 'Ditolak' ? $alasan : null,
         ]);

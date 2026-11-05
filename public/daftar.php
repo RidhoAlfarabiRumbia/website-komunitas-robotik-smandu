@@ -21,21 +21,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     /* Endpoint publik tanpa login: batasi jumlah kiriman agar tidak bisa
        dipakai menghabiskan disk (spam/banjiri unggahan).
        Gunakan DB-backed rate limit (table login_attempts) dengan prefix 'daftar_'. */
-    $ipHash = sha1($_SERVER['REMOTE_ADDR'] ?? 'unknown');
-    $daftarKey = 'daftar_' . $ipHash;
-    $stmt = Database::connect()->prepare('SELECT attempts, locked_until FROM login_attempts WHERE username_hash = ?');
-    $stmt->execute([$daftarKey]);
-    $row = $stmt->fetch();
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    // Kolom username_hash hanya CHAR(40); hash prefix agar tidak terpotong.
+    $daftarKey = sha1('daftar_' . $ip);
+    $db = Database::connect();
     $maxDaftar = 3;
     $lockDaftar = 3600; // 1 jam
-    if ($row && (int) $row['attempts'] >= $maxDaftar) {
-        if ($row['locked_until'] && strtotime($row['locked_until']) > time()) {
-            $menit = (int) ceil((strtotime($row['locked_until']) - time()) / 60);
-            flash_set('error', "Terlalu banyak pendaftaran. Coba lagi dalam $menit menit.");
-            redirect('daftar.php');
+    $cekKuota = static function (PDO $db, string $key, int $max, int $lock): ?string {
+        $stmt = $db->prepare('SELECT attempts, locked_until FROM login_attempts WHERE username_hash = ?');
+        $stmt->execute([$key]);
+        $row = $stmt->fetch();
+        if (!$row || (int) $row['attempts'] < $max) {
+            return null;
         }
-        // Lock expired, reset
-        Database::connect()->prepare('DELETE FROM login_attempts WHERE username_hash = ?')->execute([$daftarKey]);
+        $sisa = $row['locked_until'] ? strtotime($row['locked_until']) - time() : 0;
+        if ($sisa > 0) {
+            $menit = (int) ceil($sisa / 60);
+            return "Terlalu banyak pendaftaran. Coba lagi dalam $menit menit.";
+        }
+        if (!$row['locked_until']) {
+            $terkunci = date('Y-m-d H:i:s', time() + $lock);
+            $db->prepare('UPDATE login_attempts SET locked_until = ?, updated_at = ? WHERE username_hash = ?')
+                ->execute([$terkunci, date('Y-m-d H:i:s'), $key]);
+            $menit = (int) ceil($lock / 60);
+            return "Terlalu banyak pendaftaran. Coba lagi dalam $menit menit.";
+        }
+        $db->prepare('DELETE FROM login_attempts WHERE username_hash = ?')->execute([$key]);
+        return null;
+    };
+    $pesanKuota = $cekKuota($db, $daftarKey, $maxDaftar, $lockDaftar);
+    if ($pesanKuota !== null) {
+        flash_set('error', $pesanKuota);
+        redirect('daftar.php');
     }
 
     $old = [
@@ -76,17 +93,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors['pakta_integritas'] = 'Pakta Integritas wajib diunggah.';
     } else {
         $f = $_FILES['pakta_integritas'];
-        $ext = strtolower(pathinfo($f['name'], PATHINFO_EXTENSION));
-        if ($f['error'] !== UPLOAD_ERR_OK) {
-            $errors['pakta_integritas'] = 'Upload gagal, coba lagi.';
-        } elseif (!in_array($ext, ['pdf', 'jpg', 'jpeg', 'png'], true)) {
-            $errors['pakta_integritas'] = 'Format harus PDF, JPG, atau PNG.';
-        } elseif ($f['size'] > 5 * 1024 * 1024) {
-            $errors['pakta_integritas'] = 'Ukuran maksimal 5MB.';
+        if (!is_string($f['name'])) {
+            $errors['pakta_integritas'] = 'Format berkas tidak didukung.';
+        } else {
+            $ext = strtolower(pathinfo($f['name'], PATHINFO_EXTENSION));
+            if ($f['error'] !== UPLOAD_ERR_OK) {
+                $errors['pakta_integritas'] = 'Upload gagal, coba lagi.';
+            } elseif (!in_array($ext, ['pdf', 'jpg', 'jpeg', 'png'], true)) {
+                $errors['pakta_integritas'] = 'Format harus PDF, JPG, atau PNG.';
+            } elseif ($f['size'] > 5 * 1024 * 1024) {
+                $errors['pakta_integritas'] = 'Ukuran maksimal 5MB.';
+            }
         }
     }
 
     if (!$errors) {
+        $lockName = 'daftar_lock_' . substr($daftarKey, 0, 40);
+        $kunciDipegang = false;
+        $lepasKunci = static function () use ($db, &$kunciDipegang, $lockName): void {
+            if ($kunciDipegang) {
+                $db->prepare('SELECT RELEASE_LOCK(?)')->execute([$lockName]);
+                $kunciDipegang = false;
+            }
+        };
+        $stmt = $db->prepare('SELECT GET_LOCK(?, 5)');
+        $stmt->execute([$lockName]);
+        if ((int) $stmt->fetchColumn() !== 1) {
+            flash_set('error', 'Pendaftaran sedang sibuk diproses. Coba lagi sebentar.');
+            redirect('daftar.php');
+        }
+        $kunciDipegang = true;
+
+        $pesanKuota = $cekKuota($db, $daftarKey, $maxDaftar, $lockDaftar);
+        if ($pesanKuota !== null) {
+            $lepasKunci();
+            flash_set('error', $pesanKuota);
+            redirect('daftar.php');
+        }
+
         $berkas = simpan_upload(
             'pakta_integritas',
             'pakta-integritas',
@@ -97,34 +141,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             true
         );
 
-        Pendaftaran::create([
-            'nama' => $old['nama'],
-            'kelas' => $old['kelas'],
-            'kontak' => $old['kontak'],
-            'email' => $old['email'],
-            'alasan' => $old['alasan'] ?: null,
-            'pakta_integritas' => $berkas,
-            'nama_berkas' => sanitize_filename($_FILES['pakta_integritas']['name']),
-            'status' => 'Baru',
-        ]);
-
-        // Catat rate limit untuk pendaftaran (IP-based)
-        $ipHash = sha1($_SERVER['REMOTE_ADDR'] ?? 'unknown');
-        $daftarKey = 'daftar_' . $ipHash;
-        $now = date('Y-m-d H:i:s');
-        $stmt = Database::connect()->prepare('SELECT attempts FROM login_attempts WHERE username_hash = ?');
-        $stmt->execute([$daftarKey]);
-        $row = $stmt->fetch();
-        if ($row) {
-            Database::connect()->prepare('UPDATE login_attempts SET attempts = attempts + 1, updated_at = ? WHERE username_hash = ?')
-                ->execute([$now, $daftarKey]);
+        if ($berkas === null) {
+            $lepasKunci();
+            $errors['pakta_integritas'] = 'Pakta Integritas gagal diunggah. Coba lagi.';
         } else {
-            Database::connect()->prepare('INSERT INTO login_attempts (username_hash, attempts, created_at, updated_at) VALUES (?, 1, ?, ?)')
-                ->execute([$daftarKey, $now, $now]);
-        }
+            Pendaftaran::create([
+                'nama' => $old['nama'],
+                'kelas' => $old['kelas'],
+                'kontak' => $old['kontak'],
+                'email' => $old['email'],
+                'alasan' => $old['alasan'] ?: null,
+                'pakta_integritas' => $berkas,
+                'nama_berkas' => sanitize_filename((string) $_FILES['pakta_integritas']['name']),
+                'status' => 'Baru',
+            ]);
 
-        flash_set('success', 'Pendaftaran terkirim. Admin akan memverifikasi Pakta Integritas kamu sebelum akun diaktifkan. Admin/pembina akan menghubungimu melalui WhatsApp.');
-        redirect('daftar.php?terkirim=1');
+            // Catat rate limit untuk pendaftaran (IP-based), atomik saat baris sudah ada.
+            $now = date('Y-m-d H:i:s');
+            $terkunci = date('Y-m-d H:i:s', time() + $lockDaftar);
+            $stmt = $db->prepare(
+                'UPDATE login_attempts
+                 SET attempts = attempts + 1,
+                     locked_until = IF(attempts + 1 >= ?, ?, locked_until),
+                     updated_at = ?
+                 WHERE username_hash = ?'
+            );
+            $stmt->execute([$maxDaftar, $terkunci, $now, $daftarKey]);
+            if ($stmt->rowCount() === 0) {
+                $db->prepare('INSERT INTO login_attempts (username_hash, attempts, created_at, updated_at) VALUES (?, 1, ?, ?)')
+                    ->execute([$daftarKey, $now, $now]);
+            }
+            $lepasKunci();
+
+            flash_set('success', 'Pendaftaran terkirim. Admin akan memverifikasi Pakta Integritas kamu sebelum akun diaktifkan. Admin/pembina akan menghubungimu melalui WhatsApp.');
+            redirect('daftar.php?terkirim=1');
+        }
     }
 
     flash_set('error', 'Periksa kembali isian yang ditandai.');

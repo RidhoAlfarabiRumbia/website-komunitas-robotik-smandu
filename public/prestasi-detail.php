@@ -16,8 +16,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         flash_set('error', 'Prestasi tidak ditemukan.');
         redirect('prestasi.php');
     }
-    Prestasi::setStatus($id, $p['status'] === 'Tayang' ? 'Disembunyikan' : 'Tayang');
-    flash_set('success', 'Status prestasi diperbarui.');
+    if (Prestasi::setStatus($id, $p['status'] === 'Tayang' ? 'Disembunyikan' : 'Tayang')) {
+        flash_set('success', 'Status prestasi diperbarui.');
+    } else {
+        flash_set('error', 'Status prestasi gagal diperbarui.');
+    }
     redirect('prestasi-detail.php?id=' . $id);
 }
 

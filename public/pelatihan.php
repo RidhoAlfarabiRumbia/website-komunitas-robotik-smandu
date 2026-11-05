@@ -34,14 +34,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect('pelatihan.php');
     }
     if (Pelatihan::sudahTerdaftar($id, (int) Auth::anggotaId())) {
-        flash_set('error', 'Kamu sudah terdaftar pada pelatihan ini.');
+        flash_set('error', 'Kamu sudah terdaftar atau pendaftaran sedang diproses. Coba lagi.');
         redirect('pelatihan-detail.php?id=' . $id);
     }
-    if ($p['status'] !== 'Dibuka') {
+    if (!Pelatihan::bisaDaftar($p)) {
         flash_set('error', 'Pendaftaran pelatihan ini sudah ditutup.');
         redirect('pelatihan-detail.php?id=' . $id);
     }
-    Pelatihan::daftar($id, (int) Auth::anggotaId());
+    if (!Pelatihan::daftarSekali($id, (int) Auth::anggotaId())) {
+        flash_set('error', 'Kamu sudah terdaftar atau pendaftaran sedang diproses. Coba lagi.');
+        redirect('pelatihan-detail.php?id=' . $id);
+    }
     flash_set('success', 'Pendaftaran terkirim. Menunggu persetujuan admin sebelum materi dapat dibuka.');
     redirect('pelatihan-detail.php?id=' . $id);
 }
@@ -116,7 +119,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
             <?php elseif (Auth::role() === 'anggota'): ?>
               <?php if ($saya): ?>
                 <?= badge_status_peserta($saya['status']) ?>
-              <?php elseif ($p['status'] === 'Dibuka'): ?>
+              <?php elseif (Pelatihan::bisaDaftar($p)): ?>
                 <form method="post" style="display:inline;">
                   <?= Csrf::field() ?>
                   <input type="hidden" name="pelatihan_id" value="<?= (int) $p['id'] ?>">

@@ -57,13 +57,13 @@ include __DIR__ . '/../app/includes/header.php';
 
         <div class="field">
           <label>Username</label>
-          <input type="text" name="username" id="usernameField" required>
+          <input type="text" name="username" id="usernameField" maxlength="60" autocomplete="username" required>
         </div>
 
         <div class="field">
           <label for="passwordField">Kata sandi</label>
           <div class="password-wrap">
-            <input type="password" name="password" id="passwordField" required>
+            <input type="password" name="password" id="passwordField" maxlength="255" autocomplete="current-password" required>
             <button type="button" class="password-toggle" id="togglePassword" aria-label="Tampilkan kata sandi" aria-pressed="false" title="Tampilkan kata sandi">
               <i class="bi bi-eye" id="passwordIcon"></i>
             </button>

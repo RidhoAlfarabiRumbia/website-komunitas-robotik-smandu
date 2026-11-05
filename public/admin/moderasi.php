@@ -11,11 +11,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = nilai_int($_POST, 'id');
     $aksi = nilai_teks($_POST, 'aksi');
     if ($aksi === 'approve') {
-        Karya::moderasi($id, 'Disetujui');
-        flash_set('Karya disetujui dan kini tayang di portal.');
+        if (Karya::moderasi($id, 'Disetujui')) {
+            flash_set('Karya disetujui dan kini tayang di portal.');
+        } else {
+            flash_set('error', 'Karya gagal disetujui. Data mungkin sudah berubah.');
+        }
     } elseif ($aksi === 'reject') {
-        Karya::moderasi($id, 'Ditolak', nilai_teks($_POST, 'alasan') ?: 'Perlu perbaikan sebelum diajukan kembali.');
-        flash_set('Karya ditolak dan anggota dapat melihat catatannya.');
+        if (Karya::moderasi($id, 'Ditolak', nilai_teks($_POST, 'alasan') ?: 'Perlu perbaikan sebelum diajukan kembali.')) {
+            flash_set('Karya ditolak dan anggota dapat melihat catatannya.');
+        } else {
+            flash_set('error', 'Karya gagal ditolak. Data mungkin sudah berubah.');
+        }
     }
     $statusKembali = nilai_teks($_POST, 'status_kembali') ?: 'Menunggu';
     redirect('admin/moderasi.php?status=' . urlencode($statusKembali) . $qs);
@@ -24,10 +30,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $status = nilai_teks($_GET, 'status') ?: 'Menunggu';
 if (!in_array($status, ['Menunggu', 'Disetujui', 'Ditolak'], true)) $status = 'Menunggu';
 $list = Karya::byStatus($status);
-$totalList = count($list);
 if ($q !== '') {
     $list = cari_filter($list, ['judul', 'deskripsi', 'teknologi', 'pembuat_nama', 'alasan_tolak'], $q);
 }
+$totalList = count($list);
+$perHalaman = 20;
+$totalHalaman = max(1, (int) ceil($totalList / $perHalaman));
+$halaman = max(1, min($totalHalaman, nilai_int($_GET, 'page')));
+$list = array_slice($list, ($halaman - 1) * $perHalaman, $perHalaman);
 
 $pageTitle = 'Moderasi Karya';
 include __DIR__ . '/../../app/includes/header.php';
@@ -116,6 +126,7 @@ include __DIR__ . '/../../app/includes/header.php';
         <div class="empty" style="grid-column:1/-1;"><?= $q !== '' ? 'Data tidak ditemukan.' : 'Tidak ada karya berstatus ' . e($status) . '.' ?></div>
       <?php endif; ?>
     </div>
+    <?= paginasi_bar($halaman, $totalHalaman, ['status' => $status, 'q' => $q]) ?>
   </div>
 </div>
 <?php include __DIR__ . '/../../app/includes/footer.php'; ?>

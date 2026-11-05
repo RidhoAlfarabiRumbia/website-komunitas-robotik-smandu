@@ -26,6 +26,7 @@ if ($crudAktif) {
 }
 
 $materi = Materi::semuaWithPelatihan();
+$aksesMateri = Materi::aksesMap(array_column($materi, 'id'), $idAnggota, $isAdmin);
 $referensi = Referensi::all('nama ASC');
 
 $pageTitle = 'Materi';
@@ -54,7 +55,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
   <?php if ($materi): ?>
     <div class="grid grid-3 grid-stagger reveal">
       <?php foreach ($materi as $m):
-        $boleh = Materi::bolehAkses((int) $m['id'], $idAnggota, $isAdmin);
+        $boleh = isset($aksesMateri[(int) $m['id']]);
         $hasFile = !empty($m['file_path']);
         // Hanya tautan http/https yang boleh diklik (anti javascript: pada data lama).
         $hasLink = !empty($m['link_url']) && preg_match('#^https?://#i', (string) $m['link_url']);
@@ -79,8 +80,6 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
             <a class="btn btn-outline btn-sm" href="berkas.php?jenis=materi&amp;id=<?= (int) $m['id'] ?>"><i class="bi bi-download"></i> Unduh</a>
           <?php elseif ($boleh && $hasLink): ?>
             <a class="btn btn-outline btn-sm" href="<?= e($m['link_url']) ?>" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right"></i> Buka</a>
-          <?php elseif ($hasLink): ?>
-            <a class="btn btn-outline btn-sm" href="<?= e($m['link_url']) ?>" target="_blank" rel="noopener"><i class="bi bi-box-arrow-up-right"></i> Tautan</a>
           <?php else: ?>
             <span class="badge badge-muted"><i class="bi bi-lock"></i> Terkunci</span>
           <?php endif; ?>

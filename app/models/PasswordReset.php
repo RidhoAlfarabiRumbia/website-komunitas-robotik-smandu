@@ -57,6 +57,51 @@ class PasswordReset extends Model
     }
 
     /**
+     * Cek batas dan catat permintaan dalam satu kunci agar request paralel
+     * tidak bisa melewati rate limit.
+     */
+    public static function catatJikaBoleh(
+        string $email,
+        ?int $userId,
+        ?string $tokenHash,
+        ?string $expiresAt,
+        ?string $ip
+    ): bool {
+        $emailHash = self::emailHash($email);
+        $lockNames = ['pwreset_' . substr($emailHash, 0, 40)];
+        if ($ip !== null && $ip !== '') {
+            $lockNames[] = 'pwreset_ip_' . substr(sha1($ip), 0, 40);
+        }
+
+        $db = self::db();
+        $terkunci = [];
+        try {
+            foreach ($lockNames as $lockName) {
+                $stmt = $db->prepare('SELECT GET_LOCK(?, 5)');
+                $stmt->execute([$lockName]);
+                if ((int) $stmt->fetchColumn() === 1) {
+                    $terkunci[] = $lockName;
+                }
+            }
+
+            if (count($terkunci) !== count($lockNames)) {
+                return false;
+            }
+
+            if (self::terlaluSering($emailHash, $ip)) {
+                return false;
+            }
+
+            self::catat($email, $userId, $tokenHash, $expiresAt, $ip);
+            return true;
+        } finally {
+            foreach (array_reverse($terkunci) as $lockName) {
+                $db->prepare('SELECT RELEASE_LOCK(?)')->execute([$lockName]);
+            }
+        }
+    }
+
+    /**
      * Catat permintaan. user_id/ token_hash boleh NULL untuk email yang tidak
      * terdaftar; baris itu hanya dipakai untuk rate limit.
      */
@@ -95,10 +140,14 @@ class PasswordReset extends Model
         return $row;
     }
 
-    public static function tandaiTerpakai(int $id): void
+    public static function tandaiTerpakai(int $id): bool
     {
-        self::db()->prepare('UPDATE password_resets SET used_at = NOW() WHERE id = ?')
-            ->execute([$id]);
+        $stmt = self::db()->prepare(
+            'UPDATE password_resets SET used_at = NOW()
+             WHERE id = ? AND used_at IS NULL AND expires_at IS NOT NULL AND expires_at > NOW()'
+        );
+        $stmt->execute([$id]);
+        return $stmt->rowCount() === 1;
     }
 
     /** Token lama tidak boleh dipakai lagi setelah password/email berubah. */

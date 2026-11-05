@@ -105,6 +105,7 @@ include __DIR__ . '/../../app/includes/header.php';
           </tbody>
         </table>
       </div>
+      <?= paginasi_bar($halaman, $totalHalaman, ['entity' => $crudEntitas, 'q' => $q]) ?>
       <?php if ($crudEntitas === 'materi' && !$refPanel): ?>
         <div style="margin-top:18px;">
           <a class="btn btn-outline" href="?entity=materi&amp;sub=referensi"><i class="bi bi-link-45deg"></i> Kelola Referensi Belajar</a>

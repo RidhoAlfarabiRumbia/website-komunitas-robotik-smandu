@@ -19,39 +19,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (!$errors) {
+        $mulai = microtime(true);
         $ip = $_SERVER['REMOTE_ADDR'] ?? null;
-        $emailHash = PasswordReset::emailHash($email);
+        $user = User::findByEmail($email);
+        $token = $user ? bin2hex(random_bytes(32)) : null;
+        $tokenHash = $token !== null ? hash('sha256', $token) : null;
+        $expiresAt = $token !== null ? date('Y-m-d H:i:s', time() + 1800) : null;
 
-        if (!PasswordReset::terlaluSering($emailHash, $ip)) {
-            $user = User::findByEmail($email);
-            if ($user) {
-                $token = bin2hex(random_bytes(32));
-                PasswordReset::catat(
-                    $email,
-                    (int) $user['id'],
-                    hash('sha256', $token),
-                    date('Y-m-d H:i:s', time() + 1800),
-                    $ip
-                );
+        $boleh = PasswordReset::catatJikaBoleh(
+            $email,
+            $user ? (int) $user['id'] : null,
+            $tokenHash,
+            $expiresAt,
+            $ip
+        );
 
-                $tautan = app_url('reset-password.php?token=' . rawurlencode($token));
-                $teks = "Halo,\n\n"
-                    . "Kami menerima permintaan reset kata sandi untuk akun Portal Robotik ini.\n"
-                    . "Buka tautan berikut untuk membuat kata sandi baru (berlaku 30 menit):\n\n"
-                    . $tautan . "\n\n"
-                    . "Abaikan email ini jika Anda tidak meminta reset. Kata sandi tidak berubah.\n";
-                $html = '<p>Halo,</p>'
-                    . '<p>Kami menerima permintaan reset kata sandi untuk akun Portal Robotik ini.</p>'
-                    . '<p><a href="' . e($tautan) . '">Buat kata sandi baru</a> (berlaku 30 menit).</p>'
-                    . '<p style="font-size:12px; color:#666;">Jika tombol tidak berfungsi, salin tautan ini:<br>'
-                    . e($tautan) . '</p>'
-                    . '<p>Abaikan email ini jika Anda tidak meminta reset. Kata sandi tidak berubah.</p>';
+        if ($boleh && $user && $token !== null) {
+            $tautan = app_url('reset-password.php?token=' . rawurlencode($token));
+            $teks = "Halo,\n\n"
+                . "Kami menerima permintaan reset kata sandi untuk akun Portal Robotik ini.\n"
+                . "Buka tautan berikut untuk membuat kata sandi baru (berlaku 30 menit):\n\n"
+                . $tautan . "\n\n"
+                . "Abaikan email ini jika Anda tidak meminta reset. Kata sandi tidak berubah.\n";
+            $html = '<p>Halo,</p>'
+                . '<p>Kami menerima permintaan reset kata sandi untuk akun Portal Robotik ini.</p>'
+                . '<p><a href="' . e($tautan) . '">Buat kata sandi baru</a> (berlaku 30 menit).</p>'
+                . '<p style="font-size:12px; color:#666;">Jika tombol tidak berfungsi, salin tautan ini:<br>'
+                . e($tautan) . '</p>'
+                . '<p>Abaikan email ini jika Anda tidak meminta reset. Kata sandi tidak berubah.</p>';
 
-                Mailer::send($email, 'Reset kata sandi Portal Robotik', $html, $teks);
-            } else {
-                // Tetap catat untuk rate limit, tanpa membuat token.
-                PasswordReset::catat($email, null, null, null, $ip);
-            }
+            Mailer::send($email, 'Reset kata sandi Portal Robotik', $html, $teks);
+        }
+
+        // Samakan waktu respons agar status email tidak mudah ditebak dari timing.
+        $sisa = 1.5 - (microtime(true) - $mulai);
+        if ($sisa > 0) {
+            usleep((int) ($sisa * 1000000));
         }
 
         // Selalu pesan generik agar tidak membocorkan apakah email terdaftar.
