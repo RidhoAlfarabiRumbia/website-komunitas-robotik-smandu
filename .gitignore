@@ -4,10 +4,19 @@
 .env.*.local
 
 # ===== USER UPLOADS (public) =====
-public/uploads/
+# Abaikan seluruh berkas unggahan, tetapi folder dan berkas pengaman tetap dilacak.
+public/uploads/**
+!public/uploads/**/
+!public/uploads/.htaccess
+!public/uploads/.gitkeep
+!public/uploads/**/.gitkeep
 
 # ===== PRIVATE STORAGE (outside document root) =====
-storage/terbatas/
+storage/terbatas/**
+!storage/terbatas/**/
+!storage/terbatas/.htaccess
+!storage/terbatas/.gitkeep
+!storage/terbatas/**/.gitkeep
 
 # ===== DEPENDENCIES =====
 vendor/
