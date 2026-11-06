@@ -26,29 +26,9 @@ function load_env(string $path): void
         } else {
             $value = trim((string) preg_replace('/(?:^|\s+)#.*$/', '', $value));
         }
-        if (function_exists('putenv')) {
-            putenv("$key=$value");
-        }
+        putenv("$key=$value");
         $_ENV[$key] = $value;
-        $_SERVER[$key] = $value;
     }
 }
 
 load_env(__DIR__ . '/../../.env');
-
-function env_val(string $key): string
-{
-    if (isset($_ENV[$key]) && $_ENV[$key] !== '') {
-        return (string) $_ENV[$key];
-    }
-    if (isset($_SERVER[$key]) && $_SERVER[$key] !== '') {
-        return (string) $_SERVER[$key];
-    }
-    if (function_exists('getenv')) {
-        $v = getenv($key);
-        if ($v !== false && $v !== '') {
-            return (string) $v;
-        }
-    }
-    return '';
-}

@@ -7,10 +7,10 @@ class Database
     public static function connect(): PDO
     {
         if (self::$instance === null) {
-            $host = env_val('DB_HOST');
-            $name = env_val('DB_NAME');
-            $user = env_val('DB_USER');
-            $pass = env_val('DB_PASS');
+            $host = getenv('DB_HOST');
+            $name = getenv('DB_NAME');
+            $user = getenv('DB_USER');
+            $pass = getenv('DB_PASS');
 
             $dsn = "mysql:host=$host;dbname=$name;charset=utf8mb4";
             try {
