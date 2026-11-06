@@ -40,14 +40,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $reset) {
         $errors[] = 'Pengulangan kata sandi baru tidak sama.';
     }
 
-    if (!$errors && User::setPassword((int) $reset['user_id'], $password)) {
-        PasswordReset::tandaiTerpakai((int) $reset['id']);
-        flash_set('success', 'Kata sandi berhasil diubah. Silakan masuk dengan kata sandi baru.');
-        redirect('login.php');
-    }
-
     if (!$errors) {
-        $errors[] = 'Kata sandi gagal diubah. Silakan coba lagi.';
+        $db = Database::connect();
+        try {
+            $db->beginTransaction();
+
+            // Klaim token secara atomik agar token yang sama tidak bisa dipakai dua kali.
+            if (!PasswordReset::tandaiTerpakai((int) $reset['id'])) {
+                $db->rollBack();
+                flash_set('error', 'Tautan reset sudah digunakan atau kedaluwarsa.');
+                redirect('error.php?code=token');
+            }
+
+            if (!User::setPassword((int) $reset['user_id'], $password)) {
+                throw new RuntimeException('Gagal memperbarui kata sandi.');
+            }
+
+            $db->commit();
+            flash_set('success', 'Kata sandi berhasil diubah. Silakan masuk dengan kata sandi baru.');
+            redirect('login.php');
+        } catch (Throwable $e) {
+            if ($db->inTransaction()) {
+                $db->rollBack();
+            }
+            error_log('[RESET PASSWORD] ' . $e->getMessage());
+            $errors[] = 'Kata sandi gagal diubah. Silakan coba lagi.';
+        }
     }
 }
 

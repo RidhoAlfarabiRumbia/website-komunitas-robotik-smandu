@@ -40,11 +40,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             flash_set('error', 'Username wajib diisi untuk mengaktifkan akun.');
             redirect('admin/verifikasi.php?id=' . $id . $qs);
         }
+        if (mb_strlen($username) > 60) {
+            flash_set('error', 'Username maksimal 60 karakter.');
+            redirect('admin/verifikasi.php?id=' . $id . $qs);
+        }
         if (User::usernameTaken($username, $akunId)) {
             flash_set('error', 'Username sudah dipakai akun lain.');
             redirect('admin/verifikasi.php?id=' . $id . $qs);
         }
-        if (strlen($password) < 8) {
+        if ($password === '' && !$akunLama) {
+            flash_set('error', 'Kata sandi wajib diisi untuk akun baru.');
+            redirect('admin/verifikasi.php?id=' . $id . $qs);
+        }
+        if ($password !== '' && strlen($password) < 8) {
             flash_set('error', 'Kata sandi minimal 8 karakter.');
             redirect('admin/verifikasi.php?id=' . $id . $qs);
         }
@@ -68,40 +76,78 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // username+sandi miliknya terpasang ke akun anggota tersebut (account
         // takeover). Satu-satunya sumber kebenaran adalah $p['anggota_id'] yang
         // sudah terisi dari verifikasi sebelumnya.
-        if (!$anggotaId) {
-            $anggotaId = (int) Anggota::create([
-                'nama' => $p['nama'],
-                'kelas' => $p['kelas'],
-                'kontak' => $p['kontak'],
-                'deskripsi' => $p['alasan'] ?: 'Anggota baru terdaftar lewat formulir pendaftaran.',
-            ]);
+        $db = Database::connect();
+        try {
+            $db->beginTransaction();
+
+            if (!$anggotaId) {
+                $anggotaId = (int) Anggota::create([
+                    'nama' => $p['nama'],
+                    'kelas' => $p['kelas'],
+                    'kontak' => $p['kontak'],
+                    'deskripsi' => $p['alasan'] ?: 'Anggota baru terdaftar lewat formulir pendaftaran.',
+                ]);
+                if ($anggotaId <= 0) {
+                    throw new RuntimeException('Gagal membuat data anggota.');
+                }
+            }
+
+            if ($akunLama) {
+                $userData = ['username' => $username, 'email' => $email];
+                if ($password !== '') {
+                    $userData['password_hash'] = password_hash($password, PASSWORD_DEFAULT);
+                }
+                if (!User::update((int) $akunLama['id'], $userData)) {
+                    throw new RuntimeException('Gagal memperbarui akun anggota.');
+                }
+            } elseif (User::createForAnggota($anggotaId, $username, $password, $email) <= 0) {
+                throw new RuntimeException('Gagal membuat akun anggota.');
+            }
+
+            if (!Pendaftaran::verifikasi($id, 'Diverifikasi', $catatan, $anggotaId)) {
+                throw new RuntimeException('Gagal memperbarui data pendaftaran.');
+            }
+            $db->commit();
+        } catch (Throwable $e) {
+            if ($db->inTransaction()) {
+                $db->rollBack();
+            }
+            error_log('[VERIFIKASI] ' . $e->getMessage());
+            flash_set('error', 'Verifikasi gagal disimpan. Silakan coba lagi.');
+            redirect('admin/verifikasi.php?id=' . $id . $qs);
         }
 
-        if ($akunLama) {
-            User::update((int) $akunLama['id'], ['email' => $email]);
-        } else {
-            User::createForAnggota($anggotaId, $username, $password, $email);
-        }
-
-        Pendaftaran::verifikasi($id, 'Diverifikasi', $catatan, $anggotaId);
         flash_set('success', 'Pendaftaran diverifikasi. Akun anggota sudah aktif.');
     } elseif ($aksi === 'tolak') {
-        Pendaftaran::verifikasi($id, 'Ditolak', $catatan ?: 'Dokumen tidak valid.');
-        flash_set('success', 'Pendaftaran ditolak.');
+        if (Pendaftaran::verifikasi($id, 'Ditolak', $catatan ?: 'Dokumen tidak valid.')) {
+            flash_set('success', 'Pendaftaran ditolak.');
+        } else {
+            flash_set('error', 'Pendaftaran gagal ditolak.');
+        }
     } elseif ($aksi === 'hapus') {
-        Pendaftaran::delete($id);
-        flash_set('success', 'Data pendaftaran dihapus.');
+        if (Pendaftaran::delete($id)) {
+            flash_set('success', 'Data pendaftaran dihapus.');
+        } else {
+            flash_set('error', 'Data pendaftaran gagal dihapus.');
+        }
     }
 
     redirect('admin/verifikasi.php' . $qsBase);
 }
 
 $daftar = Pendaftaran::semua($filter);
-$totalDaftar = count($daftar);
 if ($q !== '') {
     $daftar = cari_filter($daftar, ['nama', 'kelas', 'kontak', 'email', 'alasan', 'catatan', 'nama_berkas'], $q);
 }
+$totalDaftar = count($daftar);
+$perHalaman = 20;
+$totalHalaman = max(1, (int) ceil($totalDaftar / $perHalaman));
+$halaman = max(1, min($totalHalaman, nilai_int($_GET, 'page')));
+$daftar = array_slice($daftar, ($halaman - 1) * $perHalaman, $perHalaman);
 $detail = nilai_int($_GET, 'id') ? Pendaftaran::detail(nilai_int($_GET, 'id')) : null;
+$akunDetail = $detail && !empty($detail['anggota_id'])
+    ? User::findByAnggota((int) $detail['anggota_id'])
+    : null;
 
 $pageTitle = 'Verifikasi Pendaftaran';
 include __DIR__ . '/../../app/includes/header.php';
@@ -181,17 +227,17 @@ include __DIR__ . '/../../app/includes/header.php';
 
               <div class="field">
                 <label>Username akun <span class="req">*</span></label>
-                <input name="username" value="<?= e(strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $detail['nama']))) ?>" maxlength="50" autocomplete="off">
+                <input name="username" value="<?= e($akunDetail ? $akunDetail['username'] : strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $detail['nama']))) ?>" maxlength="60" autocomplete="off">
               </div>
               <div class="field">
                 <label>Email akun <span class="req">*</span></label>
-                <input type="email" name="email" value="<?= e($detail['email'] ?: '') ?>" maxlength="120" required autocomplete="email">
+                <input type="email" name="email" value="<?= e(!empty($akunDetail['email']) ? $akunDetail['email'] : ($detail['email'] ?: '')) ?>" maxlength="120" required autocomplete="email">
                 <span class="hint">Dipakai untuk reset kata sandi. Pastikan email ini milik calon anggota.</span>
               </div>
               <div class="field">
-                <label>Kata sandi <span class="req">*</span></label>
-                <input type="password" name="password" minlength="8" autocomplete="new-password">
-                <span class="hint">Minimal 8 karakter. Sampaikan ke calon anggota lewat kanal aman.</span>
+                <label>Kata sandi <?php if (!$akunDetail): ?><span class="req">*</span><?php endif; ?></label>
+                <input type="password" name="password" minlength="8" autocomplete="new-password" <?= $akunDetail ? '' : 'required' ?>>
+                <span class="hint"><?= $akunDetail ? 'Kosongkan jika kata sandi tidak diubah.' : 'Minimal 8 karakter. Sampaikan ke calon anggota lewat kanal aman.' ?></span>
               </div>
               <div class="field">
                 <label>Catatan (opsional)</label>
@@ -255,6 +301,7 @@ include __DIR__ . '/../../app/includes/header.php';
           </tbody>
         </table>
       </div>
+      <?= paginasi_bar($halaman, $totalHalaman, ['status' => $filter, 'q' => $q]) ?>
     <?php endif; ?>
   </div>
 </div>

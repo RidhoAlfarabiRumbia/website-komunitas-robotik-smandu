@@ -4,10 +4,35 @@
 .env.*.local
 
 # ===== USER UPLOADS (public) =====
-public/uploads/
+# Abaikan seluruh berkas unggahan, tetapi folder dan berkas pengaman tetap dilacak.
+public/uploads/**
+!public/uploads/**/
+!public/uploads/.htaccess
+!public/uploads/.gitkeep
+!public/uploads/**/.gitkeep
 
 # ===== PRIVATE STORAGE (outside document root) =====
-storage/terbatas/
+storage/terbatas/**
+!storage/terbatas/**/
+!storage/terbatas/.htaccess
+!storage/terbatas/.gitkeep
+!storage/terbatas/**/.gitkeep
+
+# ===== FOTO DB_ROBOTIK_2 =====
+# 13 file asli (jpg/png) yang dirujuk db_robotik_2 (variasi _opt.webp tidak ada, gunakan file asli)
+!public/uploads/hero/hero_6aec705a3cb71.jpg
+!public/uploads/hero/hero_6aec70663ce03.jpg
+!public/uploads/hero/hero_6aec70794ac27.jpg
+!public/uploads/hero/hero_6aec708790e69.jpg
+!public/uploads/hero/hero_6aec709646a43.jpg
+!public/uploads/hero/hero_6aec70abe8770.jpg
+!public/uploads/hero/hero_6aec70c00252b.jpg
+!public/uploads/hero/hero_6aec70d7efbbf.jpg
+!public/uploads/hero/hero_6aec70eb3362b.jpg
+!public/uploads/galeri/galeri_6aec7175d7586.jpeg
+!public/uploads/karya/karya_6aec7150d9525.png
+!public/uploads/content/content_6aec703d208d9.jpg
+!public/uploads/anggota/anggota_6aec72fab8c53.jpeg
 
 # ===== DEPENDENCIES =====
 vendor/

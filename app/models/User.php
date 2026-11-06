@@ -163,7 +163,9 @@ class User extends Model
         if ($email !== null && $email !== $emailLama) {
             $data['email'] = $email;
         }
-        self::update($userId, $data);
+        if (!self::update($userId, $data)) {
+            return ['Akun gagal diperbarui. Coba lagi.'];
+        }
 
         return [];
     }

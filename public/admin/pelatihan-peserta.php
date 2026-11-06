@@ -29,14 +29,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $redirectKe = 'admin/pelatihan-peserta.php?id=' . (int) $row['pelatihan_id'] . $qs;
 
     if ($aksi === 'setuju') {
-        PelatihanPeserta::setStatus($pesertaId, 'Disetujui');
-        flash_set('success', 'Peserta disetujui. Materi pelatihan kini terbuka untuknya.');
+        if (PelatihanPeserta::setStatus($pesertaId, 'Disetujui')) {
+            flash_set('success', 'Peserta disetujui. Materi pelatihan kini terbuka untuknya.');
+        } else {
+            flash_set('error', 'Status peserta gagal diperbarui.');
+        }
     } elseif ($aksi === 'tolak') {
-        PelatihanPeserta::setStatus($pesertaId, 'Ditolak');
-        flash_set('success', 'Peserta ditolak.');
+        if (PelatihanPeserta::setStatus($pesertaId, 'Ditolak')) {
+            flash_set('success', 'Peserta ditolak.');
+        } else {
+            flash_set('error', 'Status peserta gagal diperbarui.');
+        }
     } elseif ($aksi === 'hapus') {
-        PelatihanPeserta::delete($pesertaId);
-        flash_set('success', 'Data peserta dihapus.');
+        if (PelatihanPeserta::delete($pesertaId)) {
+            flash_set('success', 'Data peserta dihapus.');
+        } else {
+            flash_set('error', 'Data peserta gagal dihapus.');
+        }
     }
 
     redirect($redirectKe);
@@ -56,11 +65,15 @@ if ($pelatihan) {
 } else {
     $peserta = $filterStatus ? Pelatihan::semuaPeserta($filterStatus) : Pelatihan::semuaPeserta();
 }
-$totalPeserta = count($peserta);
 if ($q !== '') {
     // Kolom 'pelatihan_nama' hanya ada pada daftar lintas pelatihan.
     $peserta = cari_filter($peserta, ['nama', 'kontak', 'kelas', 'asal', 'pelatihan_nama', 'catatan'], $q);
 }
+$totalPeserta = count($peserta);
+$perHalaman = 20;
+$totalHalaman = max(1, (int) ceil($totalPeserta / $perHalaman));
+$halaman = max(1, min($totalHalaman, nilai_int($_GET, 'page')));
+$peserta = array_slice($peserta, ($halaman - 1) * $perHalaman, $perHalaman);
 
 $pageTitle = 'Peserta Pelatihan';
 include __DIR__ . '/../../app/includes/header.php';
@@ -183,6 +196,7 @@ include __DIR__ . '/../../app/includes/header.php';
         </tbody>
       </table>
     </div>
+    <?= paginasi_bar($halaman, $totalHalaman, ['id' => $id ?: null, 'status' => $filterStatus, 'q' => $q]) ?>
   </div>
 </div>
 <?php include __DIR__ . '/../../app/includes/footer.php'; ?>

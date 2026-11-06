@@ -14,7 +14,18 @@ function load_env(string $path): void
         }
         [$key, $value] = array_pad(explode('=', $line, 2), 2, '');
         $key = trim($key);
-        $value = trim($value, " \t\n\r\0\x0B\"'");
+        if (!preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $key)) {
+            continue;
+        }
+        $value = trim($value);
+        if (preg_match('/^(["\'])(.*)\1\s*(?:#.*)?$/s', $value, $m)) {
+            $value = $m[2];
+            if ($m[1] === '"') {
+                $value = str_replace(['\\n', '\\r', '\\t', '\\"', '\\\\'], ["\n", "\r", "\t", '"', '\\'], $value);
+            }
+        } else {
+            $value = trim((string) preg_replace('/(?:^|\s+)#.*$/', '', $value));
+        }
         putenv("$key=$value");
         $_ENV[$key] = $value;
     }

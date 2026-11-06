@@ -3,6 +3,18 @@ require_once __DIR__ . '/../app/includes/bootstrap.php';
 
 $id = nilai_int($_GET, 'id');
 $k = Karya::detail($id);
+
+$kembaliHref = base_url('karya.php');
+$kembaliLabel = 'Kembali ke daftar karya';
+if (($_GET['dari'] ?? '') === 'moderasi' && Auth::isAdmin()) {
+    $statusKembali = nilai_teks($_GET, 'status') ?: 'Menunggu';
+    if (!in_array($statusKembali, ['Menunggu', 'Disetujui', 'Ditolak'], true)) {
+        $statusKembali = 'Menunggu';
+    }
+    $qKembali = cari_kunci($_GET['q'] ?? '');
+    $kembaliHref = base_url('admin/moderasi.php?status=' . urlencode($statusKembali) . cari_qs($qKembali));
+    $kembaliLabel = 'Kembali ke moderasi';
+}
 // Karya yang belum tayang hanya boleh dilihat admin atau pembuatnya sendiri
 // (Karya::bolehDilihat); pengunjung umum dan anggota lain hanya Disetujui.
 if (!Karya::bolehDilihat($k, Auth::anggotaId(), Auth::isAdmin())) {
@@ -13,15 +25,21 @@ include __DIR__ . '/../app/includes/header.php';
 include __DIR__ . '/../app/includes/navbar_anggota.php';
 ?>
 <div class="main">
+  <a class="back-link" href="<?= e($kembaliHref) ?>"><i class="bi bi-arrow-left"></i> <?= e($kembaliLabel) ?></a>
 <?php if (!$k): ?>
   <div class="empty"><i class="bi bi-exclamation-circle" style="font-size:24px;"></i><p>Karya tidak ditemukan.</p></div>
 <?php else:
   $teknologi = array_filter(array_map('trim', explode(',', $k['teknologi'] ?? '')));
+  $fotoRel = foto_relatif($k['foto'] ?? null, 'assets/img/karya-robot.svg');
+  $pakaiDefault = $fotoRel === 'assets/img/karya-robot.svg';
+  [$fotoW, $fotoH] = foto_dimensi($fotoRel);
+  $lebarMaks = lebar_foto_maks($fotoW, $fotoH);
+  $mediaClass = 'karya-detail-media' . ($pakaiDefault ? ' is-default' : '');
+  $mediaStyle = $pakaiDefault ? '' : ' style="width:min(100%, ' . $lebarMaks . 'px); aspect-ratio: ' . $fotoW . ' / ' . $fotoH . ';"';
 ?>
-  <div class="breadcrumb"><a href="karya.php">Karya</a> / <?= e($k['judul']) ?></div>
-  <div class="karya-detail">
-    <div class="karya-detail-media">
-      <span data-lightbox="<?= base_url(e($k['foto'] ?? 'assets/img/karya-robot.svg')) ?>" tabindex="0" role="button" aria-label="Perbesar foto karya"><img src="<?= base_url(e($k['foto'] ?? 'assets/img/karya-robot.svg')) ?>" alt="<?= e($k['judul']) ?>" fetchpriority="high" decoding="async"></span>
+  <div class="karya-detail<?= $pakaiDefault ? ' karya-detail-default' : '' ?>">
+    <div class="<?= $mediaClass ?>"<?= $mediaStyle ?>>
+      <span data-lightbox="<?= base_url(e($fotoRel)) ?>" tabindex="0" role="button" aria-label="Perbesar foto karya"><img src="<?= base_url(e($fotoRel)) ?>" alt="<?= e($k['judul']) ?>" fetchpriority="high" decoding="async"></span>
     </div>
     <div class="karya-detail-card">
       <h1><?= e($k['judul']) ?></h1>

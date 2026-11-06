@@ -6,7 +6,7 @@
 # luar folder public/ (app/, storage/, .env, *.sql, *.md) ikut terjangkau
 # Apache unless ditolak di sini.
 #
-# Aturan: hanya public/ yang boleh diakses lewat web.
+# Aturan: hanya public/ dan index.php root (pengalih) yang boleh diakses lewat web.
 # Berkas privat tetap dilayani lewat public/berkas.php yang memeriksa hak akses.
 #
 # Halaman publik  : http://localhost/portal-robotik/public/beranda.php
@@ -19,3 +19,26 @@
     Order deny,allow
     Deny from all
 </IfModule>
+
+<Files "index.php">
+    <IfModule mod_authz_core.c>
+        Require all granted
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Allow from all
+    </IfModule>
+</Files>
+
+<If "-d %{REQUEST_FILENAME}">
+    <IfModule mod_authz_core.c>
+        Require all granted
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Allow from all
+    </IfModule>
+</If>
+
+Options -Indexes
+DirectoryIndex index.php

@@ -15,10 +15,10 @@ class PelatihanPeserta extends Model
      * Status peserta. "Disetujui" inilah yang membuka akses materi pelatihan
      * (lihat Materi::bolehAkses()).
      */
-    public static function setStatus(int $id, string $status): void
+    public static function setStatus(int $id, string $status): bool
     {
-        if (!in_array($status, ['Pending', 'Disetujui', 'Ditolak'], true)) return;
-        self::update($id, ['status' => $status]);
+        if (!in_array($status, ['Pending', 'Disetujui', 'Ditolak'], true) || !self::find($id)) return false;
+        return self::update($id, ['status' => $status]);
     }
 
     public static function find(int $id): ?array

@@ -39,13 +39,22 @@ class Pelatihan extends Model
     }
 
     /**
-     * Aptika pelatihan masih berjalan (periode belum berakhir).
+     * Apakah periode pelatihan belum berakhir.
      */
     public static function aktif(?array $pelatihan): bool
     {
         if (!$pelatihan) return false;
-        $selesai = $pelatihan['tanggal_selesai'] ?: $pelatihan['tanggal_mulai'];
+        $selesai = ($pelatihan['tanggal_selesai'] ?? null) ?: ($pelatihan['tanggal_mulai'] ?? null);
         return strcmp((string) $selesai, date('Y-m-d')) >= 0;
+    }
+
+    /** Apakah pelatihan sudah mulai dan belum berakhir. */
+    public static function sedangBerjalan(?array $pelatihan): bool
+    {
+        if (!self::aktif($pelatihan)) return false;
+
+        $mulai = $pelatihan['tanggal_mulai'] ?? null;
+        return !$mulai || strcmp((string) $mulai, date('Y-m-d')) <= 0;
     }
 
     /** Apakah pendaftaran peserta masih dibuka (status Dibuka, belum daftar, tanggal valid)? */
@@ -81,6 +90,36 @@ class Pelatihan extends Model
             $a['kontak'] ?? '-',
             $a['kelas'] ?? ($nama !== '' ? 'Pendaftaran umum' : 'SMA Negeri 2'),
         ]);
+    }
+
+    /**
+     * Daftarkan anggota satu kali. Kunci per pasangan pelatihan+anggota
+     * mencegah dua request paralel membuat baris ganda.
+     */
+    public static function daftarSekali(int $pelatihanId, int $anggotaId): bool
+    {
+        if ($pelatihanId <= 0 || $anggotaId <= 0) return false;
+
+        $db = self::db();
+        $lockName = 'pelatihan_' . sha1($pelatihanId . ':' . $anggotaId);
+        $terkunci = false;
+        try {
+            $stmt = $db->prepare('SELECT GET_LOCK(?, 5)');
+            $stmt->execute([$lockName]);
+            $terkunci = (int) $stmt->fetchColumn() === 1;
+            if (!$terkunci) return false;
+
+            if (self::sudahTerdaftar($pelatihanId, $anggotaId)) {
+                return false;
+            }
+
+            self::daftar($pelatihanId, $anggotaId);
+            return true;
+        } finally {
+            if ($terkunci) {
+                $db->prepare('SELECT RELEASE_LOCK(?)')->execute([$lockName]);
+            }
+        }
     }
 
     /** Daftarkan peserta umum (tanpa akun) pada pelatihan terbuka untuk umum. */

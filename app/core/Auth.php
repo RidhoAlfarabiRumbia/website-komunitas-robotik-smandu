@@ -17,7 +17,7 @@ class Auth
 
         // Selalu jalankan password_verify meski user tidak ada, agar waktu
         // merespons tidak membocorkan username mana yang terdaftar.
-        $hash = $user['password_hash'] ?? '$2y$10$invalidinvalidinvalidinvalidinvalidinvalidinvalidinvalidiu';
+        $hash = $user['password_hash'] ?? '$2y$10$psoVpEZT/EuKdXoIlfPVK.hkA.ZAMBHE9g6.5EufqEZjl/SrE0O.m';
         $cocok = password_verify($password, $hash);
 
         if (!$user || !$cocok) {
@@ -87,23 +87,36 @@ class Auth
     {
         $hash = self::kunci($username);
         $db = Database::connect();
-        $stmt = $db->prepare('SELECT attempts FROM login_attempts WHERE username_hash = ?');
-        $stmt->execute([$hash]);
-        $row = $stmt->fetch();
-        $now = date('Y-m-d H:i:s');
-        if ($row) {
-            $attempts = (int) $row['attempts'] + 1;
-            if ($attempts >= self::MAX_PERCOBAAN) {
-                $locked = date('Y-m-d H:i:s', time() + self::JEDA_PERCOBAAN);
-                $db->prepare('UPDATE login_attempts SET attempts = ?, locked_until = ?, updated_at = ? WHERE username_hash = ?')
-                    ->execute([$attempts, $locked, $now, $hash]);
+        $lockName = 'login_fail_' . $hash;
+        $terkunci = false;
+        try {
+            // Serialkan hitung gagal agar percobaan paralel tidak saling menimpa.
+            $stmt = $db->prepare('SELECT GET_LOCK(?, 5)');
+            $stmt->execute([$lockName]);
+            $terkunci = (int) $stmt->fetchColumn() === 1;
+
+            $stmt = $db->prepare('SELECT attempts FROM login_attempts WHERE username_hash = ?');
+            $stmt->execute([$hash]);
+            $row = $stmt->fetch();
+            $now = date('Y-m-d H:i:s');
+            if ($row) {
+                $attempts = (int) $row['attempts'] + 1;
+                if ($attempts >= self::MAX_PERCOBAAN) {
+                    $locked = date('Y-m-d H:i:s', time() + self::JEDA_PERCOBAAN);
+                    $db->prepare('UPDATE login_attempts SET attempts = ?, locked_until = ?, updated_at = ? WHERE username_hash = ?')
+                        ->execute([$attempts, $locked, $now, $hash]);
+                } else {
+                    $db->prepare('UPDATE login_attempts SET attempts = ?, updated_at = ? WHERE username_hash = ?')
+                        ->execute([$attempts, $now, $hash]);
+                }
             } else {
-                $db->prepare('UPDATE login_attempts SET attempts = ?, updated_at = ? WHERE username_hash = ?')
-                    ->execute([$attempts, $now, $hash]);
+                $db->prepare('INSERT INTO login_attempts (username_hash, attempts, created_at, updated_at) VALUES (?, 1, ?, ?)')
+                    ->execute([$hash, $now, $now]);
             }
-        } else {
-            $db->prepare('INSERT INTO login_attempts (username_hash, attempts, created_at, updated_at) VALUES (?, 1, ?, ?)')
-                ->execute([$hash, $now, $now]);
+        } finally {
+            if ($terkunci) {
+                $db->prepare('SELECT RELEASE_LOCK(?)')->execute([$lockName]);
+            }
         }
     }
 

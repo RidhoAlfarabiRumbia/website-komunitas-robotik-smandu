@@ -29,6 +29,9 @@ class Csrf
                 $onFailure();
                 return;
             }
+            if (PHP_SAPI !== 'cli' && !headers_sent()) {
+                redirect('error.php?code=csrf');
+            }
             http_response_code(403);
             die('Permintaan tidak valid (token keamanan tidak cocok). Silakan muat ulang halaman.');
         }

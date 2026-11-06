@@ -10,7 +10,7 @@
  * loop atau AJAX) tetap berfungsi tanpa perlu bind ulang.
  */
 ?>
-<div class="lightbox" id="lightbox" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-label="Pratinjau foto">
+<div class="lightbox<?= !empty($lightboxFixed) ? ' lightbox-fixed' : '' ?>" id="lightbox" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-label="Pratinjau foto">
   <div class="lightbox-inner">
     <img class="lightbox-img" id="lightboxImg" src="" alt="">
     <div class="lightbox-cap" id="lightboxCap"></div>

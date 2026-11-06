@@ -50,12 +50,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($old['nama'] === '') {
         $errors['nama'] = 'Nama prestasi wajib diisi.';
-    } elseif (mb_strlen($old['nama']) > 160) {
-        $errors['nama'] = 'Maksimal 160 karakter.';
     }
 
     if ($old['tanggal'] === '') {
         $errors['tanggal'] = 'Tanggal wajib diisi.';
+    } else {
+        $tanggal = DateTimeImmutable::createFromFormat('!Y-m-d', $old['tanggal']);
+        $tanggalError = DateTimeImmutable::getLastErrors();
+        if (!$tanggal
+            || ($tanggalError !== false && ($tanggalError['warning_count'] > 0 || $tanggalError['error_count'] > 0))
+            || $tanggal->format('Y-m-d') !== $old['tanggal']) {
+            $errors['tanggal'] = 'Tanggal tidak valid.';
+        }
     }
 
     if (!in_array($old['tingkat'], $tingkatOpsi, true)) {
@@ -64,8 +70,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($old['hasil'] === '') {
         $errors['hasil'] = 'Hasil wajib diisi, misalnya Juara 1.';
-    } elseif (mb_strlen($old['hasil']) > 80) {
-        $errors['hasil'] = 'Maksimal 80 karakter.';
     }
 
     $idLombaValid = array_map('intval', array_column($lombaList, 'id'));
@@ -90,6 +94,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $sertifikat = simpan_upload('sertifikat', 'sertifikat', ['pdf', 'jpg', 'jpeg', 'png'], 2 * 1024 * 1024, 'PDF atau gambar', '2MB');
         $foto = simpan_upload('foto', 'content', ['jpg', 'jpeg', 'png', 'webp'], 2 * 1024 * 1024, 'JPG, PNG, atau WEBP', '2MB');
 
+        if ($sertifikat === null && !empty($_FILES['sertifikat']['name'])) {
+            $errors['sertifikat'] = 'Sertifikat gagal diunggah. Coba lagi.';
+        }
+        if ($foto === null && !empty($_FILES['foto']['name'])) {
+            $errors['foto'] = 'Foto gagal diunggah. Coba lagi.';
+        }
+    }
+
+    if (!$errors) {
         $idBaru = Prestasi::create([
             'nama' => $old['nama'],
             'lomba_id' => $old['lomba_id'] ?: null,
@@ -133,7 +146,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
 
         <div class="field" style="grid-column:1/-1;">
           <label for="nama">Nama Prestasi <span class="req">*</span></label>
-          <input type="text" id="nama" name="nama" value="<?= e($old['nama']) ?>" required maxlength="160" class="<?= isset($errors['nama']) ? 'invalid' : '' ?>">
+          <input type="text" id="nama" name="nama" value="<?= e($old['nama']) ?>" required class="<?= isset($errors['nama']) ? 'invalid' : '' ?>">
           <?php if (isset($errors['nama'])): ?><span class="err"><?= e($errors['nama']) ?></span><?php endif; ?>
         </div>
 
@@ -168,7 +181,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
 
         <div class="field">
           <label for="hasil">Hasil <span class="req">*</span></label>
-          <input type="text" id="hasil" name="hasil" value="<?= e($old['hasil']) ?>" required maxlength="80" placeholder="Juara 1, Podium 2, Finalis..." class="<?= isset($errors['hasil']) ? 'invalid' : '' ?>">
+          <input type="text" id="hasil" name="hasil" value="<?= e($old['hasil']) ?>" required placeholder="Juara 1, Podium 2, Finalis..." class="<?= isset($errors['hasil']) ? 'invalid' : '' ?>">
           <?php if (isset($errors['hasil'])): ?><span class="err"><?= e($errors['hasil']) ?></span><?php endif; ?>
         </div>
 

@@ -67,6 +67,9 @@ abstract class Model
 
     public static function where(string $column, $value, string $orderBy = ''): array
     {
+        if (!preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $column)) {
+            return [];
+        }
         $sql = 'SELECT * FROM ' . static::$table . ' WHERE ' . $column . ' = ?';
         $orderBy = static::validateOrderBy($orderBy);
         if ($orderBy) {
@@ -80,6 +83,9 @@ abstract class Model
     public static function create(array $data): int
     {
         $data = array_intersect_key($data, array_flip(static::$fillable));
+        if (!$data) {
+            return 0;
+        }
         $cols = array_keys($data);
         $placeholders = array_fill(0, count($cols), '?');
         $sql = 'INSERT INTO ' . static::$table . ' (' . implode(',', $cols) . ') VALUES (' . implode(',', $placeholders) . ')';
@@ -91,6 +97,9 @@ abstract class Model
     public static function update(int $id, array $data): bool
     {
         $data = array_intersect_key($data, array_flip(static::$fillable));
+        if (!$data) {
+            return false;
+        }
         $set = implode(',', array_map(fn($c) => "$c = ?", array_keys($data)));
         $sql = 'UPDATE ' . static::$table . ' SET ' . $set . ' WHERE ' . static::$primaryKey . ' = ?';
         $stmt = static::db()->prepare($sql);
@@ -100,7 +109,8 @@ abstract class Model
     public static function delete(int $id): bool
     {
         $stmt = static::db()->prepare('DELETE FROM ' . static::$table . ' WHERE ' . static::$primaryKey . ' = ?');
-        return $stmt->execute([$id]);
+        $stmt->execute([$id]);
+        return $stmt->rowCount() > 0;
     }
 
     public static function fields(): array

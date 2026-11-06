@@ -55,12 +55,12 @@ include __DIR__ . '/../../app/includes/header.php';
       <?php endif; ?>
       <div class="table-wrap">
         <table>
-          <thead><tr><?php if ($listHasFoto): ?><th style="width:112px;">Foto</th><?php endif; ?><?php foreach ($crudCfg['list'] as $col): ?><th><?= e(($crudCfg['column_labels'] ?? [])[$col] ?? $crudCfg['fields'][$col]['label'] ?? ucfirst($col)) ?></th><?php endforeach; ?><th style="width:120px;">Aksi</th></tr></thead>
+          <thead><tr><?php if ($listHasFoto): ?><th style="width:112px;">Foto</th><?php endif; ?><?php foreach ($crudCfg['list'] as $col): ?><th><?= e(($crudCfg['column_labels'] ?? [])[$col] ?? $crudCfg['fields'][$col]['label'] ?? ucfirst($col)) ?></th><?php endforeach; ?><?php if (!empty($crudCfg['toggle_status'])): ?><th style="width:120px;"><?= e($crudCfg['toggle_status']['label'] ?? 'Status') ?></th><?php endif; ?><th style="width:120px;">Aksi</th></tr></thead>
           <tbody>
-            <?php foreach ($rows as $row): ?>
+            <?php foreach ($rows as $row): $tampil = ($row['status'] ?? '') === 'Tampil'; ?>
               <tr>
                 <?php if ($listHasFoto): ?>
-                  <td><?php if (!empty($row['foto'])): ?><img src="<?= base_url(e($row['foto'])) ?>" alt="" loading="lazy" decoding="async" style="display:block; width:96px; height:96px; object-fit:cover; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface-2);"><?php else: ?><img src="<?= base_url('assets/img/avatar-1.svg') ?>" alt="" style="display:block; width:96px; height:96px; object-fit:cover; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface-2);"><?php endif; ?></td>
+                  <td><?php $fotoList = !empty($row['foto']) ? (string) $row['foto'] : ($crudCfg['foto_default'] ?? 'assets/img/avatar-1.svg'); ?><img src="<?= base_url(e($fotoList)) ?>" alt="" loading="lazy" decoding="async" style="display:block; width:96px; height:96px; object-fit:cover; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface-2);"></td>
                 <?php endif; ?>
                 <?php foreach ($crudCfg['list'] as $col): ?>
                   <td><?php
@@ -68,14 +68,25 @@ include __DIR__ . '/../../app/includes/header.php';
                         echo e($akunList[(int) $row['id']] ?? '-');
                     } elseif ($col === 'akun_email') {
                         echo e(trunc((string) ($akunEmailList[(int) $row['id']] ?? '-'), 40));
+                    } elseif ($col === 'pakta') {
+                        $pakta = $paktaList[(int) $row['id']] ?? null;
+                        if ($pakta) {
+                            $namaPakta = (string) ($pakta['nama_berkas'] ?: 'dokumen');
+                            echo '<a class="btn btn-outline btn-sm" href="' . e(base_url('berkas.php?jenis=pakta&id=' . (int) $pakta['id'] . '&lihat=1')) . '" target="_blank" rel="noopener" title="Buka Pakta Integritas: ' . e($namaPakta) . '">Lihat</a>';
+                        } else {
+                            echo '<span style="color:var(--text-muted);">-</span>';
+                        }
                     } else {
                         echo e(trunc((string) ($row[$col] ?? '-'), 60));
                     }
                   ?></td>
                 <?php endforeach; ?>
+                <?php if (!empty($crudCfg['toggle_status'])): ?>
+                  <td><span class="badge <?= $tampil ? 'badge-teal' : 'badge-muted' ?>"><?= $tampil ? 'Tampil' : 'Disembunyikan' ?></span></td>
+                <?php endif; ?>
                 <td>
                   <div class="row-actions">
-                    <?php if (!empty($crudCfg['toggle_status'])): $tampil = ($row['status'] ?? '') === 'Tampil'; ?>
+                    <?php if (!empty($crudCfg['toggle_status'])): ?>
                       <form method="post" action="?entity=<?= e($crudEntitas) ?>&amp;action=toggle_status&amp;id=<?= (int) $row['id'] ?><?= e($qs) ?>" style="display:flex;">
                         <?= Csrf::field() ?>
                         <button type="submit" class="icon-btn<?= $tampil ? ' is-on' : '' ?>"
@@ -90,10 +101,11 @@ include __DIR__ . '/../../app/includes/header.php';
                 </td>
               </tr>
             <?php endforeach; ?>
-            <?php if (!$rows): ?><tr><td colspan="<?= count($crudCfg['list']) + ($listHasFoto ? 2 : 1) ?>"><div class="empty"><?= $q !== '' ? 'Data tidak ditemukan.' : 'Belum ada data.' ?></div></td></tr><?php endif; ?>
+            <?php if (!$rows): ?><tr><td colspan="<?= count($crudCfg['list']) + ($listHasFoto ? 2 : 1) + (!empty($crudCfg['toggle_status']) ? 1 : 0) ?>"><div class="empty"><?= $q !== '' ? 'Data tidak ditemukan.' : 'Belum ada data.' ?></div></td></tr><?php endif; ?>
           </tbody>
         </table>
       </div>
+      <?= paginasi_bar($halaman, $totalHalaman, ['entity' => $crudEntitas, 'q' => $q]) ?>
       <?php if ($crudEntitas === 'materi' && !$refPanel): ?>
         <div style="margin-top:18px;">
           <a class="btn btn-outline" href="?entity=materi&amp;sub=referensi"><i class="bi bi-link-45deg"></i> Kelola Referensi Belajar</a>

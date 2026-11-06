@@ -12,11 +12,11 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
 <?php else:
   $karyaAnggota = array_filter(Karya::byPembuat($id), fn($k) => $k['publikasi'] === 'Disetujui');
   $lombaAnggota = Anggota::lombaDiikuti($id);
-  $prestasi = count(array_filter($lombaAnggota, fn($l) => $l['hasil'] && str_starts_with($l['hasil'], 'Juara')));
+  $prestasi = count(Prestasi::byAnggota($id));
 ?>
   <div class="breadcrumb"><a href="anggota.php">Anggota</a> / <?= e($a['nama']) ?></div>
   <div class="card" style="display:flex; gap:20px; align-items:center; margin-bottom:28px;">
-    <div class="avatar" style="width:64px; height:64px;"><img src="<?= base_url(e($a['foto'] ?? 'assets/img/avatar-1.svg')) ?>" alt=""></div>
+    <div class="avatar" style="width:64px; height:64px;"><img src="<?= base_url(e(!empty($a['foto']) ? $a['foto'] : 'assets/img/avatar-1.svg')) ?>" alt=""></div>
     <div>
       <h1 style="font-size:20px;"><?= e($a['nama']) ?></h1>
       <div class="meta" style="margin:4px 0 8px;"><?= e($a['kelas']) ?></div>

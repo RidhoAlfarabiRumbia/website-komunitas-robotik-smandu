@@ -6,25 +6,12 @@ $isAnggota = Auth::role() === 'anggota';
 // Admin juga melihat konten anggota di beranda (PRD 7: seluruh menu anggota).
 $kontenAnggota = $isAnggota || $isAdmin;
 
-// ---- Mode kelola admin: tambah / ubah / sembunyikan gambar slider beranda ----
-$crudEntitas = 'hero';
-$crudItemEntity = 'hero';                           // tombol Ubah/Hapus di tiap slide
-$crudQs = '?manage=hero';
-$crudAktif = $isAdmin && (($_GET['manage'] ?? $_POST['manage'] ?? '') === $crudEntitas);
-$crudForm = false;
-if ($crudAktif) {
-    $crudPath = 'beranda.php';
-    $crudParam = 'manage';
-    include __DIR__ . '/../app/includes/crud_handle.php';
-    $crudForm = $showForm;
-}
-
 $heroData = Hero::getSliderData();
 
 // Konten publik (PRD 8.3)
 $galeriTerbaru = Galeri::all('tanggal DESC');
 $pengumumanTerbaru = Pengumuman::all('tanggal DESC', 3);
-$pelatihanTerbaru = Pelatihan::untukPengunjung(3);
+$pelatihanTerbaru = array_slice(Pelatihan::semua(), 0, 3);
 $prestasiTerbaru = Prestasi::tayang();
 
 // Konten khusus anggota & admin
@@ -44,11 +31,11 @@ $materiTerbaru = $kontenAnggota
 $fitur = [
     ['bi-people', 'teal', 'Profil Komunitas', 'Kenali cerita, visi, misi, pembina, dan anggota komunitas robotik.', 'komunitas.php', 'Lihat Profil'],
     ['bi-mortarboard', 'teal', 'Pelatihan & Workshop', 'Jadwal pelatihan terjadwal dengan mode daring/luring dan persetujuan peserta.', 'pelatihan.php', 'Lihat Pelatihan'],
-    ['bi-award', 'amber', 'Prestasi Anggota', 'Jeak juara dan penghargaan yang dicapai anggota komunitas.', 'prestasi.php', 'Lihat Prestasi'],
+    ['bi-award', 'amber', 'Prestasi Anggota', 'Jejak juara dan penghargaan yang dicapai anggota komunitas.', 'prestasi.php', 'Lihat Prestasi'],
     ['bi-images', 'blue', 'Galeri Kegiatan', 'Dokumentasi latihan, workshop, lomba, dan pameran karya komunitas.', 'galeri.php', 'Buka Galeri'],
     ['bi-megaphone', 'red', 'Pengumuman', 'Informasi terbaru soal pendaftaran, jadwal, dan pengumuman resmi komunitas.', 'pengumuman.php', 'Baca Pengumuman'],
     ['bi-journal-bookmark', 'teal', 'Materi Terstruktur', 'Materi pelatihan bagi peserta yang telah disetujui admin.', 'materi.php', 'Lihat Materi'],
-    ['bi-cpu', 'amber', 'Karya Anggota', 'Karya robot, IoT, AI, dan elektronika karya anggota yang sudah tayang.', 'karya.php', 'Jelajahi Karya'],
+    ['bi-cpu', 'amber', 'Karya Anggota', 'Karya anggota yang sudah tayang.', 'karya.php', 'Jelajahi Karya'],
     ['bi-calendar-event', 'blue', 'Agenda Kegiatan', 'Rangkaian kegiatan komunitas beserta tanggal, waktu, dan lokasinya.', 'kegiatan.php', 'Lihat Agenda'],
     ['bi-trophy', 'red', 'Lomba & Kompetisi', 'Jadwal lomba, informasi pendaftaran, dan informasi kompetisi.', 'lomba.php', 'Lihat Lomba'],
     ['bi-link-45deg', 'teal', 'Referensi Belajar', 'Sumber eksternal yang biasa dipakai anggota untuk belajar dan mengerjakan proyek.', 'materi.php#referensi', 'Lihat Referensi'],
@@ -76,13 +63,8 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
   <div class="hero-frame">
   <section class="welcome-hero">
     <div class="welcome-media hero-media">
-      <?php $sliderAdminHref = null; include __DIR__ . '/../app/includes/partial_hero_slider.php'; ?>
+      <?php $sliderAdminHref = $isAdmin ? base_url('admin/crud.php?entity=hero') : null; include __DIR__ . '/../app/includes/partial_hero_slider.php'; ?>
     </div>
-    <?php if ($isAdmin): ?>
-      <div class="welcome-hero-admin">
-        <a class="chip-admin" href="<?= e($crudQs) ?>" title="Kelola gambar slider"><i class="bi bi-pencil-square"></i> Kelola Slider</a>
-      </div>
-    <?php endif; ?>
     <div class="welcome-scrim" aria-hidden="true"></div>
     <div class="welcome-copy">
       <?php
@@ -115,53 +97,6 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
       </div>
     </section>
   </div>
-
-  <?php if ($crudAktif): ?>
-    <?php if ($msg = flash_get()): ?><div class="alert <?= flash_alert_class($msg['type']) ?>"><?= e($msg['text']) ?></div><?php endif; ?>
-    <section class="section">
-      <div class="section-head">
-        <div>
-          <div class="eyebrow">KELOLA</div>
-          <h2><?= $crudForm ? ($editing ? 'Ubah' : 'Tambah') . ' Gambar Slider' : 'Gambar Slider Beranda' ?></h2>
-          <p class="desc">Gambar slider yang tampil di bagian atas beranda. Slide yang disembunyikan tidak muncul untuk pengunjung.</p>
-        </div>
-        <?php if (!$crudForm): ?>
-          <a class="btn btn-primary" href="?manage=hero&amp;action=create"><i class="bi bi-plus-circle"></i> Tambah Gambar</a>
-        <?php endif; ?>
-      </div>
-
-      <?php if ($crudForm): ?>
-        <?php include __DIR__ . '/../app/includes/crud_form.php'; ?>
-      <?php elseif ($rows): ?>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th style="width:140px;">Gambar</th><th>Status</th><th style="width:150px;">Aksi</th></tr></thead>
-            <tbody>
-              <?php foreach ($rows as $row): $tampil = ($row['status'] ?? '') === 'Tampil'; ?>
-                <tr>
-                  <td><img src="<?= base_url(e($row['foto'] ?? 'assets/img/hero-illustration.svg')) ?>" alt="" loading="lazy" decoding="async" style="display:block; width:120px; height:68px; object-fit:cover; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface-2);"></td>
-                  <td><span class="badge <?= $tampil ? 'badge-teal' : 'badge-muted' ?>"><?= $tampil ? 'Tampil' : 'Disembunyikan' ?></span></td>
-                  <td>
-                    <div class="row-actions">
-                      <form method="post" action="<?= e($crudQs) ?>&amp;action=toggle_status&amp;id=<?= (int) $row['id'] ?>" style="display:flex;">
-                        <?= Csrf::field() ?>
-                        <button type="submit" class="icon-btn<?= $tampil ? ' is-on' : '' ?>" title="<?= $tampil ? 'Sembunyikan dari beranda' : 'Tampilkan di beranda' ?>">
-                          <i class="bi <?= $tampil ? 'bi-eye' : 'bi-eye-slash' ?>"></i>
-                        </button>
-                      </form>
-                      <?php $itemId = (int) $row['id']; include __DIR__ . '/../app/includes/partial_admin_actions.php'; ?>
-                    </div>
-                  </td>
-                </tr>
-              <?php endforeach; ?>
-            </tbody>
-          </table>
-        </div>
-      <?php else: ?>
-        <div class="empty">Belum ada gambar slider. Klik "Tambah Gambar" untuk mengunggah.</div>
-      <?php endif; ?>
-    </section>
-  <?php endif; ?>
 
   <?php if (!$isAnggota): ?>
   <section class="section reveal">
@@ -197,7 +132,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
           <div class="carousel-track grid-stagger">
             <?php foreach ($prestasiTerbaru as $p): ?>
               <a href="prestasi-detail.php?id=<?= (int) $p['id'] ?>" class="work-card">
-                <span class="work-thumb" data-lightbox="<?= base_url(e($p['foto'] ?? 'assets/img/galeri-prestasi.svg')) ?>" tabindex="0" role="button" aria-label="Perbesar foto prestasi: <?= e($p['nama']) ?>"><img src="<?= base_url(e($p['foto'] ?? 'assets/img/galeri-prestasi.svg')) ?>" alt="<?= e($p['nama']) ?>" loading="lazy" decoding="async"></span>
+                <span class="work-thumb" data-lightbox="<?= base_url(e(!empty($p['foto']) ? $p['foto'] : 'assets/img/galeri-prestasi.svg')) ?>" tabindex="0" role="button" aria-label="Perbesar foto prestasi: <?= e($p['nama']) ?>"><img src="<?= base_url(e(!empty($p['foto']) ? $p['foto'] : 'assets/img/galeri-prestasi.svg')) ?>" alt="<?= e($p['nama']) ?>" loading="lazy" decoding="async"></span>
                 <div class="work-body">
                   <span class="badge badge-amber"><i class="bi bi-trophy"></i> <?= e($p['hasil']) ?></span>
                   <div class="work-title" style="font-size:14px;"><?= e($p['nama']) ?></div>
@@ -229,8 +164,8 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
             <div class="grow">
               <div class="ttl"><?= e($l['nama']) ?></div>
               <div class="meta"><?= tanggal_indo($l['tanggal']) ?> · <?= e($l['lokasi']) ?></div>
+              <?php if ($l['hasil']): ?><div class="lomba-hasil"><span class="badge badge-amber"><i class="bi bi-trophy"></i> <?= e($l['hasil']) ?></span></div><?php endif; ?>
             </div>
-            <?php if ($l['hasil']): ?><span class="badge badge-amber"><i class="bi bi-trophy"></i> <?= e($l['hasil']) ?></span><?php endif; ?>
             <span class="badge <?= $l['status'] === 'Selesai' ? 'badge-muted' : ($l['status'] === 'Akan Datang' ? 'badge-blue' : 'badge-teal') ?>"><?= e($l['status']) ?></span>
           </div>
         <?php endforeach; ?>
@@ -327,7 +262,10 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
               <a href="<?= base_url('pelatihan-detail.php?id=' . (int) $p['id']) ?>" class="ttl"><?= e($p['nama']) ?></a>
               <div class="meta"><?= e(tanggal_rentang($p['tanggal_mulai'], $p['tanggal_selesai'])) ?> · <?= e($p['lokasi'] ?: '-') ?></div>
             </div>
-            <span class="badge <?= $p['akses'] === 'Umum' ? 'badge-blue' : 'badge-amber' ?>"><?= $p['akses'] === 'Umum' ? 'Terbuka Umum' : 'Khusus Anggota' ?></span>
+            <div class="list-badges">
+              <span class="badge <?= $p['akses'] === 'Umum' ? 'badge-blue' : 'badge-amber' ?>"><?= $p['akses'] === 'Umum' ? 'Terbuka Umum' : 'Khusus Anggota' ?></span>
+              <?php if (!Pelatihan::aktif($p)): ?><span class="badge badge-muted">Selesai</span><?php endif; ?>
+            </div>
           </div>
         <?php endforeach; ?>
       </div>
@@ -338,7 +276,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
   <?php $secPelatihan = ob_get_clean(); ?>
 
   <?php ob_start(); ?>
-  <section class="section reveal home-span">
+  <section class="section reveal">
     <div class="section-head">
       <h2>Pengumuman terbaru</h2>
       <a class="see-all" href="<?= base_url('pengumuman.php') ?>">Lihat semua pengumuman <i class="bi bi-arrow-right"></i></a>
@@ -351,7 +289,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
             <div class="grow">
               <div class="ttl"><?= e($p['judul']) ?></div>
               <div class="meta"><?= tanggal_indo($p['tanggal']) ?></div>
-              <div style="font-size:13px; color:var(--text-muted); margin-top:6px;"><?= e(trunc($p['isi'], 90)) ?></div>
+              <div style="font-size:13px; color:var(--text-muted); margin-top:6px;"><?= linkify(trunc($p['isi'], 90)) ?></div>
             </div>
           </div>
         <?php endforeach; ?>
@@ -367,20 +305,20 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
    kiri + 1 section kanan, jadi puncak kedua kolom selalu sejajar walau tinggi
    isi section berbeda. Section lebar penuh tetap berada di luar grid. -->
   <div class="home-cols">
+    <?= $secPengumuman ?>
+    <?= $secAgenda ?>
     <?= $secPelatihan ?>
     <?= $secLomba ?>
-    <?= $secPrestasi ?>
-    <?= $secAgenda ?>
-    <?= $secPengumuman ?>
   </div>
-  <?= $secGaleri ?>
+  <?= $secPrestasi ?>
   <?= $secKarya ?>
+  <?= $secGaleri ?>
   <?php else: ?>
   <!-- Urutan beranda tamu -->
   <?= $secPrestasi ?>
   <?= $secLomba ?>
-  <?= $secKarya ?>
   <?= $secGaleri ?>
+  <?= $secKarya ?>
   <?= $secAgenda ?>
   <?= $secPelatihan ?>
   <?= $secPengumuman ?>
@@ -411,12 +349,13 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
   </section>
   <?php endif; ?>
 
+  <?php if (!$isAnggota): ?>
   <section class="section reveal">
     <div class="section-head">
-      <h2><?= $isAnggota ? 'Cara Berkarya' : 'Cara bergabung' ?></h2>
+      <h2>Cara bergabung</h2>
     </div>
     <div class="steps">
-      <?php foreach (($isAnggota ? $langkahAnggota : $langkah) as $i => [$judul, $deskripsi]): ?>
+      <?php foreach ($langkah as $i => [$judul, $deskripsi]): ?>
         <div class="step">
           <div class="n"><?= $i + 1 ?></div>
           <div class="f-ttl"><?= e($judul) ?></div>
@@ -425,6 +364,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
       <?php endforeach; ?>
     </div>
   </section>
+  <?php endif; ?>
 
   <section class="cta-panel reveal">
     <div>

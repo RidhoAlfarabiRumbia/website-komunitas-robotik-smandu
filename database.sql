@@ -159,7 +159,7 @@ CREATE TABLE lomba (
   tanggal DATE NOT NULL,
   lokasi VARCHAR(120) DEFAULT NULL,
   status ENUM('Akan Datang','Selesai') NOT NULL DEFAULT 'Akan Datang',
-  hasil VARCHAR(80) DEFAULT NULL
+  hasil TEXT DEFAULT NULL
 ) ENGINE=InnoDB;
 
 CREATE TABLE lomba_peserta (
@@ -175,12 +175,12 @@ CREATE TABLE lomba_peserta (
 -- ---------------------------------------------------------
 CREATE TABLE prestasi (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  nama VARCHAR(180) NOT NULL,
+  nama TEXT NOT NULL,
   lomba_id INT DEFAULT NULL,
   lomba_teks VARCHAR(150) DEFAULT NULL,
   tanggal DATE NOT NULL,
   tingkat ENUM('Sekolah','Kota','Provinsi','Nasional','Internasional') NOT NULL DEFAULT 'Sekolah',
-  hasil VARCHAR(120) DEFAULT NULL,
+  hasil TEXT DEFAULT NULL,
   deskripsi TEXT,
   foto VARCHAR(191) DEFAULT NULL,
   sertifikat VARCHAR(191) DEFAULT NULL,
@@ -411,7 +411,7 @@ INSERT INTO pengumuman (judul, isi, tanggal) VALUES
 
 INSERT INTO hero (foto, status) VALUES
 ('assets/img/hero-illustration.svg','Tampil'),
-('assets/img/IMG-20251222-WA0052.jpg','Tampil');
+('uploads/hero/hero_6aec705a3cb71.jpg','Tampil');
 
 -- ---------------------------------------------------------
 -- PENDAFTARAN ANGGOTA + PAKTA INTEGRITAS (data contoh)

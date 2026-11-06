@@ -30,7 +30,7 @@ class Hero extends Model
         $fotoPool = [];
         $pusatList = [];
         foreach ($slides as $i => $hs) {
-            $f = $hs['foto'] ?? '';
+            $f = !empty($hs['foto']) ? (string) $hs['foto'] : '';
             $pusatList[$i] = $f !== '' ? $f : 'assets/img/hero-illustration.svg';
             if ($f !== '' && !in_array($f, $fotoPool, true)) {
                 $fotoPool[] = $f;
@@ -100,7 +100,7 @@ class Hero extends Model
         // Build result - ALL slides in 'slides' for JSON
         $allSlides = [];
         foreach ($slides as $i => $h) {
-            $foto = $h['foto'] ?? 'assets/img/hero-illustration.svg';
+            $foto = !empty($h['foto']) ? (string) $h['foto'] : 'assets/img/hero-illustration.svg';
             $fotoKiri = $fotoSamping[$i][0] ?? $foto;
             $fotoKanan = $fotoSamping[$i][1] ?? $foto;
 

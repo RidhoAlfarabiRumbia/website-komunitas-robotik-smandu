@@ -11,11 +11,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = nilai_int($_POST, 'id');
     $aksi = nilai_teks($_POST, 'aksi');
     if ($aksi === 'approve') {
-        Karya::moderasi($id, 'Disetujui');
-        flash_set('Karya disetujui dan kini tayang di portal.');
+        if (Karya::moderasi($id, 'Disetujui')) {
+            flash_set('Karya disetujui dan kini tayang di portal.');
+        } else {
+            flash_set('error', 'Karya gagal disetujui. Data mungkin sudah berubah.');
+        }
     } elseif ($aksi === 'reject') {
-        Karya::moderasi($id, 'Ditolak', nilai_teks($_POST, 'alasan') ?: 'Perlu perbaikan sebelum diajukan kembali.');
-        flash_set('Karya ditolak dan anggota dapat melihat catatannya.');
+        if (Karya::moderasi($id, 'Ditolak', nilai_teks($_POST, 'alasan') ?: 'Perlu perbaikan sebelum diajukan kembali.')) {
+            flash_set('Karya ditolak dan anggota dapat melihat catatannya.');
+        } else {
+            flash_set('error', 'Karya gagal ditolak. Data mungkin sudah berubah.');
+        }
     }
     $statusKembali = nilai_teks($_POST, 'status_kembali') ?: 'Menunggu';
     redirect('admin/moderasi.php?status=' . urlencode($statusKembali) . $qs);
@@ -24,10 +30,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $status = nilai_teks($_GET, 'status') ?: 'Menunggu';
 if (!in_array($status, ['Menunggu', 'Disetujui', 'Ditolak'], true)) $status = 'Menunggu';
 $list = Karya::byStatus($status);
-$totalList = count($list);
 if ($q !== '') {
     $list = cari_filter($list, ['judul', 'deskripsi', 'teknologi', 'pembuat_nama', 'alasan_tolak'], $q);
 }
+$totalList = count($list);
+$perHalaman = 20;
+$totalHalaman = max(1, (int) ceil($totalList / $perHalaman));
+$halaman = max(1, min($totalHalaman, nilai_int($_GET, 'page')));
+$list = array_slice($list, ($halaman - 1) * $perHalaman, $perHalaman);
 
 $pageTitle = 'Moderasi Karya';
 include __DIR__ . '/../../app/includes/header.php';
@@ -65,20 +75,30 @@ include __DIR__ . '/../../app/includes/header.php';
     <div class="grid grid-2">
       <?php if ($list): foreach ($list as $k):
         $teknologi = array_filter(array_map('trim', explode(',', $k['teknologi'] ?? '')));
+        $fotoKarya = !empty($k['foto']) ? (string) $k['foto'] : 'assets/img/karya-robot.svg';
+        $detailParams = ['id' => (int) $k['id'], 'dari' => 'moderasi', 'status' => $status];
+        if ($q !== '') $detailParams['q'] = $q;
+        $detailHref = base_url('karya-detail.php?' . http_build_query($detailParams));
       ?>
         <div class="card">
-          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
-            <div style="display:flex; gap:8px;"><?= badge_progres($k['progres']) ?><?= badge_publikasi($k['publikasi']) ?></div>
+          <div class="moderasi-card-head">
+            <span class="moderasi-foto"><img src="<?= base_url(e($fotoKarya)) ?>" alt="<?= e($k['judul']) ?>" loading="lazy" decoding="async"></span>
+            <div style="min-width:0; flex:1;">
+              <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px;"><?= badge_progres($k['progres']) ?><?= badge_publikasi($k['publikasi']) ?></div>
+              <h3 style="font-size:15px; margin-bottom:4px;"><?= e($k['judul']) ?></h3>
+              <div class="meta">oleh <?= e($k['pembuat_nama']) ?> · <?= tanggal_indo($k['dibuat_pada']) ?></div>
+            </div>
           </div>
-          <h3 style="font-size:15px; margin-bottom:4px;"><?= e($k['judul']) ?></h3>
-          <div class="meta" style="margin-bottom:8px;">oleh <?= e($k['pembuat_nama']) ?> Â· <?= tanggal_indo($k['dibuat_pada']) ?></div>
           <p style="font-size:13px; color:var(--text-muted); margin-bottom:12px;"><?= e($k['deskripsi']) ?></p>
           <?php if ($teknologi): ?>
             <div class="work-tags" style="margin-bottom:14px;"><?php foreach ($teknologi as $t): ?><span class="tag"><?= e($t) ?></span><?php endforeach; ?></div>
           <?php endif; ?>
 
-          <?php if ($k['publikasi'] === 'Menunggu'): ?>
-            <div style="display:flex; gap:8px;">
+          <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+            <a class="btn btn-outline btn-sm" href="<?= e($detailHref) ?>" target="_blank" rel="noopener">
+              <i class="bi bi-eye"></i> Lihat Detail
+            </a>
+            <?php if ($k['publikasi'] === 'Menunggu'): ?>
               <form method="post" style="display:inline;">
                 <?= Csrf::field() ?>
                 <input type="hidden" name="id" value="<?= $k['id'] ?>">
@@ -87,7 +107,9 @@ include __DIR__ . '/../../app/includes/header.php';
                 <button class="btn btn-primary btn-sm" type="submit"><i class="bi bi-check-lg"></i> Setujui</button>
               </form>
               <button class="btn btn-danger-outline btn-sm" type="button" onclick="document.getElementById('reject-<?= $k['id'] ?>').style.display='block'"><i class="bi bi-x-lg"></i> Tolak</button>
-            </div>
+            <?php endif; ?>
+          </div>
+          <?php if ($k['publikasi'] === 'Menunggu'): ?>
             <form method="post" id="reject-<?= $k['id'] ?>" style="display:none; margin-top:10px;">
               <?= Csrf::field() ?>
               <input type="hidden" name="id" value="<?= $k['id'] ?>">
@@ -104,6 +126,7 @@ include __DIR__ . '/../../app/includes/header.php';
         <div class="empty" style="grid-column:1/-1;"><?= $q !== '' ? 'Data tidak ditemukan.' : 'Tidak ada karya berstatus ' . e($status) . '.' ?></div>
       <?php endif; ?>
     </div>
+    <?= paginasi_bar($halaman, $totalHalaman, ['status' => $status, 'q' => $q]) ?>
   </div>
 </div>
 <?php include __DIR__ . '/../../app/includes/footer.php'; ?>

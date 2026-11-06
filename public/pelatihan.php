@@ -1,7 +1,7 @@
 <?php
 /**
  * Pelatihan / Workshop (PRD 8.4).
- * Pengunjung umum hanya melihat pelatihan berlabel "Umum".
+ * Seluruh pelatihan dapat dilihat pengunjung; pendaftaran tetap butuh login.
  * Anggota dapat mendaftar; admin menyetujui peserta.
  * Materi pelatihan hanya terbuka bagi peserta yang sudah disetujui.
  */
@@ -34,23 +34,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect('pelatihan.php');
     }
     if (Pelatihan::sudahTerdaftar($id, (int) Auth::anggotaId())) {
-        flash_set('error', 'Kamu sudah terdaftar pada pelatihan ini.');
+        flash_set('error', 'Kamu sudah terdaftar atau pendaftaran sedang diproses. Coba lagi.');
         redirect('pelatihan-detail.php?id=' . $id);
     }
-    if ($p['status'] !== 'Dibuka') {
+    if (!Pelatihan::bisaDaftar($p)) {
         flash_set('error', 'Pendaftaran pelatihan ini sudah ditutup.');
         redirect('pelatihan-detail.php?id=' . $id);
     }
-    Pelatihan::daftar($id, (int) Auth::anggotaId());
+    if (!Pelatihan::daftarSekali($id, (int) Auth::anggotaId())) {
+        flash_set('error', 'Kamu sudah terdaftar atau pendaftaran sedang diproses. Coba lagi.');
+        redirect('pelatihan-detail.php?id=' . $id);
+    }
     flash_set('success', 'Pendaftaran terkirim. Menunggu persetujuan admin sebelum materi dapat dibuka.');
     redirect('pelatihan-detail.php?id=' . $id);
 }
 
-// Hanya anggota & admin yang boleh melihat pelatihan non-Umum.
-// Auth::check() saja tidak cukup: itu tidak membedakan role.
-$daftar = ($isPenggunaInternal = in_array(Auth::role(), ['anggota', 'admin'], true))
-    ? Pelatihan::semua()
-    : Pelatihan::untukPengunjung();
+// Semua pelatihan ditampilkan; materi dan pendaftaran tetap dibatasi.
+$daftar = Pelatihan::semua();
 
 $pageTitle = 'Pelatihan / Workshop';
 include __DIR__ . '/../app/includes/header.php';
@@ -81,7 +81,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
   <?php if (!Auth::check()): ?>
     <div class="alert alert-info" style="display:flex; gap:10px; align-items:flex-start;">
       <i class="bi bi-info-circle"></i>
-      <span>Kamu melihat pelatihan yang terbuka untuk umum. Daftar pelatihan khusus anggota setelah <a href="<?= base_url('login.php') ?>" style="color:var(--teal);">masuk ke portal</a>.</span>
+      <span>Kamu dapat melihat seluruh jadwal pelatihan. <a href="<?= base_url('login.php') ?>" style="color:var(--teal);">Masuk ke portal</a> untuk mendaftar sebagai peserta.</span>
     </div>
   <?php endif; ?>
 
@@ -116,7 +116,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
             <?php elseif (Auth::role() === 'anggota'): ?>
               <?php if ($saya): ?>
                 <?= badge_status_peserta($saya['status']) ?>
-              <?php elseif ($p['status'] === 'Dibuka'): ?>
+              <?php elseif (Pelatihan::bisaDaftar($p)): ?>
                 <form method="post" style="display:inline;">
                   <?= Csrf::field() ?>
                   <input type="hidden" name="pelatihan_id" value="<?= (int) $p['id'] ?>">

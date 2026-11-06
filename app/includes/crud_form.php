@@ -125,6 +125,9 @@ $hasWhen = false;
           <?php if ($val): ?>
             <div style="margin-top:8px;"><img src="<?= base_url(e($val)) ?>" alt="Preview" style="display:block; width:100%; max-width:260px; height:auto; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface-2);"></div>
             <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Saat ini: <?= e($val) ?></div>
+          <?php elseif (!empty($crudCfg['foto_default'])): ?>
+            <div style="margin-top:8px;"><img src="<?= base_url(e($crudCfg['foto_default'])) ?>" alt="Gambar default" style="display:block; width:100%; max-width:260px; height:auto; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface-2);"></div>
+            <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Gambar default dipakai bila tidak ada foto.</div>
           <?php endif; ?>
         <?php elseif ($f['type'] === 'doc_file'): ?>
           <input type="file" name="<?= $key ?>" accept=".pdf,.ppt,.pptx,.doc,.docx,.xls,.xlsx,.txt,.zip">

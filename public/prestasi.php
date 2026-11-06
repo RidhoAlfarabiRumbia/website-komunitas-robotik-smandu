@@ -21,6 +21,7 @@ if ($crudAktif) {
 }
 
 $daftar = Prestasi::tayang();
+$timPrestasi = Prestasi::timMap(array_column($daftar, 'id'));
 
 $pageTitle = 'Prestasi';
 include __DIR__ . '/../app/includes/header.php';
@@ -51,16 +52,16 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
   <?php if ($daftar): ?>
     <div class="grid grid-3 grid-stagger reveal">
       <?php foreach ($daftar as $p):
-        $tim = Prestasi::tim((int) $p['id']);
+        $tim = $timPrestasi[(int) $p['id']] ?? [];
       ?>
         <div class="card<?= Auth::isAdmin() && ($crudItemEntity ?? '') === 'prestasi' ? ' card-admin' : '' ?>">
           <?php if ($crudItemEntity === 'prestasi'): $itemId = (int) $p['id']; include __DIR__ . '/../app/includes/partial_admin_actions.php'; endif; ?>
           <?php if ($p['foto']): ?>
             <span data-lightbox="<?= base_url(e($p['foto'])) ?>" tabindex="0" role="button" aria-label="Perbesar foto prestasi: <?= e($p['nama']) ?>" style="display:block;">
-              <img src="<?= base_url(e($p['foto'])) ?>" alt="<?= e($p['nama']) ?>" loading="lazy" decoding="async" style="width:100%; height:170px; object-fit:cover; border-radius:var(--radius-md); margin-bottom:14px;">
+              <img src="<?= base_url(e($p['foto'])) ?>" alt="<?= e($p['nama']) ?>" loading="lazy" decoding="async" style="width:100%; height:210px; object-fit:cover; border-radius:var(--radius-md); margin-bottom:14px;">
             </span>
           <?php else: ?>
-            <div class="card-img-fallback" style="height:170px; margin-bottom:14px;">
+            <div class="card-img-fallback" style="height:210px; margin-bottom:14px;">
               <i class="bi bi-trophy"></i>
             </div>
           <?php endif; ?>

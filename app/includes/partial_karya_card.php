@@ -3,10 +3,11 @@
 // Tombol Ubah/Hapus hanya muncul untuk admin, dan hanya pada halaman yang
 // memang mengelola karya di sana ($crudItemEntity = 'karya').
 $kartuDikelola = Auth::isAdmin() && ($crudItemEntity ?? '') === 'karya';
+$fotoKarya = !empty($k['foto']) ? (string) $k['foto'] : 'assets/img/karya-robot.svg';
 ?>
 <div class="card-wrap">
 <a href="karya-detail.php?id=<?= $k['id'] ?>" class="work-card">
-  <span class="work-thumb" data-lightbox="<?= base_url(e($k['foto'] ?? 'assets/img/karya-robot.svg')) ?>" tabindex="0" role="button" aria-label="Perbesar foto karya: <?= e($k['judul']) ?>"><img src="<?= base_url(e($k['foto'] ?? 'assets/img/karya-robot.svg')) ?>" alt="<?= e($k['judul']) ?>" loading="lazy" decoding="async"></span>
+  <span class="work-thumb" data-lightbox="<?= base_url(e($fotoKarya)) ?>" tabindex="0" role="button" aria-label="Perbesar foto karya: <?= e($k['judul']) ?>"><img src="<?= base_url(e($fotoKarya)) ?>" alt="<?= e($k['judul']) ?>" loading="lazy" decoding="async"></span>
   <div class="work-body">
     <div class="work-meta"><?= badge_progres($k['progres']) ?></div>
     <div class="work-title"><?= e($k['judul']) ?></div>

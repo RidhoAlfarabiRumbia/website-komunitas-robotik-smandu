@@ -1,6 +1,7 @@
 <?php
 /**
  * Detail Pelatihan / Workshop (PRD 8.4).
+ * Detail terbuka untuk semua pengunjung, termasuk pelatihan khusus anggota.
  * Daftar materi ditampilkan, tetapi berkas hanya bisa diunduh bila pengguna
  * adalah admin atau peserta yang telah disetujui pada pelatihan ini.
  */
@@ -21,15 +22,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect('pelatihan.php');
     }
     if (Pelatihan::sudahTerdaftar($id, (int) Auth::anggotaId())) {
-        flash_set('error', 'Kamu sudah terdaftar pada pelatihan ini.');
+        flash_set('error', 'Kamu sudah terdaftar atau pendaftaran sedang diproses. Coba lagi.');
         redirect('pelatihan-detail.php?id=' . $id);
     }
-    if ($p['status'] !== 'Dibuka') {
+    if (!Pelatihan::bisaDaftar($p)) {
         flash_set('error', 'Pendaftaran pelatihan ini sudah ditutup.');
         redirect('pelatihan-detail.php?id=' . $id);
     }
 
-    Pelatihan::daftar($id, (int) Auth::anggotaId());
+    if (!Pelatihan::daftarSekali($id, (int) Auth::anggotaId())) {
+        flash_set('error', 'Kamu sudah terdaftar atau pendaftaran sedang diproses. Coba lagi.');
+        redirect('pelatihan-detail.php?id=' . $id);
+    }
     flash_set('success', 'Pendaftaran terkirim. Materi baru terbuka setelah disetujui admin.');
     redirect('pelatihan-detail.php?id=' . $id);
 }
@@ -41,17 +45,13 @@ if (!$p) {
     redirect('pelatihan.php');
 }
 
-// Pengunjung hanya boleh membuka pelatihan yang terbuka untuk umum.
-if (!Auth::check() && $p['akses'] !== 'Umum') {
-    Auth::requireRole('anggota');
-}
-
 $isAdmin = Auth::isAdmin();
 $isAnggota = Auth::role() === 'anggota';
+$bisaDaftar = Pelatihan::bisaDaftar($p);
 $saya = $isAnggota ? Pelatihan::pendaftaranAnggota($id, (int) Auth::anggotaId()) : null;
 
 $materi = Pelatihan::materi($id);
-$bolehMateri = $isAdmin || ($saya && $saya['status'] === 'Disetujui' && Pelatihan::aktif($p));
+$bolehMateri = $isAdmin || ($saya && $saya['status'] === 'Disetujui' && Pelatihan::sedangBerjalan($p));
 
 $pageTitle = $p['nama'];
 include __DIR__ . '/../app/includes/header.php';
@@ -95,7 +95,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
                     <i class="bi bi-download"></i> Unduh
                   </a>
                 <?php // Hanya tautan http/https yang boleh diklik (anti javascript: pada data lama).
-                elseif (!empty($m['link_url']) && preg_match('#^https?://#i', (string) $m['link_url'])): ?>
+                elseif ($boleh && !empty($m['link_url']) && preg_match('#^https?://#i', (string) $m['link_url'])): ?>
                   <a class="btn btn-outline btn-sm" href="<?= e($m['link_url']) ?>" target="_blank" rel="noopener">
                     <i class="bi bi-box-arrow-up-right"></i> Buka
                   </a>
@@ -111,7 +111,9 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
               <i class="bi bi-lock"></i>
               <span>
                 Materi ini terbuka bagi peserta yang <strong>sudah disetujui admin</strong> pada pelatihan ini.
-                <?= $saya ? ' Status pendaftaran kamu: ' . e($saya['status']) . '.' : ' Silakan daftar terlebih dahulu.' ?>
+                <?= $saya
+                    ? ' Status pendaftaran kamu: ' . e($saya['status']) . '.'
+                    : (Auth::check() ? ' Silakan daftar terlebih dahulu.' : ' Masuk sebagai anggota lalu daftar untuk membukanya.') ?>
               </span>
             </div>
           <?php endif; ?>
@@ -137,7 +139,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
               <p style="font-size:12.5px; color:var(--text-muted); margin-top:10px;">
                 Terdaftar sejak <?= e(tanggal_indo($saya['dibuat_pada'])) ?>.
               </p>
-            <?php elseif ($p['status'] === 'Dibuka'): ?>
+            <?php elseif ($bisaDaftar): ?>
               <form method="post">
                 <?= Csrf::field() ?>
                 <input type="hidden" name="pelatihan_id" value="<?= (int) $p['id'] ?>">

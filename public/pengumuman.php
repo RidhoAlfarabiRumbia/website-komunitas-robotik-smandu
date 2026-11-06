@@ -40,7 +40,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
         <div class="grow">
           <div class="ttl"><?= e($p['judul']) ?></div>
           <div class="meta"><?= tanggal_indo($p['tanggal']) ?></div>
-          <div style="font-size:13px; color:var(--text-muted); margin-top:6px;"><?= e($p['isi']) ?></div>
+          <div style="font-size:13px; color:var(--text-muted); margin-top:6px;"><?= linkify($p['isi']) ?></div>
         </div>
         <?php if ($crudItemEntity === 'pengumuman'): $itemId = (int) $p['id']; include __DIR__ . '/../app/includes/partial_admin_actions.php'; endif; ?>
       </div>

@@ -46,13 +46,15 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
             if ($vid !== '' && preg_match('#^https?://#i', $vid)): ?>
             <div class="keg-video">
               <a class="btn btn-outline btn-sm" href="<?= e($vid) ?>" target="_blank" rel="noopener noreferrer">
-                <i class="bi bi-play-circle"></i> Tonton Video Laporan
+                <i class="bi bi-box-arrow-up-right"></i> Lihat Dokumentasi
               </a>
             </div>
           <?php
             elseif ($vid !== '' && preg_match('#^uploads/kegiatan/[A-Za-z0-9._-]+\.(mp4|webm|mov|m4v)$#i', $vid)): ?>
             <div class="keg-video">
-              <video controls preload="metadata" src="<?= base_url(e($vid)) ?>"></video>
+              <button type="button" class="btn btn-outline btn-sm" data-video-modal="<?= base_url(e($vid)) ?>" data-video-title="Dokumentasi: <?= e($k['nama']) ?>">
+                <i class="bi bi-play-circle"></i> Lihat Dokumentasi
+              </button>
             </div>
           <?php endif; endif; ?>
         </div>
@@ -65,4 +67,5 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
     <div class="empty">Belum ada kegiatan terjadwal.</div>
   <?php endif; ?>
 </div>
+<?php include __DIR__ . '/../app/includes/partial_video_modal.php'; ?>
 <?php include __DIR__ . '/../app/includes/footer.php'; ?>

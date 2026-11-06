@@ -34,8 +34,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($form['judul'] === '') $errors[] = 'Judul karya wajib diisi.';
     if ($form['deskripsi'] === '') $errors[] = 'Deskripsi wajib diisi.';
     if (!in_array($form['progres'], $progresOpsi, true)) $errors[] = 'Status progres tidak valid.';
-    if ($form['link_demo'] !== '' && !filter_var($form['link_demo'], FILTER_VALIDATE_URL)) {
-        $errors[] = 'Tautan proyek tidak valid.';
+    if ($form['link_demo'] !== '' && !url_http_aman($form['link_demo'])) {
+        $errors[] = 'Tautan proyek harus berupa URL http/https yang valid.';
     }
 
     if (!$errors) {
