@@ -411,7 +411,7 @@ INSERT INTO pengumuman (judul, isi, tanggal) VALUES
 
 INSERT INTO hero (foto, status) VALUES
 ('assets/img/hero-illustration.svg','Tampil'),
-('uploads/hero/hero_6aec705a3cb71.jpg','Tampil');
+('uploads/hero/hero_6aec705a3cb71_opt.webp','Tampil');
 
 -- ---------------------------------------------------------
 -- PENDAFTARAN ANGGOTA + PAKTA INTEGRITAS (data contoh)

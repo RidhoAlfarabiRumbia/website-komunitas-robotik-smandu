@@ -18,21 +18,35 @@ storage/terbatas/**
 !storage/terbatas/.gitkeep
 !storage/terbatas/**/.gitkeep
 
-# ===== FOTO DB_ROBOTIK_2 =====
-# 13 file asli (jpg/png) yang dirujuk db_robotik_2 (variasi _opt.webp tidak ada, gunakan file asli)
-!public/uploads/hero/hero_6aec705a3cb71.jpg
-!public/uploads/hero/hero_6aec70663ce03.jpg
-!public/uploads/hero/hero_6aec70794ac27.jpg
-!public/uploads/hero/hero_6aec708790e69.jpg
-!public/uploads/hero/hero_6aec709646a43.jpg
-!public/uploads/hero/hero_6aec70abe8770.jpg
-!public/uploads/hero/hero_6aec70c00252b.jpg
-!public/uploads/hero/hero_6aec70d7efbbf.jpg
-!public/uploads/hero/hero_6aec70eb3362b.jpg
-!public/uploads/galeri/galeri_6aec7175d7586.jpeg
-!public/uploads/karya/karya_6aec7150d9525.png
-!public/uploads/content/content_6aec703d208d9.jpg
-!public/uploads/anggota/anggota_6aec72fab8c53.jpeg
+# ===== MEDIA DEMO & FOTO DB_ROBOTIK_2 =====
+# Pengecualian exact-path agar aset yang dirujuk database.sql dan db_robotik_2 ikut repo.
+!public/uploads/hero/hero_6aec705a3cb71_opt.webp
+!public/uploads/hero/hero_6aec70663ce03_opt.webp
+!public/uploads/hero/hero_6aec70794ac27_opt.webp
+!public/uploads/hero/hero_6aec708790e69_opt.webp
+!public/uploads/hero/hero_6aec709646a43_opt.webp
+!public/uploads/hero/hero_6aec70abe8770_opt.webp
+!public/uploads/hero/hero_6aec70c00252b_opt.webp
+!public/uploads/hero/hero_6aec70d7efbbf_opt.webp
+!public/uploads/hero/hero_6aec70eb3362b_opt.webp
+!public/uploads/galeri/galeri_6aec7175d7586_opt.webp
+!public/uploads/karya/karya_6aec7150d9525_opt.webp
+!public/uploads/content/content_6aec703d208d9_opt.webp
+!public/uploads/anggota/anggota_6aec72fab8c53_opt.webp
+!public/uploads/galeri/galeri_latihan_chassis.jpg
+!public/uploads/galeri/galeri_workshop_arduino.jpg
+!public/uploads/galeri/galeri_lomba_krpai.jpg
+!public/uploads/galeri/galeri_pameran_stem.jpg
+!public/uploads/galeri/galeri_demo_robot.jpg
+!public/uploads/galeri/galeri_proses_rakitan.jpg
+!public/uploads/prestasi/prestasi_krpai.jpg
+!public/uploads/prestasi/prestasi_inovasi.jpg
+!public/uploads/prestasi/prestasi_krpai_2026.jpg
+!public/uploads/prestasi/prestasi_line_tracer.jpg
+!public/uploads/prestasi/sertifikat_krpai_2025.pdf
+!public/uploads/prestasi/sertifikat_inovasi_2025.pdf
+!public/uploads/prestasi/sertifikat_krpai_2026.pdf
+!public/uploads/prestasi/sertifikat_line_tracer_2026.pdf
 
 # ===== DEPENDENCIES =====
 vendor/
