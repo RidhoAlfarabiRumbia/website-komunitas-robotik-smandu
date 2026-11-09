@@ -33,7 +33,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
     <div style="margin:30px 0; border-top:1px solid var(--border);"></div>
   <?php endif; ?>
   <?php if ($daftarAnggota): ?>
-    <div class="grid grid-3 grid-stagger reveal">
+    <div class="grid grid-3 grid-stagger">
       <?php foreach ($daftarAnggota as $a): ?>
       <div class="card-wrap<?= Auth::isAdmin() && ($crudItemEntity ?? '') === 'anggota' ? ' card-wrap-admin' : '' ?>">
       <a href="anggota-detail.php?id=<?= $a['id'] ?>" class="card" style="display:flex; gap:14px; align-items:center;">

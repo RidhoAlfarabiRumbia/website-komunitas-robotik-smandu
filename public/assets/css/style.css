@@ -1027,7 +1027,7 @@ h1, h2, h3, h4, p, span, a, div {
    seluruh isi hero (termasuk dots & chip "Kelola Slider") ikut pudar/gelap
    saat refresh sebelum akhirnya terang. */
 .main > :not(.welcome-hero):not(.hero-frame), .login-wrap {
-  animation: fadeIn .55s cubic-bezier(.22,.61,.36,1) backwards;
+  animation: fadeInAdmin .4s ease-out backwards;
 }
 /* Admin: fade saja tanpa translateY. Transform pada .admin-body menambah
    tinggi scrollable selama animasi, sehingga scrollbar sempat muncul lalu
@@ -1129,14 +1129,14 @@ h1, h2, h3, h4, p, span, a, div {
   animation: staggerUp .5s cubic-bezier(.22,.61,.36,1) both;
 }
 .admin-main .grid > *:nth-child(1) { animation-delay: .05s; }
-.admin-main .grid > *:nth-child(2) { animation-delay: .12s; }
-.admin-main .grid > *:nth-child(3) { animation-delay: .19s; }
-.admin-main .grid > *:nth-child(4) { animation-delay: .26s; }
-.admin-main .grid > *:nth-child(5) { animation-delay: .33s; }
-.admin-main .grid > *:nth-child(6) { animation-delay: .4s; }
-.admin-main .grid > *:nth-child(7) { animation-delay: .47s; }
-.admin-main .grid > *:nth-child(8) { animation-delay: .54s; }
-.admin-main .grid > *:nth-child(9) { animation-delay: .61s; }
+.admin-main .grid > *:nth-child(2) { animation-delay: .09s; }
+.admin-main .grid > *:nth-child(3) { animation-delay: .13s; }
+.admin-main .grid > *:nth-child(4) { animation-delay: .17s; }
+.admin-main .grid > *:nth-child(5) { animation-delay: .21s; }
+.admin-main .grid > *:nth-child(6) { animation-delay: .25s; }
+.admin-main .grid > *:nth-child(7) { animation-delay: .29s; }
+.admin-main .grid > *:nth-child(8) { animation-delay: .33s; }
+.admin-main .grid > *:nth-child(9) { animation-delay: .37s; }
 
 /* 7. Hero section entrance */
 .hero-left {
@@ -1229,27 +1229,25 @@ a:focus-visible, button:focus-visible {
 .grid-stagger > * {
   opacity: 0;
   transform: translateY(20px);
-  animation: staggerUp .5s cubic-bezier(.22,.61,.36,1) both;
+  animation: staggerUp .4s cubic-bezier(.22,.61,.36,1) both;
 }
 .grid-stagger > *:nth-child(1) { animation-delay: .05s; }
-.grid-stagger > *:nth-child(2) { animation-delay: .12s; }
-.grid-stagger > *:nth-child(3) { animation-delay: .19s; }
-.grid-stagger > *:nth-child(4) { animation-delay: .26s; }
-.grid-stagger > *:nth-child(5) { animation-delay: .33s; }
-.grid-stagger > *:nth-child(6) { animation-delay: .4s; }
-.grid-stagger > *:nth-child(7) { animation-delay: .47s; }
-.grid-stagger > *:nth-child(8) { animation-delay: .54s; }
-.grid-stagger > *:nth-child(9) { animation-delay: .61s; }
+.grid-stagger > *:nth-child(2) { animation-delay: .09s; }
+.grid-stagger > *:nth-child(3) { animation-delay: .13s; }
+.grid-stagger > *:nth-child(4) { animation-delay: .17s; }
+.grid-stagger > *:nth-child(5) { animation-delay: .21s; }
+.grid-stagger > *:nth-child(6) { animation-delay: .25s; }
+.grid-stagger > *:nth-child(7) { animation-delay: .29s; }
+.grid-stagger > *:nth-child(8) { animation-delay: .33s; }
+.grid-stagger > *:nth-child(9) { animation-delay: .37s; }
 @keyframes staggerUp {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* 19. Card anggota — slide up dari bawah (tanpa margin) */
-.grid-stagger .card,
-.card-wrap .card {
-  animation: slideUp .5s cubic-bezier(.22,.61,.36,1) both;
-}
+/* 19. Kartu di dalam grid berandes (grid-stagger) TIDAK beranimasi lagi sendiri:
+   animasi ganda (induk + kartu) membuat entri terlihat berkedip dua lapis.
+   Kartu non-grid yang berdiri sendiri masih dianimasikan di bagiannya masing-masing. */
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {

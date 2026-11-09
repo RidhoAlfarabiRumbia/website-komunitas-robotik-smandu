@@ -22,6 +22,8 @@ Ringkasan perubahan pada branch `update-terbaru`.
 
 ### Perbaikan (9 November 2026)
 
+- Halaman berkedip/flashy saat pindah dan kadang "nyangkut" semi-transparan (paling terasa pada Karya & Galeri) dibereskan. Penyebab: animasi masuk bertumpuk — container halaman fade 0,55s menunggu JS reveal (kartu bisa blank/stuck bila skrip sempat gagal), lalu kartu dianimasikan dua lapis (induk grid + kartu) dengan jeda bertingkat sampai 0,61s. Kini: grid kartu tidak lagi bergantung pada JS (class `reveal` dilepas dari 9 halaman: Karya, Galeri, Anggota, Lomba, Materi, Pelatihan, Prestasi, Komunitas), container halaman fade opacity saja 0,4s tanpa translasi, jeda stagger kartu dipersingkat (maks 0,37s), dan animasi ganda pada kartu dihapus.
+- Beranda & hero Komunitas tidak diubah: fade masuk foto slider tetap 0,8 detik seperti semula (fade + naik), supaya gerakannya tetap terasa.
 - Hasil "Gunakan Foto Ini" tidak lagi bergeser atau pecah: potongan diambil tepat dari area yang terlihat di modal dengan resolusi foto asli (dibatasi sisi terpanjang 1600px), bukan ukuran frame di layar.
 - Modal penyesuaian foto ikut dimuat pada mode manage di halaman fitur (Karya, Galeri, Prestasi, Anggota, Materi, Pelatihan, Kegiatan, Lomba, Pengumuman) sehingga crop, tombol "Edit Foto", dan pratinjau alamat foto bekerja juga bila form edit dibuka dari dashboard admin.
 - Pratinjau form langsung ikut berubah setelah menekan "Gunakan Foto Ini" (termasuk pada form yang memakai gambar default). Penyebab semula: CSP `img-src 'self' data:` menolak gambar buatan canvas dari `blob:` — kini CSP mengizinkan `blob:` untuk konten yang dihasilkan sendiri oleh portal.

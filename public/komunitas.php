@@ -149,7 +149,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
       <a class="see-all" href="<?= base_url('anggota.php') ?>">Lihat semua anggota <i class="bi bi-arrow-right"></i></a>
     </div>
     <?php if ($anggotaTampil): ?>
-      <div class="grid grid-3 grid-stagger reveal">
+      <div class="grid grid-3 grid-stagger">
         <?php foreach ($anggotaTampil as $a): ?>
           <?php $fotoAnggota = trim((string) ($a['foto'] ?? '')); ?>
           <a href="<?= base_url('anggota-detail.php?id=' . (int) $a['id']) ?>" class="card" style="display:flex; gap:14px; align-items:center; text-decoration:none; color:inherit;">

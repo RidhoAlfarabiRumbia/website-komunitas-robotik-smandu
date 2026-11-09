@@ -50,7 +50,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
   <?php endif; ?>
 
   <?php if ($daftar): ?>
-    <div class="grid grid-3 grid-stagger reveal">
+    <div class="grid grid-3 grid-stagger">
       <?php foreach ($daftar as $p):
         $tim = $timPrestasi[(int) $p['id']] ?? [];
       ?>

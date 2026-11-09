@@ -86,7 +86,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
   <?php endif; ?>
 
   <?php if ($daftar): ?>
-    <div class="grid grid-2 grid-stagger reveal">
+    <div class="grid grid-2 grid-stagger">
       <?php foreach ($daftar as $p):
         $saya = Auth::role() === 'anggota' ? Pelatihan::pendaftaranAnggota((int) $p['id'], (int) Auth::anggotaId()) : null;
       ?>

@@ -53,7 +53,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
   <?php endif; ?>
 
   <?php if ($materi): ?>
-    <div class="grid grid-3 grid-stagger reveal">
+    <div class="grid grid-3 grid-stagger">
       <?php foreach ($materi as $m):
         $boleh = isset($aksesMateri[(int) $m['id']]);
         $hasFile = !empty($m['file_path']);
@@ -102,7 +102,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
     </div>
   </div>
   <?php if ($referensi): ?>
-    <div class="grid grid-3 grid-stagger reveal">
+    <div class="grid grid-3 grid-stagger">
       <?php foreach ($referensi as $r): ?>
       <div class="card">
         <h3 style="font-size:15px; margin-bottom:6px;"><i class="bi bi-link-45deg"></i> <?= e($r['nama']) ?></h3>
