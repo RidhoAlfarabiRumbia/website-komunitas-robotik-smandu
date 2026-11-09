@@ -150,6 +150,35 @@ class PasswordReset extends Model
         return $stmt->rowCount() === 1;
     }
 
+    /**
+     * Batalkan semua tautan "lengkapi akun" (user_id NULL) yang belum dipakai
+     * untuk email tertentu. Dipakai saat admin membuat/kirim ulang tautan agar
+     * token lama tidak tetap berlaku di tengah-tengah.
+     */
+    public static function batalkanPending(string $email): void
+    {
+        self::db()->prepare(
+            'UPDATE password_resets SET used_at = NOW()
+             WHERE email_hash = ? AND user_id IS NULL AND used_at IS NULL'
+        )->execute([self::emailHash($email)]);
+    }
+
+    /**
+     * Tautan buat-akun terbaru untuk sebuah email (user_id NULL) — untuk
+     * menampilkan statusnya pada halaman verifikasi admin. NULL bila belum ada.
+     */
+    public static function statusEmail(string $email): ?array
+    {
+        $stmt = self::db()->prepare(
+            'SELECT * FROM password_resets
+             WHERE email_hash = ? AND user_id IS NULL AND token_hash IS NOT NULL
+             ORDER BY id DESC LIMIT 1'
+        );
+        $stmt->execute([self::emailHash($email)]);
+        $row = $stmt->fetch();
+        return $row ?: null;
+    }
+
     /** Token lama tidak boleh dipakai lagi setelah password/email berubah. */
     public static function batalkanTokenUser(int $userId): void
     {

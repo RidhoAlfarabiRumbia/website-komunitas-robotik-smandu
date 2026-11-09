@@ -7,6 +7,40 @@
 require_once __DIR__ . '/../../app/includes/bootstrap.php';
 Auth::requireRole('admin');
 
+/**
+ * Buat tautan pembuatan akun (token sekali pakai, berlaku 24 jam) untuk hasil
+ * verifikasi dan kirimkan ke email pelamar. Tautan lama untuk email yang sama
+ * otomatis tidak berlaku. true bila email sukses terkirim.
+ */
+function kirimTautanAkun(string $email, string $nama): bool
+{
+    PasswordReset::batalkanPending($email);
+
+    $token = bin2hex(random_bytes(32));
+    $emailHash = PasswordReset::emailHash($email);
+    $berlaku = date('Y-m-d H:i:s', time() + 86400); // 24 jam
+    PasswordReset::catat($email, null, hash('sha256', $token), $berlaku, $_SERVER['REMOTE_ADDR'] ?? null);
+
+    $tautan = app_url('lengkapi-akun.php?token=' . rawurlencode($token));
+    $judul = 'Pendaftaran Diverifikasi — Silakan Buat Akun di Komunitas Robotik';
+    $isiHtml = '<p>Halo ' . e($nama) . ',</p>'
+        . '<p>Kabar baik! Pendaftaran Anda di Komunitas Robotik telah diverifikasi. '
+        . 'Langkah terakhir: silakan pilih nama pengguna (username) dan kata sandi '
+        . 'untuk mengaktifkan akun Anda melalui tautan berikut:</p>'
+        . '<p><a href="' . e($tautan) . '">' . e($tautan) . '</a></p>'
+        . '<p>Tautan ini berlaku 24 jam dan hanya dapat digunakan sekali.</p>'
+        . '<p style="font-size:13px;">Salam,<br>Komunitas Robotik SMA Negeri 2 Kota Ternate</p>';
+    $isiTeks = "Halo " . $nama . ",\n\n"
+        . "Kabar baik! Pendaftaran Anda di Komunitas Robotik telah diverifikasi.\n"
+        . "Langkah terakhir: silakan pilih nama pengguna (username) dan kata sandi "
+        . "untuk mengaktifkan akun Anda melalui tautan berikut:\n\n"
+        . $tautan . "\n\n"
+        . "Tautan ini berlaku 24 jam dan hanya dapat digunakan sekali.\n\n"
+        . "Salam,\n"
+        . "Komunitas Robotik SMA Negeri 2 Kota Ternate\n";
+    return Mailer::send($email, $judul, $isiHtml, $isiTeks);
+}
+
 $filter = nilai_teks($_GET, 'status');
 // Pencarian daftar; kata kunci ikut dibawa ke link detail & redirect.
 $q = cari_kunci($_GET['q'] ?? $_POST['q'] ?? '');
@@ -27,55 +61,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $catatan = nilai_teks($_POST, 'catatan');
 
     if ($aksi === 'verifikasi') {
-        // Buat akun anggota + login sehingga anggota bisa langsung masuk
-        $username = nilai_teks($_POST, 'username');
-        $password = nilai_teks($_POST, 'password', false);
-        $email = strtolower(nilai_teks($_POST, 'email'));
-
-        $anggotaId = (int) ($p['anggota_id'] ?? 0);
-        $akunLama = $anggotaId ? User::findByAnggota($anggotaId) : null;
-        $akunId = $akunLama ? (int) $akunLama['id'] : 0;
-
-        if ($username === '') {
-            flash_set('error', 'Username wajib diisi untuk mengaktifkan akun.');
-            redirect('admin/verifikasi.php?id=' . $id . $qs);
-        }
-        if (mb_strlen($username) > 60) {
-            flash_set('error', 'Username maksimal 60 karakter.');
-            redirect('admin/verifikasi.php?id=' . $id . $qs);
-        }
-        if (User::usernameTaken($username, $akunId)) {
-            flash_set('error', 'Username sudah dipakai akun lain.');
-            redirect('admin/verifikasi.php?id=' . $id . $qs);
-        }
-        if ($password === '' && !$akunLama) {
-            flash_set('error', 'Kata sandi wajib diisi untuk akun baru.');
-            redirect('admin/verifikasi.php?id=' . $id . $qs);
-        }
-        if ($password !== '' && strlen($password) < 8) {
-            flash_set('error', 'Kata sandi minimal 8 karakter.');
-            redirect('admin/verifikasi.php?id=' . $id . $qs);
-        }
-
-        if ($email === '') {
-            flash_set('error', 'Email wajib diisi untuk mengaktifkan akun.');
-            redirect('admin/verifikasi.php?id=' . $id . $qs);
-        }
-        if (strlen($email) > 120 || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            flash_set('error', 'Format email akun tidak valid.');
-            redirect('admin/verifikasi.php?id=' . $id . $qs);
-        }
-        if (User::emailTaken($email, $akunId)) {
-            flash_set('error', 'Email sudah dipakai akun lain.');
+        // Tautan buat-akun dikirim ke email yang diisi pelamar di formulir;
+        // username & kata sandi ditetapkan pelamar sendiri lewat tautan tersebut.
+        $email = strtolower(trim((string) ($p['email'] ?? '')));
+        if ($email === '' || strlen($email) > 120 || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            flash_set('error', 'Email pendaftaran belum terisi dengan benar, sehingga tautan pembuatan akun tidak bisa dikirim.');
             redirect('admin/verifikasi.php?id=' . $id . $qs);
         }
 
         // Keamanan: JANGAN pernah otomatis menempelkan akun ini ke anggota
         // existing berdasarkan pencocokan nama+kelas. Orang bisa mendaftar
         // memakai nama & kelas anggota asli lalu, saat admin memverifikasi,
-        // username+sandi miliknya terpasang ke akun anggota tersebut (account
-        // takeover). Satu-satunya sumber kebenaran adalah $p['anggota_id'] yang
-        // sudah terisi dari verifikasi sebelumnya.
+        // akunnya terpasang ke anggota tersebut (account takeover). Satu-satunya
+        // sumber kebenaran adalah $p['anggota_id'] yang sudah terisi dari
+        // verifikasi sebelumnya.
+        $anggotaId = (int) ($p['anggota_id'] ?? 0);
+
         $db = Database::connect();
         try {
             $db->beginTransaction();
@@ -92,18 +93,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
 
-            if ($akunLama) {
-                $userData = ['username' => $username, 'email' => $email];
-                if ($password !== '') {
-                    $userData['password_hash'] = password_hash($password, PASSWORD_DEFAULT);
-                }
-                if (!User::update((int) $akunLama['id'], $userData)) {
-                    throw new RuntimeException('Gagal memperbarui akun anggota.');
-                }
-            } elseif (User::createForAnggota($anggotaId, $username, $password, $email) <= 0) {
-                throw new RuntimeException('Gagal membuat akun anggota.');
-            }
-
             if (!Pendaftaran::verifikasi($id, 'Diverifikasi', $catatan, $anggotaId)) {
                 throw new RuntimeException('Gagal memperbarui data pendaftaran.');
             }
@@ -117,7 +106,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             redirect('admin/verifikasi.php?id=' . $id . $qs);
         }
 
-        flash_set('success', 'Pendaftaran diverifikasi. Akun anggota sudah aktif.');
+        // Email dikirim setelah commit: kegagalan SMTP tidak boleh menggagalkan
+        // verifikasi, cukup dicatat di log (tidak diekspos ke calon anggota).
+        if (kirimTautanAkun($email, (string) $p['nama'])) {
+            flash_set('success', 'Pendaftaran diverifikasi. Tautan pembuatan akun dikirim ke ' . $email . '.');
+        } else {
+            error_log('[VERIFIKASI] Gagal mengirim tautan pembuatan akun ke ' . $email);
+            flash_set('error', 'Pendaftaran diverifikasi, tetapi email gagal terkirim. Periksa konfigurasi SMTP lalu gunakan tombol Kirim Ulang Tautan.');
+        }
+    } elseif ($aksi === 'kirim_ulang') {
+        // Antisipasi email tidak terkirim (mis. kotak masuk penuh/layanan
+        // email bermasalah): kirim ulang; tautan lama otomatis tidak berlaku.
+        if ($p['status'] !== 'Diverifikasi') {
+            flash_set('error', 'Kirim ulang hanya untuk pendaftaran yang sudah diverifikasi.');
+            redirect('admin/verifikasi.php?id=' . $id . $qs);
+        }
+        $email = strtolower(trim((string) ($p['email'] ?? '')));
+        if ($email === '' || strlen($email) > 120 || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            flash_set('error', 'Email pendaftaran belum terisi dengan benar, tautan tidak bisa dikirim.');
+            redirect('admin/verifikasi.php?id=' . $id . $qs);
+        }
+        if (User::findByAnggota((int) ($p['anggota_id'] ?? 0))) {
+            flash_set('success', 'Akun pendaftaran ini sudah aktif. Tidak perlu kirim ulang.');
+            redirect('admin/verifikasi.php?id=' . $id . $qs);
+        }
+        if (kirimTautanAkun($email, (string) $p['nama'])) {
+            flash_set('success', 'Tautan baru dikirim ke ' . $email . '. Berlaku 24 jam.');
+        } else {
+            error_log('[VERIFIKASI] Gagal kirim ulang tautan buat akun ke ' . $email);
+            flash_set('error', 'Email gagal terkirim. Periksa konfigurasi SMTP, lalu coba lagi.');
+        }
     } elseif ($aksi === 'tolak') {
         if (Pendaftaran::verifikasi($id, 'Ditolak', $catatan ?: 'Dokumen tidak valid.')) {
             flash_set('success', 'Pendaftaran ditolak.');
@@ -225,20 +243,13 @@ include __DIR__ . '/../../app/includes/header.php';
               <input type="hidden" name="id" value="<?= (int) $detail['id'] ?>">
               <h3 style="font-size:14px; margin-bottom:12px;">Verifikasi</h3>
 
-              <div class="field">
-                <label>Username akun <span class="req">*</span></label>
-                <input name="username" value="<?= e($akunDetail ? $akunDetail['username'] : strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $detail['nama']))) ?>" maxlength="60" autocomplete="off">
+              <div class="alert alert-info" style="margin-bottom:14px;">
+                <i class="bi bi-envelope-paper"></i>
+                Saat diverifikasi, data anggota dibuat dan tautan pembuatan akun dikirim ke email pelamar
+                (<?= e($detail['email'] ?: 'belum terisi') ?>). Username &amp; kata sandi ditetapkan pelamar
+                sendiri lewat tautan tersebut; tautan berlaku 24 jam dan hanya dipakai sekali.
               </div>
-              <div class="field">
-                <label>Email akun <span class="req">*</span></label>
-                <input type="email" name="email" value="<?= e(!empty($akunDetail['email']) ? $akunDetail['email'] : ($detail['email'] ?: '')) ?>" maxlength="120" required autocomplete="email">
-                <span class="hint">Dipakai untuk reset kata sandi. Pastikan email ini milik calon anggota.</span>
-              </div>
-              <div class="field">
-                <label>Kata sandi <?php if (!$akunDetail): ?><span class="req">*</span><?php endif; ?></label>
-                <input type="password" name="password" minlength="8" autocomplete="new-password" <?= $akunDetail ? '' : 'required' ?>>
-                <span class="hint"><?= $akunDetail ? 'Kosongkan jika kata sandi tidak diubah.' : 'Minimal 8 karakter. Sampaikan ke calon anggota lewat kanal aman.' ?></span>
-              </div>
+
               <div class="field">
                 <label>Catatan (opsional)</label>
                 <textarea name="catatan" rows="2"><?= e($detail['catatan'] ?: '') ?></textarea>
@@ -250,11 +261,54 @@ include __DIR__ . '/../../app/includes/header.php';
               </div>
             </form>
           <?php else: ?>
+            <?php
+                $adaAkun = $akunDetail !== null;
+                $emailPendaftaran = (string) ($detail['email'] ?? '');
+                $emailPendaftaranValid = $emailPendaftaran !== '' && filter_var($emailPendaftaran, FILTER_VALIDATE_EMAIL);
+                $tautanInfo = ($detail['status'] === 'Diverifikasi' && $emailPendaftaranValid && !$adaAkun)
+                    ? PasswordReset::statusEmail($emailPendaftaran)
+                    : null;
+                $tautanTerpakai = $tautanInfo && !empty($tautanInfo['used_at']);
+                $tautanKedaluwarsa = $tautanInfo
+                    && empty($tautanInfo['used_at'])
+                    && strtotime((string) $tautanInfo['expires_at']) <= time();
+            ?>
+            <?php if ($detail['status'] === 'Diverifikasi'): ?>
+              <div class="card" style="margin-bottom:16px;">
+                <h3 style="font-size:14px; margin-bottom:10px;"><i class="bi bi-envelope-paper"></i> Tautan Pembuatan Akun</h3>
+                <p style="font-size:12.5px; color:var(--text-muted); margin-bottom:12px;">
+                  <?php if ($adaAkun): ?>
+                    Akun sudah aktif dengan username <strong><?= e($akunDetail['username']) ?></strong>.
+                  <?php elseif (!$emailPendaftaranValid): ?>
+                    Email pendaftaran belum terisi dengan benar, tautan tidak bisa dikirim.
+                  <?php elseif (!$tautanInfo): ?>
+                    Tautan belum pernah dibuat.
+                  <?php elseif ($tautanTerpakai): ?>
+                    Tautan terakhir sudah digunakan.
+                  <?php elseif ($tautanKedaluwarsa): ?>
+                    Tautan terakhir sudah kedaluwarsa.
+                  <?php else: ?>
+                    Tautan aktif — dikirim <?= e(tanggal_indo((string) ($tautanInfo['created_at'] ?? ''))) ?>, berlaku sampai <?= e(tanggal_indo((string) $tautanInfo['expires_at'])) ?>.
+                  <?php endif; ?>
+                </p>
+                <?php if (!$adaAkun && $emailPendaftaranValid): ?>
+                  <form method="post">
+                    <?= Csrf::field() ?>
+                    <input type="hidden" name="id" value="<?= (int) $detail['id'] ?>">
+                    <button class="btn btn-outline btn-sm" type="submit" name="aksi" value="kirim_ulang"
+                            onclick="return konfirmasiKirim(event, 'Kirim ulang tautan pembuatan akun? Tautan lama tidak berlaku lagi.', 'Ya, kirim ulang')">
+                      <i class="bi bi-send"></i> Kirim Ulang Tautan
+                    </button>
+                  </form>
+                <?php endif; ?>
+              </div>
+            <?php endif; ?>
             <form method="post" class="card">
               <?= Csrf::field() ?>
               <input type="hidden" name="id" value="<?= (int) $detail['id'] ?>">
               <p style="font-size:12.5px; color:var(--text-muted); margin-bottom:12px;">Pendaftaran ini sudah diproses.</p>
-              <button class="btn btn-danger-outline btn-block" type="submit" name="aksi" value="hapus" onclick="return confirm('Hapus data pendaftaran ini?')">
+              <button class="btn btn-danger-outline btn-block" type="submit" name="aksi" value="hapus"
+                      onclick="return konfirmasiKirim(event, 'Hapus data pendaftaran ini?', 'Ya, hapus')">
                 <i class="bi bi-trash"></i> Hapus Data
               </button>
             </form>

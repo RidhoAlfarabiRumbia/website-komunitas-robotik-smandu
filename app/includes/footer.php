@@ -63,6 +63,16 @@ if (!$sedangAdmin):
   </div>
 </footer>
 <?php endif; ?>
+<div class="modal-overlay" id="konfirmasiModal" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="konfirmasiPesan">
+    <div class="modal-icon" aria-hidden="true"><i class="bi bi-trash"></i></div>
+    <p class="modal-text" id="konfirmasiPesan"></p>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-outline" id="konfirmasiBatal">Batal</button>
+      <button type="button" class="btn btn-danger" id="konfirmasiYa">Ya, lanjutkan</button>
+    </div>
+  </div>
+</div>
 <script>
 function toggleTheme(){
   var html=document.documentElement;
@@ -236,6 +246,60 @@ window.addEventListener('pageshow',tampilkanYangSudahDilihat);
     window.addEventListener('resize',perbarui);
     perbarui();
   });
+})();
+
+/* Modal konfirmasi seragam, pengganti dialog confirm() bawaan browser.
+   - Form dengan submit tunggal: onsubmit="return konfirmasiForm(event, 'Pesan')"
+   - Form multi-tombol, modal hanya untuk satu tombol: onclick="return konfirmasiKirim(event, 'Pesan')"
+   Aksi dikirim ulang lewat tombol aslinya supaya nama/value submitter
+   (mis. name="aksi" value="hapus") tetap terkirim. */
+function tampilkanKonfirmasi(form, submitter, pesan, labelYa, ikon){
+  var overlay = document.getElementById('konfirmasiModal');
+  overlay.__modalForm = form;
+  overlay.__modalSubmitter = submitter || form.querySelector('button[type="submit"]');
+  document.getElementById('konfirmasiPesan').textContent = pesan || 'Lanjutkan tindakan ini?';
+  var ya = document.getElementById('konfirmasiYa');
+  ya.textContent = labelYa || 'Ya, lanjutkan';
+  var ii = overlay.querySelector('.modal-icon i');
+  ii.className = 'bi ' + (ikon || 'bi-trash');
+  overlay.hidden = false;
+  ya.focus();
+  return true;
+}
+function konfirmasiForm(e, pesan, labelYa){
+  var form = e.target;
+  if(form.dataset.modalConfirmed === '1'){ delete form.dataset.modalConfirmed; return true; }
+  if(!document.getElementById('konfirmasiModal')) return confirm(pesan || 'Lanjutkan tindakan ini?');
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  tampilkanKonfirmasi(form, e.submitter, pesan, labelYa);
+  return false;
+}
+function konfirmasiKirim(e, pesan, labelYa){
+  var btn = e.currentTarget || e.target;
+  var form = btn ? btn.form : null;
+  if(form && form.dataset.modalConfirmed === '1'){ delete form.dataset.modalConfirmed; return true; }
+  if(!document.getElementById('konfirmasiModal')) return confirm(pesan || 'Lanjutkan tindakan ini?');
+  e.preventDefault();
+  if(form) tampilkanKonfirmasi(form, btn, pesan, labelYa);
+  return false;
+}
+(function(){
+  var overlay = document.getElementById('konfirmasiModal');
+  if(!overlay) return;
+  function tutup(){ overlay.hidden = true; }
+  function kirim(){
+    var form = overlay.__modalForm;
+    var sub = overlay.__modalSubmitter;
+    tutup();
+    if(!form) return;
+    form.dataset.modalConfirmed = '1';
+    if(sub){ sub.click(); } else { form.requestSubmit(); }
+  }
+  document.getElementById('konfirmasiBatal').addEventListener('click', tutup);
+  document.getElementById('konfirmasiYa').addEventListener('click', kirim);
+  overlay.addEventListener('mousedown', function(ev){ if(ev.target === overlay) tutup(); });
+  document.addEventListener('keydown', function(ev){ if(ev.key === 'Escape' && !overlay.hidden) tutup(); });
 })();
 </script>
 </body>

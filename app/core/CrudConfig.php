@@ -18,7 +18,12 @@ function crud_config(): array
                 'nama' => ['label' => 'Nama', 'type' => 'text', 'required' => true],
                 'kelas' => ['label' => 'Kelas', 'type' => 'text', 'required' => true],
                 'deskripsi' => ['label' => 'Deskripsi', 'type' => 'textarea'],
-                'foto' => ['label' => 'Foto', 'type' => 'file', 'subfolder' => 'anggota'],
+                'foto' => ['label' => 'Foto', 'type' => 'file', 'subfolder' => 'anggota', 'crop' => '1/1'],
+                // Pseudo-field (bukan kolom tabel anggota): dokumen Pakta
+                // Integritas opsional saat tambah anggota secara manual.
+                // Dipasangkan via baris pendaftaran (status Diverifikasi) yang
+                // dibuat bersamaan di crud_handle.php.
+                'pakta_baru' => ['label' => 'Dokumen Pakta Integritas', 'type' => 'pakta_baru', 'subfolder' => 'pakta-integritas'],
                 'username' => ['label' => 'Username Login', 'type' => 'akun_username'],
                 'akun_email' => ['label' => 'Email Login', 'type' => 'akun_email'],
                 'password' => ['label' => 'Kata Sandi Login', 'type' => 'password'],
@@ -66,7 +71,7 @@ function crud_config(): array
                 // Tanpa ini, admin bisa menyimpan javascript: yang dieksekusi
                 // saat anggota mengeklik tautannya di karya-detail.php.
                 'link_demo' => ['label' => 'Tautan Proyek', 'type' => 'text', 'link' => true],
-                'foto' => ['label' => 'Foto', 'type' => 'file', 'subfolder' => 'karya'],
+                'foto' => ['label' => 'Foto', 'type' => 'file', 'subfolder' => 'karya', 'crop' => '16/9'],
             ],
             'list' => ['judul', 'progres', 'publikasi'],
             'search' => ['judul', 'deskripsi', 'teknologi', '_cari_pembuat'],
@@ -79,7 +84,7 @@ function crud_config(): array
                 'kategori' => ['label' => 'Kategori', 'type' => 'select', 'options' => ['Latihan','Workshop','Lomba','Prestasi','Pameran','Demo Robot','Proses Proyek','Lainnya']],
                 'deskripsi' => ['label' => 'Deskripsi', 'type' => 'textarea'],
                 'tanggal' => ['label' => 'Tanggal', 'type' => 'date', 'required' => true],
-                'foto' => ['label' => 'Foto', 'type' => 'file', 'subfolder' => 'galeri'],
+                'foto' => ['label' => 'Foto', 'type' => 'file', 'subfolder' => 'galeri', 'crop' => '16/9'],
                 'video' => ['label' => 'Link Video', 'type' => 'video'],
             ],
             'list' => ['judul', 'kategori', 'tanggal'],
@@ -92,7 +97,9 @@ function crud_config(): array
         'hero' => [
             'label' => 'Slider', 'model' => Hero::class,
             'fields' => [
-                'foto' => ['label' => 'Gambar', 'type' => 'file', 'subfolder' => 'hero'],
+                // Rasio 3:4 mendekati bentuk kolom foto tengah carousel hero
+                // di beranda/profil komunitas (grid 3 kolom).
+                'foto' => ['label' => 'Gambar', 'type' => 'file', 'subfolder' => 'hero', 'crop' => '3/4'],
             ],
             'list' => [],
             // Slider hanya berisi foto: tidak ada kolom teks, jadi kotak
@@ -157,6 +164,9 @@ function crud_config(): array
                 'mode' => ['label' => 'Mode Pelaksanaan', 'type' => 'select', 'options' => ['Daring','Luring']],
                 'status' => ['label' => 'Status Pendaftaran', 'type' => 'select', 'options' => ['Dibuka','Ditutup']],
                 'akses' => ['label' => 'Sifat Akses', 'type' => 'select', 'options' => ['Anggota','Umum']],
+                // Pseudo-field (bukan kolom DB): unggahan materi opsional saat
+                // tambah pelatihan; diproses khusus di crud_handle.php.
+                'materi_baru' => ['label' => 'Unggah Materi', 'type' => 'materi_baru', 'subfolder' => 'materi'],
             ],
             'list' => ['nama', 'tanggal_mulai', 'mode', 'status', 'akses'],
             'search' => ['nama', 'deskripsi', 'lokasi', 'waktu'],
@@ -170,7 +180,7 @@ function crud_config(): array
                 'tingkat' => ['label' => 'Tingkat', 'type' => 'select', 'options' => ['Sekolah','Kota','Provinsi','Nasional','Internasional']],
                 'hasil' => ['label' => 'Hasil', 'type' => 'text'],
                 'deskripsi' => ['label' => 'Ceritakan Singkat', 'type' => 'textarea'],
-                'foto' => ['label' => 'Foto', 'type' => 'file', 'subfolder' => 'content'],
+                'foto' => ['label' => 'Foto', 'type' => 'file', 'subfolder' => 'content', 'crop' => '16/9'], // sinkron kartu (work-thumb) & detail prestasi
                 'sertifikat' => ['label' => 'Sertifikat', 'type' => 'doc_file', 'subfolder' => 'sertifikat'],
                 'status' => ['label' => 'Status', 'type' => 'select', 'options' => ['Tayang','Disembunyikan']],
                 'peraih' => ['label' => 'Peraih Prestasi', 'type' => 'peraih'],

@@ -3,8 +3,9 @@
 /**
  * Materi (PRD 8.2).
  * Akses dibatasi: materi hanya dapat dilihat/diunduh oleh anggota yang
- * terdaftar dan disetujui sebagai peserta pada Pelatihan/Workshop terkait,
- * selama periode pelatihan berlangsung.
+ * terdaftar dan disetujui sebagai peserta pada Pelatihan/Workshop terkait.
+ * Sekali disetujui, akses tetap terbuka walau pelatihan sudah selesai atau
+ * pendaftarannya ditutup — tanggal pelatihan tidak mengunci materi.
  */
 class Materi extends Model
 {
@@ -46,7 +47,7 @@ class Materi extends Model
     /**
      * Apakah anggota yang diberikan boleh membuka berkas materi ini?
      * True bila admin, atau sudah menjadi peserta yang DISETUJUI pada salah
-     * satu pelatihan terkait yang periodenya masih berjalan.
+     * satu pelatihan terkait — tanpa batas tanggal status pelatihan.
      */
     public static function bolehAkses(int $materiId, ?int $anggotaId, bool $isAdmin = false): bool
     {
@@ -55,13 +56,10 @@ class Materi extends Model
 
         $stmt = self::db()->prepare(
             'SELECT COUNT(*) FROM materi_pelatihan mp
-             JOIN pelatihan p ON p.id = mp.pelatihan_id
-             JOIN pelatihan_peserta pp ON pp.pelatihan_id = p.id
+             JOIN pelatihan_peserta pp ON pp.pelatihan_id = mp.pelatihan_id
              WHERE mp.materi_id = ?
                AND pp.anggota_id = ?
-               AND pp.status = "Disetujui"
-               AND (p.tanggal_mulai IS NULL OR p.tanggal_mulai = "" OR p.tanggal_mulai <= CURDATE())
-               AND (p.tanggal_selesai IS NULL OR p.tanggal_selesai = "" OR p.tanggal_selesai >= CURDATE())'
+               AND pp.status = "Disetujui"'
         );
         $stmt->execute([$materiId, $anggotaId]);
         return (int) $stmt->fetchColumn() > 0;
@@ -81,13 +79,10 @@ class Materi extends Model
         $placeholders = implode(',', array_fill(0, count($ids), '?'));
         $stmt = self::db()->prepare(
             'SELECT DISTINCT mp.materi_id FROM materi_pelatihan mp
-             JOIN pelatihan p ON p.id = mp.pelatihan_id
-             JOIN pelatihan_peserta pp ON pp.pelatihan_id = p.id
+             JOIN pelatihan_peserta pp ON pp.pelatihan_id = mp.pelatihan_id
              WHERE mp.materi_id IN (' . $placeholders . ')
                AND pp.anggota_id = ?
-               AND pp.status = "Disetujui"
-               AND (p.tanggal_mulai IS NULL OR p.tanggal_mulai = "" OR p.tanggal_mulai <= CURDATE())
-               AND (p.tanggal_selesai IS NULL OR p.tanggal_selesai = "" OR p.tanggal_selesai >= CURDATE())'
+               AND pp.status = "Disetujui"'
         );
         $stmt->execute(array_merge($ids, [$anggotaId]));
 

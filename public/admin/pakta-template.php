@@ -144,7 +144,7 @@ include __DIR__ . '/../../app/includes/header.php';
         <button class="btn btn-primary" type="submit" name="aksi" value="unggah"><i class="bi bi-check2"></i> Simpan Template</button>
         <?php if ($tpl['ada']): ?>
           <button class="btn btn-danger-outline" type="submit" name="aksi" value="hapus"
-                  onclick="return confirm('Hapus template Pakta Integritas? Calon anggota tidak bisa mengunduhnya lagi.')">
+                  onclick="return konfirmasiKirim(event, 'Hapus template Pakta Integritas? Calon anggota tidak bisa mengunduhnya lagi.', 'Ya, hapus')">
             <i class="bi bi-trash"></i> Hapus
           </button>
         <?php endif; ?>

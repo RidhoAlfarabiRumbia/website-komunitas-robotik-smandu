@@ -120,11 +120,19 @@ $hasWhen = false;
         <?php elseif ($f['type'] === 'date'): ?>
           <input type="date" name="<?= $key ?>" value="<?= e($val ? date('Y-m-d', strtotime($val)) : '') ?>" <?= !empty($f['required']) ? 'required' : '' ?>>
         <?php elseif ($f['type'] === 'file'): ?>
-          <input type="file" name="<?= $key ?>" accept=".jpg,.jpeg,.png,.webp">
+          <input type="file" name="<?= $key ?>" accept=".jpg,.jpeg,.png,.webp"
+                 class="<?= !empty($f['crop']) ? 'js-foto-crop' : '' ?>"
+                 data-crop-aspect="<?= e((string) ($f['crop'] ?? '')) ?>">
           <span class="hint">Format JPG, JPEG, PNG, atau WEBP. Ukuran maksimal 2MB file yang melebihi batas akan ditolak.</span>
+          <span class="crop-terpasang" data-kunci="<?= e((string) $key) ?>" hidden></span>
           <?php if ($val): ?>
             <div style="margin-top:8px;"><img src="<?= base_url(e($val)) ?>" alt="Preview" style="display:block; width:100%; max-width:260px; height:auto; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface-2);"></div>
             <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Saat ini: <?= e($val) ?></div>
+            <?php if (!empty($f['crop'])): ?>
+              <div style="margin-top:8px;">
+                <button type="button" class="btn btn-outline btn-sm js-crop-edit" data-crop-src="<?= base_url(e($val)) ?>" data-crop-aspect="<?= e((string) $f['crop']) ?>"><i class="bi bi-crop"></i> Edit Foto</button>
+              </div>
+            <?php endif; ?>
           <?php elseif (!empty($crudCfg['foto_default'])): ?>
             <div style="margin-top:8px;"><img src="<?= base_url(e($crudCfg['foto_default'])) ?>" alt="Gambar default" style="display:block; width:100%; max-width:260px; height:auto; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface-2);"></div>
             <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Gambar default dipakai bila tidak ada foto.</div>
@@ -135,6 +143,35 @@ $hasWhen = false;
             <span class="hint">Berkas ini terbatas: disimpan di luar document root dan hanya bisa diunduh anggota yang berhak lewat halaman Materi.</span>
           <?php endif; ?>
           <?php if ($val): ?><div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Saat ini: <?= e($val) ?></div><?php endif; ?>
+        <?php elseif ($f['type'] === 'materi_baru'): ?>
+          <?php if ($editing): ?>
+            <?php if ($materiPelatihan): ?>
+              <ul style="margin:0; padding-left:18px; font-size:13px;">
+                <?php foreach ($materiPelatihan as $mtl): ?>
+                  <li><?= e($mtl['judul']) ?></li>
+                <?php endforeach; ?>
+              </ul>
+              <span class="hint">Kelola materi ini lewat menu Materi (edit → Pelatihan Tertaut).</span>
+            <?php else: ?>
+              <span class="hint">Belum ada materi terkait. Tambahkan lewat menu Materi.</span>
+            <?php endif; ?>
+          <?php else: ?>
+            <input type="file" name="materi_baru" accept=".pdf,.ppt,.pptx,.doc,.docx,.xls,.xlsx,.txt,.zip">
+            <span class="hint">Opsional: berkas materi untuk pelatihan ini (PDF, PPT, DOC, XLS, TXT, atau ZIP maks 10MB). Judul materi otomatis memakai nama pelatihan dan terkait dengan pelatihan yang baru dibuat.</span>
+          <?php endif; ?>
+        <?php elseif ($f['type'] === 'pakta_baru'): ?>
+          <?php $paktaTampil = $editing ? (Pendaftaran::paktaPerAnggota([(int) $editing['id']])[(int) $editing['id']] ?? null) : null; ?>
+          <?php if ($editing): ?>
+            <?php if ($paktaTampil): ?>
+              <a class="btn btn-outline btn-sm" href="<?= base_url('berkas.php?jenis=pakta&id=' . (int) $paktaTampil['id'] . '&lihat=1') ?>" target="_blank" rel="noopener"><i class="bi bi-eye"></i> Lihat Dokumen</a>
+              <span class="hint">Dokumen pakta sudah terpasang. Pergantian berkas dilakukan lewat menu Verifikasi Pendaftaran.</span>
+            <?php else: ?>
+              <span class="hint">Belum ada dokumen pakta terpasang. Bisa ditambahkan lewat menu Verifikasi Pendaftaran.</span>
+            <?php endif; ?>
+          <?php else: ?>
+            <input type="file" name="pakta_baru" accept=".pdf,.jpg,.jpeg,.png">
+            <span class="hint">Opsional. PDF, JPG, atau PNG maksimal 5MB — bisa berupa dokumen hasil scan.</span>
+          <?php endif; ?>
         <?php else: ?>
           <input name="<?= $key ?>" value="<?= e($val) ?>" <?= !empty($f['required']) ? 'required' : '' ?>>
         <?php endif; ?>
@@ -158,15 +195,21 @@ $hasWhen = false;
       <a class="btn btn-outline" href="<?= e(base_url($crudBase . $qs)) ?>">Batal</a>
     </div>
   </div>
-  <?php if (isset($crudCfg['fields']['foto']) && !($crudCfg['foto_inline'] ?? false)): $valFoto = $editing['foto'] ?? ''; ?>
+  <?php if (isset($crudCfg['fields']['foto']) && !($crudCfg['foto_inline'] ?? false)): $valFoto = $editing['foto'] ?? ''; $rasioFoto = (string) ($crudCfg['fields']['foto']['crop'] ?? ''); ?>
     <aside class="card crud-form-foto">
       <div class="field" style="margin-bottom:0;">
         <label><?= e($crudCfg['fields']['foto']['label']) ?></label>
-        <input type="file" name="foto" accept=".jpg,.jpeg,.png,.webp">
+        <input type="file" name="foto" accept=".jpg,.jpeg,.png,.webp"<?= $rasioFoto !== '' ? ' class="js-foto-crop" data-crop-aspect="' . e($rasioFoto) . '"' : '' ?>>
         <span class="hint">Format JPG, JPEG, PNG, atau WEBP. Ukuran maksimal 2MB file yang melebihi batas akan ditolak.</span>
+        <span class="crop-terpasang" data-kunci="foto" hidden></span>
         <?php if ($valFoto): ?>
           <div style="margin-top:10px;"><img src="<?= base_url(e($valFoto)) ?>" alt="Preview" style="display:block; width:100%; height:170px; object-fit:cover; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface-2);"></div>
           <span class="hint">Saat ini: <?= e($valFoto) ?></span>
+          <?php if ($rasioFoto !== ''): ?>
+            <div style="margin-top:8px;">
+              <button type="button" class="btn btn-outline btn-sm js-crop-edit" data-crop-src="<?= base_url(e($valFoto)) ?>" data-crop-aspect="<?= e($rasioFoto) ?>"><i class="bi bi-crop"></i> Edit Foto</button>
+            </div>
+          <?php endif; ?>
         <?php endif; ?>
       </div>
     </aside>

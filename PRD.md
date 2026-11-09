@@ -96,7 +96,7 @@ Pengunjung (tanpa login):
 •	Dapat diakses tanpa login oleh pengunjung umum.
 8.2 Materi
 •	Materi Arduino, IoT, Python, AI, robotik, pemrograman, dan elektronika dasar.
-•	Akses dibatasi: materi hanya dapat dilihat/diunduh oleh anggota yang terdaftar dan disetujui sebagai peserta pada Pelatihan/Workshop terkait, selama periode pelatihan berlangsung — tidak otomatis terbuka untuk seluruh anggota.
+•	Akses dibatasi: materi hanya dapat dilihat/diunduh oleh anggota yang terdaftar dan disetujui sebagai peserta pada Pelatihan/Workshop terkait — tidak otomatis terbuka untuk seluruh anggota. Sekali disetujui, akses tetap terbuka walau pelatihan sudah selesai atau statusnya Ditutup.
 •	Admin dapat CRUD materi dan mengaitkan materi dengan satu atau lebih Pelatihan/Workshop.
 •	Referensi (lihat 8.3) digabung ke dalam fitur ini: tampil sebagai bagian terpisah di halaman Materi dan dikelola lewat panel di halaman Materi admin.
 8.3 Referensi (digabung ke Materi)
@@ -109,7 +109,7 @@ Modul baru untuk mengelola kegiatan belajar terjadwal (mis. "Workshop Mini") yan
 •	Informasi: nama, deskripsi, jadwal, kuota peserta, status (Dibuka/Ditutup), dan penanda "Terbuka untuk Umum" atau "Khusus Anggota".
 •	Anggota (atau pengunjung, jika ditandai terbuka untuk umum) dapat mendaftar sebagai peserta.
 •	Admin menyetujui/menolak pendaftaran peserta sesuai kuota.
-•	Materi yang dikaitkan dengan pelatihan hanya terbuka bagi peserta yang disetujui, selama status pelatihan aktif.
+•	Materi yang dikaitkan dengan pelatihan hanya terbuka bagi peserta yang disetujui; sekali disetujui, akses tetap terbuka tanpa batas jadwal pelatihan.
 •	Riwayat pelatihan yang pernah diikuti tersimpan pada profil anggota.
 8.5 Karya
 •	Karya individu maupun tim.
@@ -144,7 +144,7 @@ Modul khusus untuk mendokumentasikan pencapaian/kejuaraan komunitas sebagai bukt
 •	Calon anggota mengisi formulir pendaftaran (data diri, kelas, kontak, email).
 •	Pendaftaran dibuka berdasarkan kunci dan periode yang diatur admin. Default tertutup; admin dapat memilih buka manual, tutup manual, atau mengikuti jadwal tanggal WIT. Tanggal selesai bersifat inklusif sampai pukul 23.59 WIT.
 •	Pakta Integritas: pernyataan komitmen keanggotaan yang diisi dan ditandatangani (bila perlu bermeterai), kemudian diunggah sebagai dokumen/hasil pindai.
-•	Admin memverifikasi formulir dan dokumen sebelum akun anggota diaktifkan.
+•	Admin memverifikasi formulir dan dokumen sebelum akun anggota diaktifkan; setelah verifikasi, sistem membuat data anggota dan mengirim tautan pembuatan akun (username & kata sandi diisi pelamar) ke email pendaftaran. Tautan berlaku 24 jam, sekali pakai, dan dapat dikirim ulang admin bila email tidak masuk.
 •	Status Pakta Integritas (sudah/belum lengkap) terlihat pada profil anggota.
 8.13 Profil Anggota
 •	Nama, kelas, deskripsi singkat, jumlah karya, jumlah lomba, jumlah kegiatan, riwayat pelatihan yang diikuti, dan daftar karya.
@@ -212,12 +212,13 @@ Moderasi	Ya	Tidak	Tidak
 2. Calon anggota mengisi formulir pendaftaran selama periode dibuka.
 3. Calon anggota mengisi dan menandatangani Pakta Integritas, lalu mengunggah hasil pindai.
 4. Admin memverifikasi kelengkapan formulir dan dokumen.
-5. Jika lengkap dan sesuai, akun anggota diaktifkan.
+5. Jika lengkap dan sesuai, admin memverifikasi; sistem membuat data anggota dan mengirim tautan pembuatan akun ke email pelamar (berlaku 24 jam, sekali pakai).
+6. Pelamar membuka tautan, menetapkan username & kata sandi, lalu akunnya aktif.
 11.3 Alur Pendaftaran Pelatihan/Workshop (Baru)
 1. Admin membuat Pelatihan/Workshop baru: jadwal, kuota, dan status (khusus anggota atau terbuka umum).
 2. Anggota (atau pengunjung, jika terbuka umum) mendaftar sebagai peserta.
 3. Admin menyetujui peserta sesuai kuota.
-4. Peserta yang disetujui mendapat akses ke Materi yang dikaitkan dengan pelatihan tersebut, selama periode berlangsung.
+4. Peserta yang disetujui mendapat akses ke Materi yang dikaitkan dengan pelatihan tersebut; sekali disetujui, akses tetap terbuka walau pelatihan sudah berakhir.
 11.4 Alur Lupa Password (Baru)
 1. Pengguna membuka halaman Lupa Password dan memasukkan email akun.
 2. Sistem membatasi frekuensi permintaan, lalu membuat token reset bila email terdaftar.

@@ -173,7 +173,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             $lepasKunci();
 
-            flash_set('success', 'Pendaftaran terkirim. Admin akan memverifikasi Pakta Integritas kamu sebelum akun diaktifkan. Admin/pembina akan menghubungimu melalui WhatsApp.');
+            flash_set('success', 'Pendaftaran terkirim. Tunggu verifikasi admin; tautan pembuatan akun dikirim ke emailmu.');
             redirect('daftar.php?terkirim=1');
         }
     }
@@ -192,7 +192,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
         <div class="eyebrow">GABUNG</div>
         <h1>Pendaftaran Anggota</h1>
         <p class="desc"><?= $gate['buka']
-            ? 'Isi data dan unggah Pakta Integritas. Admin memverifikasinya sebelum akun diaktifkan.'
+            ? 'Isi data dan unggah Pakta Integritas. Admin memverifikasinya terlebih dahulu; tautan pembuatan akun dikirim ke emailmu setelahnya.'
             : 'Pendaftaran hanya dapat diisi saat admin membuka periode.' ?></p>
       </div>
     </div>
@@ -203,8 +203,14 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
       <div class="card" style="text-align:center; padding:44px 24px;">
         <div style="font-size:44px; color:var(--teal); margin-bottom:12px;"><i class="bi bi-check-circle"></i></div>
         <h2 style="font-size:20px; margin-bottom:10px;">Pendaftaran Terkirim</h2>
-        <p style="color:var(--text-muted); max-width:460px; margin:0 auto 20px;">
-          Terima kasih. Admin akan memeriksa Pakta Integritas kamu. Proses ini biasanya memerlukan waktu 1-3 hari kerja. Admin/pembina akan menghubungimu melalui WhatsApp.
+        <p style="color:var(--text-muted); max-width:500px; margin:0 auto 12px; text-align:left;">
+          Terima kasih! Admin akan memverifikasi dokumen Pakta Integritasmu terlebih dahulu.
+          Setelah verifikasi berhasil, tautan untuk membuat akun (username &amp; kata sandi)
+          dikirim ke email yang kamu isi di formulir.
+        </p>
+        <p style="color:var(--text-muted); max-width:500px; margin:0 auto 20px; text-align:left;">
+          <i class="bi bi-info-circle"></i>
+          Jika email tidak masuk, silakan hubungi admin secara langsung untuk konfirmasi.
         </p>
         <a class="btn btn-outline" href="beranda.php">Kembali ke Beranda</a>
       </div>
@@ -256,7 +262,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
           <div class="field" style="grid-column:1/-1;">
             <label for="email">Email <span class="req">*</span></label>
             <input type="email" id="email" name="email" value="<?= e($old['email']) ?>" maxlength="120" required autocomplete="email" class="<?= isset($errors['email']) ? 'invalid' : '' ?>">
-            <span class="hint">Dipakai untuk reset kata sandi. Tidak ditampilkan ke publik.</span>
+            <span class="hint">Harap diisi dengan benar — setelah verifikasi admin, tautan pembuatan akun (username &amp; kata sandi) dikirim ke email ini. Tidak ditampilkan ke publik.</span>
             <?php if (isset($errors['email'])): ?><span class="err"><?= e($errors['email']) ?></span><?php endif; ?>
           </div>
 
@@ -287,7 +293,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
             <?php endif; ?>
 
             <input type="file" id="pakta_integritas" name="pakta_integritas" accept=".pdf,.jpg,.jpeg,.png" class="<?= isset($errors['pakta_integritas']) ? 'invalid' : '' ?>">
-            <span class="hint">PDF atau gambar hasil pindai, maksimal 5MB.</span>
+            <span class="hint">Pakta Integritas yang sudah diisi dan diunggah dapat berupa dokumen hasil scan (JPG/PNG) atau berkas PDF. Maksimal 5MB.</span>
             <?php if (isset($errors['pakta_integritas'])): ?><span class="err"><?= e($errors['pakta_integritas']) ?></span><?php endif; ?>
           </div>
 

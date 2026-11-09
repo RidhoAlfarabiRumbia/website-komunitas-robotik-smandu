@@ -58,7 +58,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
           <?php if ($crudItemEntity === 'prestasi'): $itemId = (int) $p['id']; include __DIR__ . '/../app/includes/partial_admin_actions.php'; endif; ?>
           <?php if ($p['foto']): ?>
             <span data-lightbox="<?= base_url(e($p['foto'])) ?>" tabindex="0" role="button" aria-label="Perbesar foto prestasi: <?= e($p['nama']) ?>" style="display:block;">
-              <img src="<?= base_url(e($p['foto'])) ?>" alt="<?= e($p['nama']) ?>" loading="lazy" decoding="async" style="width:100%; height:210px; object-fit:cover; border-radius:var(--radius-md); margin-bottom:14px;">
+              <img src="<?= base_url(e($p['foto'])) ?>" alt="<?= e($p['nama']) ?>" loading="lazy" decoding="async" style="width:100%; aspect-ratio:16/9; object-fit:cover; border-radius:var(--radius-md); margin-bottom:14px;">
             </span>
           <?php else: ?>
             <div class="card-img-fallback" style="height:210px; margin-bottom:14px;">
@@ -99,4 +99,5 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
   <?php endif; ?>
 </div>
 <?php include __DIR__ . '/../app/includes/partial_lightbox.php'; ?>
+<?php if (!empty($crudAktif)) include __DIR__ . '/../app/includes/partial_foto_crop.php'; ?>
 <?php include __DIR__ . '/../app/includes/footer.php'; ?>

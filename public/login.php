@@ -35,7 +35,6 @@ include __DIR__ . '/../app/includes/header.php';
 <div class="login-wrap">
   <div class="login-card">
     <div class="login-side">
-      <div class="brand-mark"> KOMUNITAS ROBOTIK SMA NEGERI 2</div>
       <h1>Belajar, berkarya, dan tumbuh bersama komunitas robotik Sma Negeri 2 Kota Ternate.</h1>
       <div style="margin-top:22px;">
         <?php foreach (['Belajar','Berkarya','Berkompetisi','Berbagi','Regenerasi'] as $i => $s): ?>
@@ -89,7 +88,10 @@ include __DIR__ . '/../app/includes/header.php';
         });
       })();
       </script>
-      <p style="font-size:12px; margin-top:12px;"><a href="<?= base_url('beranda.php') ?>" style="color:var(--teal); text-decoration:none;"><i class="bi bi-arrow-left"></i> Kembali ke Beranda</a></p>
+      <p style="font-size:12px; margin-top:12px; display:flex; gap:14px; flex-wrap:wrap; justify-content:space-between;">
+        <a href="<?= base_url('beranda.php') ?>" style="color:var(--teal); text-decoration:none;"><i class="bi bi-arrow-left"></i> Kembali ke Beranda</a>
+        <a href="<?= base_url('daftar.php') ?>" style="color:var(--teal); text-decoration:none;"><i class="bi bi-person-plus"></i> Daftar sebagai anggota</a>
+      </p>
     </div>
   </div>
 </div>

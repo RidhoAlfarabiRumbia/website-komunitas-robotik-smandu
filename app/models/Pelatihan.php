@@ -3,7 +3,8 @@
 /**
  * Pelatihan / Workshop (PRD 8.4).
  * Modul ini yang mengatur akses Materi: materi hanya terbuka bagi peserta
- * yang disetujui pada pelatihan terkait, selama periode pelatihan berjalan.
+ * yang disetujui pada pelatihan terkait — sekali disetujui tetap terbuka
+ * walau pelatihan sudah selesai.
  */
 class Pelatihan extends Model
 {
@@ -57,22 +58,14 @@ class Pelatihan extends Model
         return !$mulai || strcmp((string) $mulai, date('Y-m-d')) <= 0;
     }
 
-    /** Apakah pendaftaran peserta masih dibuka (status Dibuka, belum daftar, tanggal valid)? */
+    /**
+     * Apakah pendaftaran peserta masih dibuka.
+     * Cukup status Dibuka/Ditutup di CRUD Pelatihan — tanggal jadwal tidak
+     * mengunci pendaftaran (jadwal bisa mundur/geser tanpa menutup daftar).
+     */
     public static function bisaDaftar(?array $pelatihan): bool
     {
-        if (!$pelatihan) return false;
-        if ($pelatihan['status'] !== 'Dibuka') return false;
-
-        $today = date('Y-m-d');
-        $mulai = $pelatihan['tanggal_mulai'] ?? null;
-        $selesai = $pelatihan['tanggal_selesai'] ?? $pelatihan['tanggal_mulai'];
-
-        // Tanggal mulai tidak boleh sudah lewat
-        if ($mulai && $today > $mulai) return false;
-        // Tanggal selesai tidak boleh sudah lewat
-        if ($selesai && $today > $selesai) return false;
-
-        return true;
+        return $pelatihan !== null && $pelatihan['status'] === 'Dibuka';
     }
 
     /** Daftarkan seorang anggota sebagai peserta (menunggu persetujuan admin). */
@@ -181,7 +174,8 @@ class Pelatihan extends Model
         return $stmt->fetchAll();
     }
 
-    /** Semua materi milik seorang peserta yang disetujui, selama pelatihan aktif. */
+    /** Semua materi milik seorang peserta yang disetujui; $aktifSaja=true memfilter
+     *  pelatihan yang belum selesai (untuk daftar ringkas, bukan aturan akses). */
     public static function materiUntukAnggota(int $anggotaId, bool $aktifSaja = true, ?int $limit = null): array
     {
         $sql = 'SELECT m.*, p.nama AS pelatihan_nama, p.tanggal_mulai, p.tanggal_selesai

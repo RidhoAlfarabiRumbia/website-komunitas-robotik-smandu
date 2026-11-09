@@ -261,8 +261,14 @@ include __DIR__ . '/../../app/includes/header.php';
       </div>
       <div class="field">
         <label for="pembina_foto">Foto pembina</label>
-        <input type="file" id="pembina_foto" name="pembina_foto" accept="image/jpeg,image/png,image/webp">
-        <span class="hint">JPG, PNG, atau WEBP. Maksimal 2MB. Mengunggah foto baru akan mengganti foto lama.</span>
+        <input type="file" id="pembina_foto" name="pembina_foto" accept="image/jpeg,image/png,image/webp" class="js-foto-crop" data-crop-aspect="1/1">
+        <span class="crop-terpasang" data-kunci="pembina_foto" hidden></span>
+        <span class="hint">JPG, PNG, atau WEBP. Maksimal 2MB. Mengunggah foto baru akan mengganti foto lama. Foto akan ditampilkan bulat 1:1.</span>
+        <?php if ($adaFoto): ?>
+          <div style="margin-top:8px;">
+            <button type="button" class="btn btn-outline btn-sm js-crop-edit" data-crop-src="<?= base_url(e($form['pembina_foto'])) ?>" data-crop-aspect="1/1"><i class="bi bi-crop"></i> Edit Foto Pembina</button>
+          </div>
+        <?php endif; ?>
       </div>
 
       <?php if ($adaFoto): ?>
@@ -281,14 +287,16 @@ include __DIR__ . '/../../app/includes/header.php';
     </form>
 
     <?php if ($fotoTersimpan): ?>
-      <form class="card" method="post" style="margin-top:16px;">
+      <form class="card" method="post" style="margin-top:16px;"
+            onsubmit="return konfirmasiForm(event, 'Hapus foto pembina?', 'Ya, hapus')">
         <?= Csrf::field() ?>
         <input type="hidden" name="aksi" value="hapus_foto">
         <h3 style="font-size:14px; margin-bottom:8px;"><i class="bi bi-trash"></i> Hapus Foto Pembina</h3>
         <p style="font-size:12.5px; color:var(--text-muted); margin-bottom:12px;">Foto akan dihapus dari halaman publik dan berkasnya dibersihkan dari server.</p>
-        <button class="btn btn-danger-outline btn-sm" type="submit" onclick="return confirm('Hapus foto pembina?')"><i class="bi bi-trash"></i> Hapus Foto</button>
+        <button class="btn btn-danger-outline btn-sm" type="submit"><i class="bi bi-trash"></i> Hapus Foto</button>
       </form>
     <?php endif; ?>
   </div>
 </div>
+<?php include __DIR__ . '/../../app/includes/partial_foto_crop.php'; ?>
 <?php include __DIR__ . '/../../app/includes/footer.php'; ?>

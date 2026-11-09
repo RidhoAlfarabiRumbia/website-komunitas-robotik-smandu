@@ -115,4 +115,5 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
     <div class="empty">Belum ada referensi belajar.</div>
   <?php endif; ?>
 </div>
+<?php if (!empty($crudAktif)) include __DIR__ . '/../app/includes/partial_foto_crop.php'; ?>
 <?php include __DIR__ . '/../app/includes/footer.php'; ?>

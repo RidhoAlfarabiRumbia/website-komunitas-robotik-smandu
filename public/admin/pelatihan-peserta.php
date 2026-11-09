@@ -182,11 +182,12 @@ include __DIR__ . '/../../app/includes/header.php';
                       <button class="icon-btn" type="submit" title="Tolak"><i class="bi bi-x-lg"></i></button>
                     </form>
                   <?php endif; ?>
-                  <form method="post" style="display:inline;">
+                  <form method="post" style="display:inline;"
+                        onsubmit="return konfirmasiForm(event, 'Hapus peserta ini?', 'Ya, hapus')">
                     <?= Csrf::field() ?>
                     <input type="hidden" name="aksi" value="hapus">
                     <input type="hidden" name="peserta_id" value="<?= (int) $r['id'] ?>">
-                    <button class="icon-btn" type="submit" title="Hapus" onclick="return confirm('Hapus peserta ini?')"><i class="bi bi-trash"></i></button>
+                    <button class="icon-btn" type="submit" title="Hapus"><i class="bi bi-trash"></i></button>
                   </form>
                 </div>
               </td>

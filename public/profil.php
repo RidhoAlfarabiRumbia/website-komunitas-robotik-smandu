@@ -306,16 +306,20 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
     <form method="post" enctype="multipart/form-data" class="foto-form" id="fotoProfilForm">
       <?= Csrf::field() ?>
       <input type="hidden" name="aksi" value="foto_profil">
-      <input type="file" name="foto" id="fotoProfilInput" accept="image/jpeg,image/png,image/webp" hidden>
+      <input type="file" name="foto" id="fotoProfilInput" accept="image/jpeg,image/png,image/webp" class="js-foto-crop" data-crop-aspect="1/1" hidden>
       <div class="foto-actions">
         <button type="button" class="btn btn-outline" id="fotoProfilPilih"><i class="bi bi-image"></i> Pilih Foto</button>
+        <?php if (!empty($u['foto'])): ?>
+          <button type="button" class="btn btn-outline js-crop-edit" data-crop-src="<?= base_url(e($u['foto'])) ?>" data-crop-aspect="1/1"><i class="bi bi-crop"></i> Sesuaikan Foto</button>
+        <?php endif; ?>
         <button type="submit" class="btn btn-primary" id="fotoProfilSimpan" disabled><i class="bi bi-check2"></i> Simpan Foto</button>
       </div>
       <p class="hint foto-hint" id="fotoProfilInfo" aria-live="polite">JPG, PNG, atau WEBP. Maksimal 2MB.</p>
       <p class="foto-error" id="fotoProfilError" role="alert" hidden></p>
     </form>
     <?php if (!empty($u['foto'])): ?>
-      <form method="post" class="foto-hapus-form" id="fotoProfilHapusForm">
+      <form method="post" class="foto-hapus-form" id="fotoProfilHapusForm"
+            onsubmit="return konfirmasiForm(event, 'Hapus foto profil? Foto akan kembali ke avatar default.', 'Ya, hapus')">
         <?= Csrf::field() ?>
         <input type="hidden" name="aksi" value="hapus_foto">
         <button type="submit" class="btn btn-danger-outline btn-sm"><i class="bi bi-trash"></i> Hapus Foto</button>
@@ -336,7 +340,6 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
   var info = document.getElementById('fotoProfilInfo');
   var error = document.getElementById('fotoProfilError');
   var form = document.getElementById('fotoProfilForm');
-  var hapusForm = document.getElementById('fotoProfilHapusForm');
   var fotoAwal = preview ? preview.getAttribute('data-current-src') : '';
   var infoAwal = info ? info.textContent : '';
   var fokusSebelum = null;
@@ -427,15 +430,15 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
       }
     });
   }
-
-  if (hapusForm) {
-    hapusForm.addEventListener('submit', function(e){
-      if (!window.confirm('Hapus foto profil? Foto akan kembali ke avatar default.')) {
-        e.preventDefault();
-      }
-    });
-  }
+  document.addEventListener('fotocrop:selesai', function(e){
+    var pv = document.getElementById('fotoProfilPreview');
+    var input = e.target;
+    if (pv && input && input.cropPreview) pv.src = input.cropPreview;
+    if (simpan) simpan.disabled = false;
+    if (info) info.textContent = 'Foto siap disimpan (hasil penyesuaian).';
+  });
 })();
 </script>
 <?php include __DIR__ . '/../app/includes/partial_lightbox.php'; ?>
+<?php include __DIR__ . '/../app/includes/partial_foto_crop.php'; ?>
 <?php include __DIR__ . '/../app/includes/footer.php'; ?>

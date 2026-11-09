@@ -117,7 +117,8 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
               <?php if ($saya): ?>
                 <?= badge_status_peserta($saya['status']) ?>
               <?php elseif (Pelatihan::bisaDaftar($p)): ?>
-                <form method="post" style="display:inline;">
+                <form method="post" style="display:inline;"
+                      onsubmit="return konfirmasiForm(event, 'Daftar sebagai peserta pelatihan ini? Admin akan menyetujui daftarmu.', 'Ya, daftar', 'bi-check-lg')">
                   <?= Csrf::field() ?>
                   <input type="hidden" name="pelatihan_id" value="<?= (int) $p['id'] ?>">
                   <button class="btn btn-primary btn-sm" type="submit"><i class="bi bi-pencil-square"></i> Daftar</button>
@@ -134,4 +135,5 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
     <div class="empty">Belum ada pelatihan/workshop yang terdaftar.</div>
   <?php endif; ?>
 </div>
+<?php if (!empty($crudAktif)) include __DIR__ . '/../app/includes/partial_foto_crop.php'; ?>
 <?php include __DIR__ . '/../app/includes/footer.php'; ?>

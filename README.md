@@ -50,11 +50,11 @@ Materi belajar robotik tersebar di banyak platform, karya dan dokumentasi tercec
 | **Berkompetisi** | **Lomba** (info, status, hasil, peserta) · **Prestasi** dengan bukti sertifikat, tayang langsung dan bisa ditinjau admin |
 | **Berbagi** | **Galeri** foto dan video · **Kegiatan** dengan video laporan · **Pengumuman** · **Slider Beranda** yang dikelola admin |
 | **Akun** | Login username · **Lupa password via email** dengan token sekali pakai · Pengelolaan email, kata sandi, dan foto profil di Profil |
-| **Regenerasi** | **Pendaftaran Anggota** dengan Pakta Integritas dan **kunci periode** (buka manual, tutup manual, atau jadwal WIT) · **Profil** berisi rekam jejak karya, prestasi, dan pelatihan |
+| **Regenerasi** | **Pendaftaran Anggota** dengan Pakta Integritas dan **kunci periode** (buka manual, tutup manual, atau jadwal WIT); setelah verifikasi, tautan pembuatan akun dikirim via email · **Profil** berisi rekam jejak karya, prestasi, dan pelatihan |
 
 ### Aturan akses utama
 
-- **Materi** hanya terbuka bagi peserta pelatihan terkait yang disetujui, selama pelatihan belum berakhir. Admin selalu punya akses penuh.
+- **Materi** hanya terbuka bagi peserta pelatihan terkait yang disetujui; sekali disetujui tetap terbuka walau pelatihan sudah berakhir atau statusnya Ditutup, karena pendaftaran ditentukan status pelatihan. Admin selalu punya akses penuh.
 - **Karya** ditinjau admin **sebelum** tayang. **Prestasi** tayang langsung dan ditinjau **sesudahnya**.
 - **Mode pelaksanaan** pelatihan ditandai **Daring (online)** atau **Luring (tatap muka)**; tanpa batas kuota — admin menyetujui peserta secara manual.
 - **Dokumen Pakta Integritas** bersifat privat dan hanya bisa dibuka admin.

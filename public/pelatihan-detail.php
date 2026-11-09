@@ -51,7 +51,7 @@ $bisaDaftar = Pelatihan::bisaDaftar($p);
 $saya = $isAnggota ? Pelatihan::pendaftaranAnggota($id, (int) Auth::anggotaId()) : null;
 
 $materi = Pelatihan::materi($id);
-$bolehMateri = $isAdmin || ($saya && $saya['status'] === 'Disetujui' && Pelatihan::sedangBerjalan($p));
+$bolehMateri = $isAdmin || ($saya && $saya['status'] === 'Disetujui');
 
 $pageTitle = $p['nama'];
 include __DIR__ . '/../app/includes/header.php';
@@ -140,7 +140,8 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
                 Terdaftar sejak <?= e(tanggal_indo($saya['dibuat_pada'])) ?>.
               </p>
             <?php elseif ($bisaDaftar): ?>
-              <form method="post">
+              <form method="post"
+                    onsubmit="return konfirmasiForm(event, 'Daftar sebagai peserta pelatihan ini? Admin akan menyetujui daftarmu.', 'Ya, daftar', 'bi-check-lg')">
                 <?= Csrf::field() ?>
                 <input type="hidden" name="pelatihan_id" value="<?= (int) $p['id'] ?>">
                 <button class="btn btn-primary btn-block" type="submit"><i class="bi bi-pencil-square"></i> Daftar Peserta</button>

@@ -104,7 +104,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
       </div>
       <div class="field"><label>Teknologi yang digunakan</label><input name="teknologi" maxlength="255" value="<?= e($form['teknologi']) ?>" placeholder="Contoh: Arduino, Sensor Ultrasonik"></div>
       <div class="field"><label>Tautan proyek (opsional)</label><input name="link_demo" maxlength="191" value="<?= e($form['link_demo']) ?>" placeholder="https://..."></div>
-      <div class="field field-full"><label>Foto/dokumentasi (JPG/PNG/WEBP, maks 2MB)</label><input type="file" name="foto" accept=".jpg,.jpeg,.png,.webp"></div>
+      <div class="field field-full"><label>Foto/dokumentasi (JPG/PNG/WEBP, maks 2MB)</label><input type="file" name="foto" accept=".jpg,.jpeg,.png,.webp" class="js-foto-crop" data-crop-aspect="16/9"></div>
     </div>
     <div style="display:flex; gap:10px; margin-top:16px;">
       <button class="btn btn-primary" type="submit">Kirim untuk direview</button>
@@ -112,4 +112,5 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
     </div>
   </form>
 </div>
+<?php include __DIR__ . '/../app/includes/partial_foto_crop.php'; ?>
 <?php include __DIR__ . '/../app/includes/footer.php'; ?>

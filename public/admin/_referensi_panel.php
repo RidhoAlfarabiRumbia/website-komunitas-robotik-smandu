@@ -73,7 +73,7 @@ $refBack = '?entity=materi&sub=referensi&action=' . ($refEditing ? 'edit&id=' . 
               <div class="row-actions">
                 <a class="icon-btn" href="?entity=materi&sub=referensi&action=edit&id=<?= (int) $row['id'] ?><?= e($refQs) ?>"><i class="bi bi-pencil"></i></a>
                 <form method="post" action="?entity=materi&sub=referensi&action=delete&id=<?= (int) $row['id'] ?><?= e($refQs) ?>" style="display:flex;"
-                      onsubmit="return confirm('Hapus data ini?')">
+                      onsubmit="return konfirmasiForm(event, 'Hapus data ini?', 'Ya, hapus')">
                   <?= Csrf::field() ?>
                   <button type="submit" class="icon-btn" title="Hapus"><i class="bi bi-trash"></i></button>
                 </form>

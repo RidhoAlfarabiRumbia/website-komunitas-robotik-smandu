@@ -156,6 +156,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'delete' && $id) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Csrf::verify();
     $errors = [];
+    $materiBaru = null; // path berkas "Unggah Materi" pada tambah pelatihan (bukan kolom tabel)
+    $paktaBaru = null; // path berkas Pakta Integritas pada tambah anggota (bukan kolom tabel)
     foreach ($crudCfg['fields'] as $key => $f) {
         if (empty($f['required'])) continue;
         if (in_array($f['type'], ['anggota_multi', 'pelatihan_multi'], true)) {
@@ -262,6 +264,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } elseif ($path) {
                 $data[$key] = $path;
             }
+        } elseif ($f['type'] === 'materi_baru') {
+            // Pseudo-field: berkas materi opsional saat tambah pelatihan (bukan
+            // kolom tabel). Berkas disimpan lebih dulu di luar document root;
+            // baris materi + relasinya dibuat dalam transaksi pelatihan.
+            if (!empty($_FILES[$key]['name'])) {
+                $materiBaru = handle_restricted_upload(
+                    $key,
+                    $f['subfolder'] ?? 'materi',
+                    ['pdf', 'ppt', 'pptx', 'doc', 'docx', 'xls', 'xlsx', 'txt', 'zip'],
+                    10 * 1024 * 1024,
+                    'PDF, PPT, DOC, XLS, TXT, atau ZIP',
+                    '10MB'
+                );
+                if ($materiBaru === null) $errors[] = 'Berkas materi gagal diunggah.';
+            }
+        } elseif ($f['type'] === 'pakta_baru') {
+            // Pseudo-field: Dokumen Pakta Integritas opsional saat tambah
+            // anggota secara manual. Ketentuan berkas sama dengan formulir
+            // pendaftaran; dipasangkan lewat baris pendaftaran Diverifikasi.
+            if (!empty($_FILES[$key]['name'])) {
+                $paktaBaru = handle_restricted_upload(
+                    $key,
+                    $f['subfolder'] ?? 'pakta-integritas',
+                    ['pdf', 'jpg', 'jpeg', 'png'],
+                    5 * 1024 * 1024,
+                    'PDF, JPG, atau PNG',
+                    '5MB'
+                );
+                if ($paktaBaru === null) $errors[] = 'Dokumen Pakta Integritas gagal diunggah. Gunakan PDF, JPG, atau PNG maksimal 5MB.';
+            }
         } elseif (in_array($f['type'], ['pelatihan_multi', 'anggota_multi', 'peraih'], true)) {
             // 'peraih' bukan kolom tabel — diproses khusus saat simpanTim prestasi.
             continue;
@@ -353,11 +385,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
+        // Dokumen Pakta Integritas dari formulir tambah anggota manual dipasangkan
+        // sebagai baris pendaftaran milik anggota ini (status Diverifikasi) agar
+        // tombol Lihat di kolom daftar & data Profil berfungsi tanpa cara lain.
+        if ($crudEntitas === 'anggota' && $paktaBaru !== null && $postId === 0) {
+            $pendaftaranPaktaId = (int) Pendaftaran::create([
+                'nama' => (string) ($data['nama'] ?? ''),
+                'kelas' => (string) ($data['kelas'] ?? ''),
+                'kontak' => '',
+                'email' => '',
+                'alasan' => 'Penambahan langsung oleh admin.',
+                'pakta_integritas' => $paktaBaru,
+                'nama_berkas' => sanitize_filename((string) ($_FILES['pakta_baru']['name'] ?? '')),
+                'status' => 'Diverifikasi',
+                'anggota_id' => (int) $savedId,
+                'diverifikasi_pada' => date('Y-m-d H:i:s'),
+            ]);
+            if ($pendaftaranPaktaId <= 0) {
+                throw new RuntimeException('Create pendaftaran pakta anggota gagal.');
+            }
+        }
+
+        // Materi yang diunggah bersama form tambah pelatihan dibuat dalam
+        // transaksi yang sama supaya tidak yatim bila pelatihan gagal.
+        if ($crudEntitas === 'pelatihan' && $materiBaru !== null) {
+            $materiIdBaru = (int) Materi::create([
+                'judul' => mb_substr((string) ($data['nama'] ?? ''), 0, 150),
+                'topik' => 'Pelatihan',
+                'file_path' => $materiBaru,
+            ]);
+            if ($materiIdBaru <= 0) {
+                throw new RuntimeException('Create materi dari pelatihan gagal.');
+            }
+            Materi::simpanPelatihan($materiIdBaru, [(int) $savedId]);
+        }
+
         $dbSimpan->commit();
-        flash_set('success', $crudCfg['label'] . ($postId > 0 ? ' berhasil diperbarui.' : ' berhasil ditambahkan.'));
+        flash_set('success', $crudCfg['label'] . ($postId > 0 ? ' berhasil diperbarui.' : ' berhasil ditambahkan.')
+            . ($materiBaru !== null ? ' Materi baru tersimpan dan terkait pelatihan ini.' : ''));
     } catch (Throwable $e) {
         if ($dbSimpan->inTransaction()) {
             $dbSimpan->rollBack();
+        }
+        // Berkas materi yang sudah terlanjur tersimpan tidak boleh jadi sampah
+        // ketika transaksi digulung balik.
+        if ($materiBaru !== null) {
+            @unlink(dirname(__DIR__, 2) . '/storage/' . $materiBaru);
+        }
+        if ($paktaBaru !== null) {
+            @unlink(dirname(__DIR__, 2) . '/storage/' . $paktaBaru);
         }
         error_log('[CRUD] ' . $e->getMessage());
         flash_set('error', $crudCfg['label'] . ' gagal disimpan. Silakan coba lagi.');
@@ -405,9 +481,14 @@ $terpilihPelatihan = [];
 $terpilihAnggota = [];
 $peraihMode = 'anggota';
 $peraihManualTeks = '';
+$materiPelatihan = [];
 if ($editing) {
     if ($crudEntitas === 'materi') {
         $terpilihPelatihan = array_map('intval', array_column(Materi::pelatihanTerkait((int) $editing['id']), 'id'));
+    }
+    if ($crudEntitas === 'pelatihan') {
+        // Materi yang sudah terkait pelatihan ini (ditampilkan baca-saja di form).
+        $materiPelatihan = Pelatihan::materi((int) $editing['id']);
     }
     if ($crudEntitas === 'prestasi') {
         $tim = Prestasi::tim((int) $editing['id']);

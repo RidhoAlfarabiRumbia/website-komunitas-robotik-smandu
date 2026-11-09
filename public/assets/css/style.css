@@ -225,7 +225,7 @@ img{max-width:100%; display:block;}
 .profile-menu-item:hover{color:var(--text); background:var(--surface-2);}
 .profile-menu-logout{color:var(--red);}
 .profile-menu-logout:hover{color:var(--red); background:var(--red-dim);}
-.main{max-width:var(--wrap); margin:0 auto; padding:30px 24px 72px;}
+.main{max-width:var(--wrap); margin:0 auto; padding:44px 72px 72px;}
 .main > .card{margin-left:auto; margin-right:auto;}
 .form-wrap{margin-left:auto; margin-right:auto;}
 
@@ -245,7 +245,7 @@ body.sidebar-open .sidebar-backdrop, body.nav-open .sidebar-backdrop{opacity:1; 
 .side-link:hover{background:var(--surface-2); color:var(--text);}
 .side-link.active{background:var(--teal-dim); color:var(--teal); font-weight:600;}
 .badge-count{margin-left:auto; background:var(--amber); color:var(--on-amber); font-size:11.5px; font-weight:700; padding:1px 6px; border-radius:20px;}
-.admin-main{flex:1; padding:32px 36px 72px; max-width:none; min-width:0;}
+.admin-main{flex:1; padding:46px 76px 72px; max-width:none; min-width:0;}
 
 /* Components */
 .page-head{display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:26px; gap:16px; flex-wrap:wrap;}
@@ -393,12 +393,12 @@ body.sidebar-open .sidebar-backdrop, body.nav-open .sidebar-backdrop{opacity:1; 
 .moderasi-foto{display:block; width:120px; height:92px; flex:0 0 120px; border-radius:var(--radius-sm); overflow:hidden; background:var(--surface-2); box-shadow:var(--shadow-1);}
 .moderasi-foto img{display:block; width:100%; height:100%; object-fit:cover;}
 @media (max-width:480px){ .moderasi-foto{width:92px; height:72px; flex-basis:92px;} }
-.work-thumb{height:210px; background:var(--surface-2); display:flex; align-items:center; justify-content:center; overflow:hidden;}
+.work-thumb{aspect-ratio:16/9; background:var(--surface-2); display:flex; align-items:center; justify-content:center; overflow:hidden;}
 .work-thumb img{width:100%; height:100%; object-fit:cover;}
 .karya-grid{align-items:stretch;}
 .karya-grid > .card-wrap{height:100%;}
 .karya-grid .work-card{height:100%;}
-.karya-grid .work-thumb{flex:0 0 210px;}
+.karya-grid .work-thumb{flex:0 0 auto;}
 .karya-grid .work-title{line-height:1.35; min-height:2.7em; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; line-clamp:2; overflow:hidden;}
 .karya-grid .work-desc{flex:0 0 auto; line-height:1.5; min-height:3em; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; line-clamp:2; overflow:hidden;}
 .karya-grid .work-tags{height:22px; overflow:hidden; flex-wrap:nowrap;}
@@ -1316,4 +1316,41 @@ a:focus-visible, button:focus-visible {
   .welcome-media .slider .slide-photos{grid-template-columns:1fr;}
   .welcome-media .slider .slide-photos .ph-side{display:none;}
   .welcome-media .slider .dots{top:14px; bottom:auto; right:14px;}
+}
+
+/* Modal konfirmasi seragam (pengganti dialog confirm() bawaan browser) */
+.modal-overlay{position:fixed; inset:0; z-index:1000; display:flex; align-items:center; justify-content:center; padding:18px; background:rgba(8,14,24,.55); backdrop-filter:blur(3px);}
+.modal-overlay[hidden]{display:none;}
+.modal-card{width:min(420px, 100%); background:var(--surface); color:var(--text); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow-3); padding:22px; text-align:center; animation:modalMasuk .18s ease;}
+@keyframes modalMasuk{from{opacity:0; transform:translateY(10px) scale(.98);} to{opacity:1; transform:none;}}
+.modal-icon{width:46px; height:46px; margin:0 auto 10px; display:flex; align-items:center; justify-content:center; border-radius:50%; background:var(--red-dim); color:var(--red); font-size:22px;}
+.modal-text{margin:0 0 16px; font-size:14.5px; line-height:1.55;}
+.modal-actions{display:flex; gap:10px; justify-content:center;}
+.btn-danger{background:var(--red); border-color:var(--red); color:var(--on-red);}
+.btn-danger:hover{background:var(--red-dim); border-color:var(--red); color:var(--red);}
+
+/* Modal penyesuaian foto (foto-crop.js): geser & zoom dalam frame ber-border */
+.crop-modal{position:fixed; inset:0; z-index:1100; display:none; align-items:center; justify-content:center; padding:18px; background:rgba(5,12,22,.62); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);}
+.crop-modal.open{display:flex; animation:modalMasuk .18s ease;}
+.crop-card{width:min(880px, 100%); max-height:calc(100vh - 36px); overflow:auto; background:var(--surface); color:var(--text); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow-3); padding:22px; position:relative;}
+.crop-head{display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:14px;}
+.crop-head h3{font-size:15.5px; margin:0; display:flex; align-items:center; gap:8px;}
+.crop-tutup{width:34px; height:34px; flex:0 0 auto; border:1px solid var(--border); border-radius:999px; background:var(--surface-2); color:var(--text-muted); font-size:15px; cursor:pointer; display:flex; align-items:center; justify-content:center;}
+.crop-tutup:hover{background:var(--surface-3); color:var(--text);}
+.crop-stage{display:flex; justify-content:center; align-items:center; min-height:330px; background:var(--surface-2); border:1px dashed var(--border); border-radius:var(--radius-md); padding:18px; margin-bottom:14px; overflow:hidden;}
+.crop-frame{position:relative; border:3px solid var(--teal); border-radius:6px; box-shadow:0 0 0 1px var(--border), var(--shadow-2); overflow:hidden; cursor:grab; touch-action:none; background:#10161f; max-width:100%;}
+.crop-frame.dragging{cursor:grabbing;}
+.crop-frame canvas{display:block; width:100%; height:100%;}
+.crop-tools{display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:center; margin-bottom:12px;}
+.crop-zoom{display:flex; align-items:center; gap:8px;}
+.crop-zoom-btn{width:30px; height:30px; border-radius:999px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center;}
+.crop-zoom-btn:hover{background:var(--surface-3);}
+.crop-zoom-slider{width:180px; accent-color:var(--teal);}
+.crop-actions{display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap; margin-top:4px;}
+.crop-actions .btn-primary{flex:0 0 auto;}
+.crop-hint{font-size:12.5px; color:var(--text-muted); margin:10px 0 0; text-align:center;}
+.crop-terpasang{display:block; font-size:12.5px; color:var(--teal); margin-top:4px;}
+@media (max-width:640px){
+  .crop-stage{min-height:260px; padding:12px;}
+  .crop-zoom-slider{width:130px;}
 }

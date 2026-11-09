@@ -68,4 +68,5 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
   <?php endif; ?>
 </div>
 <?php include __DIR__ . '/../app/includes/partial_video_modal.php'; ?>
+<?php if (!empty($crudAktif)) include __DIR__ . '/../app/includes/partial_foto_crop.php'; ?>
 <?php include __DIR__ . '/../app/includes/footer.php'; ?>

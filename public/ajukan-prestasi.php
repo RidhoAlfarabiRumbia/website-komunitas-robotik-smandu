@@ -205,7 +205,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
 
         <div class="field">
           <label for="foto">Foto</label>
-          <input type="file" id="foto" name="foto" accept=".jpg,.jpeg,.png,.webp" class="<?= isset($errors['foto']) ? 'invalid' : '' ?>">
+          <input type="file" id="foto" name="foto" accept=".jpg,.jpeg,.png,.webp" class="js-foto-crop<?= isset($errors['foto']) ? ' invalid' : '' ?>" data-crop-aspect="16/9">
           <span class="hint">Maks 2MB.</span>
           <?php if (isset($errors['foto'])): ?><span class="err"><?= e($errors['foto']) ?></span><?php endif; ?>
         </div>
@@ -225,4 +225,5 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
     </div>
   </div>
 </div>
+<?php include __DIR__ . '/../app/includes/partial_foto_crop.php'; ?>
 <?php include __DIR__ . '/../app/includes/footer.php'; ?>

@@ -14,7 +14,7 @@ $qsItem = $qs ?? '';
 <div class="admin-item-actions">
   <a class="icon-btn" href="<?= e($crudQs) ?>&amp;action=edit&amp;id=<?= (int) $itemId ?><?= e($qsItem) ?>" title="Ubah data ini"><i class="bi bi-pencil"></i></a>
   <form method="post" action="<?= e($crudQs) ?>&amp;action=delete&amp;id=<?= (int) $itemId ?><?= e($qsItem) ?>" style="display:flex;"
-        onsubmit="return confirm('Hapus data ini?')">
+        onsubmit="return konfirmasiForm(event, 'Hapus data ini?', 'Ya, hapus')">
     <?= Csrf::field() ?>
     <button type="submit" class="icon-btn" title="Hapus data ini"><i class="bi bi-trash"></i></button>
   </form>

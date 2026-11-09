@@ -25,7 +25,7 @@ $lombaTerbaru = Lomba::all('tanggal DESC', 3);
 $materiTerbaru = $kontenAnggota
     ? ($isAdmin
         ? Materi::semuaWithPelatihan('topik ASC, judul ASC', 3)
-        : Pelatihan::materiUntukAnggota((int) Auth::anggotaId(), true, 3))
+        : Pelatihan::materiUntukAnggota((int) Auth::anggotaId(), false, 3))
     : [];
 
 $fitur = [
