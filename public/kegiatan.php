@@ -33,33 +33,33 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
     <div style="margin:30px 0; border-top:1px solid var(--border);"></div>
   <?php endif; ?>
   <?php if ($kegiatan): ?>
-    <div class="table-wrap">
+    <div class="grid grid-2 grid-stagger">
       <?php foreach ($kegiatan as $k): ?>
-      <div class="list-item list-item-pad">
-        <div class="list-thumb"><i class="bi bi-calendar-event" style="font-size:20px; color:var(--teal);"></i></div>
-        <div class="grow">
-          <div class="ttl"><?= e($k['nama']) ?></div>
-          <div class="meta"><?= tanggal_indo($k['tanggal']) ?> · <?= e($k['waktu']) ?> · <?= e($k['lokasi']) ?></div>
-          <div style="font-size:13px; color:var(--text-muted); margin-top:4px;"><?= e($k['deskripsi']) ?></div>
-          <?php if ($k['status'] === 'Selesai'):
-            $vid = trim((string) ($k['video'] ?? ''));
-            if ($vid !== '' && preg_match('#^https?://#i', $vid)): ?>
-            <div class="keg-video">
-              <a class="btn btn-outline btn-sm" href="<?= e($vid) ?>" target="_blank" rel="noopener noreferrer">
-                <i class="bi bi-box-arrow-up-right"></i> Lihat Dokumentasi
-              </a>
-            </div>
-          <?php
-            elseif ($vid !== '' && preg_match('#^uploads/kegiatan/[A-Za-z0-9._-]+\.(mp4|webm|mov|m4v)$#i', $vid)): ?>
-            <div class="keg-video">
-              <button type="button" class="btn btn-outline btn-sm" data-video-modal="<?= base_url(e($vid)) ?>" data-video-title="Dokumentasi: <?= e($k['nama']) ?>">
-                <i class="bi bi-play-circle"></i> Lihat Dokumentasi
-              </button>
-            </div>
-          <?php endif; endif; ?>
-        </div>
-        <span class="badge <?= $k['status'] === 'Selesai' ? 'badge-muted' : 'badge-teal' ?>"><?= e($k['status']) ?></span>
+      <div class="card<?= Auth::isAdmin() && ($crudItemEntity ?? '') === 'kegiatan' ? ' card-admin' : '' ?>">
         <?php if ($crudItemEntity === 'kegiatan'): $itemId = (int) $k['id']; include __DIR__ . '/../app/includes/partial_admin_actions.php'; endif; ?>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+          <div class="list-thumb" style="width:44px; height:44px;"><i class="bi bi-calendar-event" style="font-size:20px; color:var(--teal);"></i></div>
+          <span class="badge <?= $k['status'] === 'Selesai' ? 'badge-muted' : 'badge-teal' ?>"><?= e($k['status']) ?></span>
+        </div>
+        <h3 style="font-size:15px; margin-bottom:6px;"><?= e($k['nama']) ?></h3>
+        <div>
+          <div class="side-info-row"><span class="k">Tanggal</span><span><?= tanggal_indo($k['tanggal']) ?></span></div>
+          <div class="side-info-row"><span class="k">Waktu</span><span><?= e($k['waktu'] ?: '-') ?></span></div>
+          <div class="side-info-row"><span class="k">Lokasi</span><span><?= e($k['lokasi'] ?: '-') ?></span></div>
+        </div>
+        <p style="font-size:13px; color:var(--text-muted); margin:10px 0 0;"><?= e(trunc($k['deskripsi'] ?? '', 150)) ?></p>
+        <?php if ($k['status'] === 'Selesai'):
+          $vid = trim((string) ($k['video'] ?? ''));
+          if ($vid !== '' && preg_match('#^https?://#i', $vid)): ?>
+          <div class="keg-video">
+            <a class="btn btn-outline btn-sm" href="<?= e($vid) ?>" target="_blank" rel="noopener noreferrer"><i class="bi bi-box-arrow-up-right"></i> Lihat Dokumentasi</a>
+          </div>
+        <?php
+          elseif ($vid !== '' && preg_match('#^uploads/kegiatan/[A-Za-z0-9._-]+\.(mp4|webm|mov|m4v)$#i', $vid)): ?>
+          <div class="keg-video">
+            <button type="button" class="btn btn-outline btn-sm" data-video-modal="<?= base_url(e($vid)) ?>" data-video-title="Dokumentasi: <?= e($k['nama']) ?>"><i class="bi bi-play-circle"></i> Lihat Dokumentasi</button>
+          </div>
+        <?php endif; endif; ?>
       </div>
     <?php endforeach; ?>
     </div>

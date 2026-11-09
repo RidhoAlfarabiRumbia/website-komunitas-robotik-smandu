@@ -478,7 +478,7 @@ tr:last-child td{border-bottom:none;}
 .hero-left .chip-admin{top:12px; right:12px;}
 .hero-media .chip-admin{top:10px; left:12px;}
 .slider{position:relative; border-radius:var(--radius-md); border:0; overflow:hidden; background:var(--surface-2); flex:1; min-height:200px; box-shadow:var(--shadow-2);}
-.slider .slide{position:absolute; inset:0; opacity:0; transition:opacity 1.1s cubic-bezier(.45,0,.2,1); pointer-events:none;}
+.slider .slide{position:absolute; inset:0; opacity:0; transition:opacity 1.1s cubic-bezier(.45,0,.2,1); pointer-events:none; will-change:opacity;}
 .slider .slide.active{opacity:1; pointer-events:auto;}
 .slider .slide img{width:100%; height:100%; object-fit:cover;}
 .slider .slide a{display:block; height:100%;}

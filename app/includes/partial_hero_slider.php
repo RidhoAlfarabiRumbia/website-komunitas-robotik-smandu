@@ -83,11 +83,12 @@ $sliderAdminHref = $sliderAdminHref ?? null;
     return el;
   }
   function go(n){
-    if (slideEls[i]) slideEls[i].classList.remove('active');
+    var prev = slideEls[i];
     if (dots.length && dots[i]) dots[i].classList.remove('active');
     i = (n + total) % total;
     var nxt = ensure(i);
     if (nxt) nxt.classList.add('active');
+    if (prev && prev !== nxt) setTimeout(function(){ prev.classList.remove('active'); }, 1150);
     if (dots.length && dots[i]) dots[i].classList.add('active');
   }
   function centerOf(el){

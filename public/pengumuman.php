@@ -33,16 +33,13 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
     <div style="margin:30px 0; border-top:1px solid var(--border);"></div>
   <?php endif; ?>
   <?php if ($pengumuman): ?>
-    <div class="table-wrap">
+    <div class="grid grid-2 grid-stagger">
       <?php foreach ($pengumuman as $p): ?>
-      <div class="list-item list-item-pad">
-        <div class="list-thumb"><i class="bi bi-megaphone" style="font-size:18px; color:var(--blue);"></i></div>
-        <div class="grow">
-          <div class="ttl"><?= e($p['judul']) ?></div>
-          <div class="meta"><?= tanggal_indo($p['tanggal']) ?></div>
-          <div style="font-size:13px; color:var(--text-muted); margin-top:6px;"><?= linkify($p['isi']) ?></div>
-        </div>
+      <div class="card<?= Auth::isAdmin() && ($crudItemEntity ?? '') === 'pengumuman' ? ' card-admin' : '' ?>">
         <?php if ($crudItemEntity === 'pengumuman'): $itemId = (int) $p['id']; include __DIR__ . '/../app/includes/partial_admin_actions.php'; endif; ?>
+        <div class="meta" style="margin-bottom:6px;"><i class="bi bi-megaphone" style="color:var(--blue);"></i> <?= tanggal_indo($p['tanggal']) ?></div>
+        <h3 style="font-size:15px; margin-bottom:6px;"><?= e($p['judul']) ?></h3>
+        <p style="font-size:13px; color:var(--text-muted);"><?= linkify($p['isi']) ?></p>
       </div>
     <?php endforeach; ?>
     </div>
