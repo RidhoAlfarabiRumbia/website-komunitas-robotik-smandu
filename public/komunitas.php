@@ -117,8 +117,8 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
 
   <section class="section reveal">
     <div class="section-head">
-      <h2>Ringkasan prestasi</h2>
-      <a class="see-all" href="<?= base_url('prestasi.php') ?>">Lihat semua prestasi <i class="bi bi-arrow-right"></i></a>
+      <h2><a class="section-link" href="<?= base_url('prestasi.php') ?>">Ringkasan prestasi</a></h2>
+      <p class="sec-desc">Rekap juara dan penghargaan yang dicapai anggota.</p>
     </div>
     <?php if ($prestasiTampil): ?>
       <div class="card-carousel" data-carousel>
@@ -145,8 +145,8 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
 
   <section class="section reveal">
     <div class="section-head">
-      <h2>Anggota komunitas</h2>
-      <a class="see-all" href="<?= base_url('anggota.php') ?>">Lihat semua anggota <i class="bi bi-arrow-right"></i></a>
+      <h2><a class="section-link" href="<?= base_url('anggota.php') ?>">Anggota komunitas</a></h2>
+      <p class="sec-desc">Kenali anggota yang aktif di dalam komunitas ini.</p>
     </div>
     <?php if ($anggotaTampil): ?>
       <div class="grid grid-3 grid-stagger">

@@ -203,14 +203,14 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
       <div class="card" style="text-align:center; padding:44px 24px;">
         <div style="font-size:44px; color:var(--teal); margin-bottom:12px;"><i class="bi bi-check-circle"></i></div>
         <h2 style="font-size:20px; margin-bottom:10px;">Pendaftaran Terkirim</h2>
-        <p style="color:var(--text-muted); max-width:500px; margin:0 auto 12px; text-align:left;">
+        <p style="color:var(--text-muted); max-width:500px; margin:0 auto 12px; text-align:center;">
           Terima kasih! Admin akan memverifikasi dokumen Pakta Integritasmu terlebih dahulu.
           Setelah verifikasi berhasil, tautan untuk membuat akun (username &amp; kata sandi)
           dikirim ke email yang kamu isi di formulir.
         </p>
-        <p style="color:var(--text-muted); max-width:500px; margin:0 auto 20px; text-align:left;">
+        <p style="color:var(--text-muted); max-width:500px; margin:0 auto 20px; text-align:center;">
           <i class="bi bi-info-circle"></i>
-          Jika email tidak masuk, silakan hubungi admin secara langsung untuk konfirmasi.
+          Jika email tidak masuk, silakan hubungi admin komunitas secara langsung untuk konfirmasi.
         </p>
         <a class="btn btn-outline" href="beranda.php">Kembali ke Beranda</a>
       </div>

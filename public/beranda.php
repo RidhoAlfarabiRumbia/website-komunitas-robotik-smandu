@@ -59,7 +59,7 @@ $pageTitle = 'Beranda';
 include __DIR__ . '/../app/includes/header.php';
 include __DIR__ . '/../app/includes/navbar_anggota.php';
 ?>
-<div class="main">
+<div class="main home-main">
   <div class="hero-frame">
   <section class="welcome-hero">
     <div class="welcome-media hero-media">
@@ -123,10 +123,11 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
   ?>
   <section class="section reveal">
     <div class="section-head">
-      <h2>Prestasi terbaru</h2>
-      <a class="see-all" href="<?= base_url('prestasi.php') ?>">Lihat semua prestasi <i class="bi bi-arrow-right"></i></a>
+      <h2><a class="section-link" href="<?= base_url('prestasi.php') ?>">Prestasi terbaru</a></h2>
+      <p class="sec-desc">Juara dan penghargaan yang baru dicapai anggota di berbagai kompetisi.</p>
     </div>
-    <?php if ($prestasiTerbaru): ?>
+    <?php $nPrestasi = count($prestasiTerbaru); ?>
+    <?php if ($nPrestasi > 3): ?>
       <div class="card-carousel" data-carousel>
         <div class="carousel-viewport">
           <div class="carousel-track grid-stagger">
@@ -144,6 +145,19 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
         </div>
         <?php include __DIR__ . '/../app/includes/partial_carousel_arrows.php'; ?>
       </div>
+    <?php elseif ($nPrestasi > 0): ?>
+      <div class="prestasi-flex grid-stagger<?= $nPrestasi === 1 ? ' solo' : '' ?>">
+        <?php foreach ($prestasiTerbaru as $p): ?>
+          <a href="prestasi-detail.php?id=<?= (int) $p['id'] ?>" class="work-card">
+            <span class="work-thumb" data-lightbox="<?= base_url(e(!empty($p['foto']) ? $p['foto'] : 'assets/img/galeri-prestasi.svg')) ?>" tabindex="0" role="button" aria-label="Perbesar foto prestasi: <?= e($p['nama']) ?>"><img src="<?= base_url(e(!empty($p['foto']) ? $p['foto'] : 'assets/img/galeri-prestasi.svg')) ?>" alt="<?= e($p['nama']) ?>" loading="lazy" decoding="async"></span>
+            <div class="work-body">
+              <span class="badge badge-amber"><i class="bi bi-trophy"></i> <?= e($p['hasil']) ?></span>
+              <div class="work-title" style="font-size:14px;"><?= e($p['nama']) ?></div>
+              <div class="work-meta"><?= e($p['lomba_nama'] ?? '-') ?> · <?= tanggal_indo($p['tanggal']) ?></div>
+            </div>
+          </a>
+        <?php endforeach; ?>
+      </div>
     <?php else: ?>
       <div class="card"><div class="empty">Belum ada prestasi tercatat.</div></div>
     <?php endif; ?>
@@ -153,8 +167,8 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
   <?php ob_start(); ?>
   <section class="section reveal">
     <div class="section-head">
-      <h2>Lomba terdekat</h2>
-      <a class="see-all" href="<?= base_url('lomba.php') ?>">Lihat semua lomba <i class="bi bi-arrow-right"></i></a>
+      <h2><a class="section-link" href="<?= base_url('lomba.php') ?>">Lomba terdekat</a></h2>
+      <p class="sec-desc">Jadwal kompetisi mendatang beserta informasi pendaftarannya.</p>
     </div>
     <?php if ($lombaTerbaru): ?>
       <div class="table-wrap">
@@ -179,54 +193,52 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
   <?php ob_start(); ?>
   <section class="section reveal">
     <div class="section-head">
-      <h2>Karya terbaru</h2>
-      <a class="see-all" href="<?= base_url('karya.php') ?>">Lihat semua karya <i class="bi bi-arrow-right"></i></a>
+      <h2><a class="section-link" href="<?= base_url('karya.php') ?>">Karya terbaru</a></h2>
+      <p class="sec-desc">Karya robotik anggota yang baru tayang setelah lolos moderasi.</p>
     </div>
-    <?php if ($karyaTerbaru): ?>
-      <div class="card-carousel" data-carousel>
-        <div class="carousel-viewport">
-          <div class="carousel-track grid-stagger">
-            <?php foreach ($karyaTerbaru as $k): ?>
-              <?php include __DIR__ . '/../app/includes/partial_karya_card.php'; ?>
-            <?php endforeach; ?>
-          </div>
+    <div class="card-carousel" data-carousel>
+      <div class="carousel-viewport">
+        <div class="carousel-track grid-stagger">
+          <?php foreach ($karyaTerbaru as $k): ?>
+            <?php include __DIR__ . '/../app/includes/partial_karya_card.php'; ?>
+          <?php endforeach; ?>
+          <?php for ($i = count($karyaTerbaru); $i < 3; $i++): $demoBungkus = true; ?>
+            <?php include __DIR__ . '/../app/includes/partial_demo_card.php'; ?>
+          <?php endfor; ?>
         </div>
-        <?php include __DIR__ . '/../app/includes/partial_carousel_arrows.php'; ?>
       </div>
-    <?php else: ?>
-      <div class="card"><div class="empty">Belum ada karya yang tayang. Jadilah yang pertama!</div></div>
-    <?php endif; ?>
+      <?php include __DIR__ . '/../app/includes/partial_carousel_arrows.php'; ?>
+    </div>
   </section>
   <?php $secKarya = ob_get_clean(); ?>
 
   <?php ob_start(); ?>
   <section class="section reveal">
     <div class="section-head">
-      <h2>Galeri terbaru</h2>
-      <a class="see-all" href="<?= base_url('galeri.php') ?>">Lihat semua galeri <i class="bi bi-arrow-right"></i></a>
+      <h2><a class="section-link" href="<?= base_url('galeri.php') ?>">Galeri terbaru</a></h2>
+      <p class="sec-desc">Dokumentasi momen terbaru dari kegiatan dan produksi komunitas.</p>
     </div>
-    <?php if ($galeriTerbaru): ?>
-      <div class="card-carousel" data-carousel>
-        <div class="carousel-viewport">
-          <div class="carousel-track grid-stagger">
-            <?php foreach ($galeriTerbaru as $g): ?>
-              <?php include __DIR__ . '/../app/includes/partial_galeri_card.php'; ?>
-            <?php endforeach; ?>
-          </div>
+    <div class="card-carousel" data-carousel>
+      <div class="carousel-viewport">
+        <div class="carousel-track grid-stagger">
+          <?php foreach ($galeriTerbaru as $g): ?>
+            <?php include __DIR__ . '/../app/includes/partial_galeri_card.php'; ?>
+          <?php endforeach; ?>
+          <?php for ($i = count($galeriTerbaru); $i < 3; $i++): $demoBungkus = true; ?>
+            <?php include __DIR__ . '/../app/includes/partial_demo_card.php'; ?>
+          <?php endfor; ?>
         </div>
-        <?php include __DIR__ . '/../app/includes/partial_carousel_arrows.php'; ?>
       </div>
-    <?php else: ?>
-      <div class="card"><div class="empty">Belum ada dokumentasi galeri.</div></div>
-    <?php endif; ?>
+      <?php include __DIR__ . '/../app/includes/partial_carousel_arrows.php'; ?>
+    </div>
   </section>
   <?php $secGaleri = ob_get_clean(); ?>
 
   <?php ob_start(); ?>
   <section class="section reveal">
     <div class="section-head">
-      <h2>Agenda kegiatan terdekat</h2>
-      <a class="see-all" href="<?= base_url('kegiatan.php') ?>">Lihat semua agenda <i class="bi bi-arrow-right"></i></a>
+      <h2><a class="section-link" href="<?= base_url('kegiatan.php') ?>">Agenda kegiatan terdekat</a></h2>
+      <p class="sec-desc">Kegiatan yang akan datang beserta waktu dan tempat pelaksanaannya.</p>
     </div>
     <?php if ($kegiatanTerbaru): ?>
       <div class="table-wrap">
@@ -250,8 +262,8 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
   <?php ob_start(); ?>
   <section class="section reveal">
     <div class="section-head">
-      <h2>Pelatihan &amp; Workshop mendatang</h2>
-      <a class="see-all" href="<?= base_url('pelatihan.php') ?>">Lihat semua pelatihan <i class="bi bi-arrow-right"></i></a>
+      <h2><a class="section-link" href="<?= base_url('pelatihan.php') ?>">Pelatihan &amp; Workshop mendatang</a></h2>
+      <p class="sec-desc">Jadwal pelatihan dan workshop yang masih membuka pendaftaran.</p>
     </div>
     <?php if ($pelatihanTerbaru): ?>
       <div class="table-wrap">
@@ -278,8 +290,8 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
   <?php ob_start(); ?>
   <section class="section reveal">
     <div class="section-head">
-      <h2>Pengumuman terbaru</h2>
-      <a class="see-all" href="<?= base_url('pengumuman.php') ?>">Lihat semua pengumuman <i class="bi bi-arrow-right"></i></a>
+      <h2><a class="section-link" href="<?= base_url('pengumuman.php') ?>">Pengumuman terbaru</a></h2>
+      <p class="sec-desc">Kabar dan informasi penting terbaru untuk seluruh anggota.</p>
     </div>
     <?php if ($pengumumanTerbaru): ?>
       <div class="table-wrap">
@@ -317,8 +329,8 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
   <!-- Urutan beranda tamu -->
   <?= $secPrestasi ?>
   <?= $secLomba ?>
-  <?= $secGaleri ?>
   <?= $secKarya ?>
+  <?= $secGaleri ?>
   <?= $secAgenda ?>
   <?= $secPelatihan ?>
   <?= $secPengumuman ?>
@@ -327,8 +339,8 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
   <?php if ($kontenAnggota): ?>
   <section class="section reveal">
     <div class="section-head">
-      <h2>Materi untukmu</h2>
-      <a class="see-all" href="<?= base_url('materi.php') ?>">Lihat semua materi <i class="bi bi-arrow-right"></i></a>
+      <h2><a class="section-link" href="<?= base_url('materi.php') ?>">Materi untukmu</a></h2>
+      <p class="sec-desc">Modul dan referensi belajar terbaru dari pelatihan terkait.</p>
     </div>
     <?php if ($materiTerbaru): ?>
       <div class="table-wrap">
