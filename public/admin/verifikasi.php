@@ -143,7 +143,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             flash_set('error', 'Pendaftaran gagal ditolak.');
         }
     } elseif ($aksi === 'hapus') {
+        // Dokumen pakta diambil dulu: setelah baris dihapus, berkasnya di
+        // storage juga dibersihkan supaya tidak jadi orphan.
+        $paktaHapus = (string) ($p['pakta_integritas'] ?? '');
         if (Pendaftaran::delete($id)) {
+            if ($paktaHapus !== '') {
+                hapus_upload($paktaHapus);
+            }
             flash_set('success', 'Data pendaftaran dihapus.');
         } else {
             flash_set('error', 'Data pendaftaran gagal dihapus.');

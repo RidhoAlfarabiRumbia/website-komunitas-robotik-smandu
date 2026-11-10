@@ -2,6 +2,12 @@
 
 Ringkasan perubahan pada branch `update-terbaru`.
 
+## 10 November 2026 (branch `perbaikan-pelatihan-materi`)
+
+### Fitur baru (10 November 2026)
+
+- Data yang dihapus kini membersihkan berkasnya di server sekaligus: hapus data di CRUD (semua entitas) dan hapus pendaftaran di Verifikasi ikut menghapus berkas di `public/uploads/<subfolder>/` maupun `storage/terbatas/<subfolder>/` lewat helper baru `hapus_upload()` yang memvalidasi path dengan `storage_path()`. Pergantian foto/dokumen saat edit CRUD juga menghapus versi lama agar tidak menumpuk orphan; URL video eksternal dan placeholder otomatis dilewati, dan kegagalan hapus hanya dicatat di `error_log` tanpa menggagalkan aksi. Sampah orphan yang sudah ada sebelum perubahan ini tidak dibersihkan otomatis (bisa dibuat skrip sweep terpisah bila diminta).
+
 ## 9 November 2026 (branch `perbaikan-pelatihan-materi`)
 
 ### Fitur baru (9 November 2026)

@@ -853,6 +853,26 @@ function storage_path(string $relative): ?string
 }
 
 /**
+ * Hapus berkas upload dari disk dengan aman. Input berupa path relatif yang
+ * tersimpan di database (mis. "uploads/karya/x.jpg" atau "terbatas/materi/
+ * y.pdf"). Mapping, resolusi realpath, dan pembatasan lingkup folder
+ * diserahkan pada storage_path(): berkas hanya bisa terhapus bila benar-benar
+ * berada di dalam public/uploads atau storage/terbatas. Mengembalikan true
+ * bila berkas lama ditemukan dan berhasil dihapus, false bila tidak ada
+ * (contohnya path berupa URL eksternal atau placeholder SVG).
+ */
+function hapus_upload(string $relative): bool
+{
+    $abs = storage_path($relative);
+    if ($abs === null) return false;
+    $terhapus = @unlink($abs);
+    if (!$terhapus) {
+        error_log('[hapus_upload] Gagal menghapus berkas: ' . $abs);
+    }
+    return $terhapus;
+}
+
+/**
  * Kirim berkas ke peramban dengan nama yang rapi (dipakai berkas.php).
  */
 function kirim_berkas(string $absPath, string $downloadName, bool $inline = false): void

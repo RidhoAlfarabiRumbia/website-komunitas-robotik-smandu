@@ -131,6 +131,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'toggle_status' && $id)
 // Blok ini harus DI ATAS blok simpan, karena blok simpan menangkap semua POST.
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'delete' && $id) {
     Csrf::verify();
+    // Baris lama diambil sebelum delete: kolom berkasnya dipakai untuk
+    // membersihkan disk setelah penghapusan baris berhasil.
+    $rowHapus = $crudModel::find($id);
     if ($refPanel) {
         if (Referensi::delete($id)) {
             flash_set('success', 'Referensi berhasil dihapus.');
@@ -145,6 +148,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'delete' && $id) {
         User::deleteByAnggota($id);
     }
     if ($crudModel::delete($id)) {
+        // Baris benar-benar terhapus dari database: berkas yang dirujuk baris
+        // itu ikut dihapus agar tidak jadi orphan di public/uploads maupun
+        // storage. URL eksternal/placeholder otomatis dilewati oleh
+        // hapus_upload() bila pathnya tidak valid.
+        if ($rowHapus) {
+            foreach ($crudCfg['fields'] as $key => $f) {
+                $tipeF = $f['type'];
+                $berkasKolom = $tipeF === 'file' || $tipeF === 'doc_file' || $tipeF === 'video';
+                if ($berkasKolom && !empty($rowHapus[$key])) {
+                    hapus_upload((string) $rowHapus[$key]);
+                }
+            }
+        }
         flash_set($crudCfg['label'] . ' berhasil dihapus.');
     } else {
         flash_set('error', $crudCfg['label'] . ' gagal dihapus atau sudah tidak ada.');
@@ -334,7 +350,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect($crudBase . '&action=edit&id=' . $postId . $qs);
     }
 
-    if ($postId > 0 && !$crudModel::find($postId)) {
+    // Baris lama diambil SEBELUM update: dipakai menegaskan barisnya masih ada
+    // dan menjadi bahan pembersihan berkas lama yang kelak digantikan.
+    $rowLama = $postId > 0 ? $crudModel::find($postId) : null;
+    if ($postId > 0 && !$rowLama) {
         flash_set('error', $crudCfg['label'] . ' tidak ditemukan. Mungkin sudah dihapus.');
         redirect($crudBase . $qs);
     }
@@ -421,6 +440,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         $dbSimpan->commit();
+
+        // Pembersihan berkas LAMA yang digantikan saat edit. Nilai baru sudah
+        // lewat commit berarti database memakai path baru; path lama yang masih
+        // berbeda dihapus dari disk. Video dari URL eksternal aman otomatis:
+        // hapus_upload() menolak path yang bukan milik uploads/terbatas.
+        if ($rowLama) {
+            foreach ($crudCfg['fields'] as $key => $f) {
+                $tipeF = $f['type'];
+                $berkasKolom = $tipeF === 'file' || $tipeF === 'doc_file' || $tipeF === 'video';
+                if (!$berkasKolom) continue;
+                $baru = (string) ($data[$key] ?? '');
+                $lama = (string) ($rowLama[$key] ?? '');
+                if ($baru !== '' && $lama !== '' && $baru !== $lama) {
+                    hapus_upload($lama);
+                }
+            }
+        }
+
         flash_set('success', $crudCfg['label'] . ($postId > 0 ? ' berhasil diperbarui.' : ' berhasil ditambahkan.')
             . ($materiBaru !== null ? ' Materi baru tersimpan dan terkait pelatihan ini.' : ''));
     } catch (Throwable $e) {
