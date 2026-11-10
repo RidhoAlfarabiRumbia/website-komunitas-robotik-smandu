@@ -21,6 +21,11 @@ $anggotaLain = array_values(array_filter(
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Csrf::verify();
+    // Pengaman double-submit: token sekali-pakai anti klik berulang.
+    if (!form_guard_periksa(nilai_teks($_POST, 'token_kirim'))) {
+        flash_set('error', 'Form sudah terkirim. Muat ulang halaman bila ingin mengajukan lagi.');
+        redirect('ajukan-karya.php');
+    }
 
     $form = [
         'judul' => nilai_teks($_POST, 'judul'),
@@ -77,6 +82,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
   <?php if ($errors): foreach ($errors as $err): ?><div class="alert alert-error"><?= e($err) ?></div><?php endforeach; endif; ?>
   <form class="card" style="max-width:640px;" method="post" enctype="multipart/form-data">
     <?= Csrf::field() ?>
+    <?= form_guard_field() ?>
     <div class="form-grid">
       <div class="field field-full"><label>Judul karya</label><input name="judul" required maxlength="150" value="<?= e($form['judul']) ?>" placeholder="Contoh: Robot Penyiram Tanaman Otomatis"></div>
       <div class="field">

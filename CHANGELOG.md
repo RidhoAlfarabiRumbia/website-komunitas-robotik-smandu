@@ -7,6 +7,8 @@ Ringkasan perubahan pada branch `update-terbaru`.
 ### Fitur baru (10 November 2026)
 
 - Data yang dihapus kini membersihkan berkasnya di server sekaligus: hapus data di CRUD (semua entitas) dan hapus pendaftaran di Verifikasi ikut menghapus berkas di `public/uploads/<subfolder>/` maupun `storage/terbatas/<subfolder>/` lewat helper baru `hapus_upload()` yang memvalidasi path dengan `storage_path()`. Pergantian foto/dokumen saat edit CRUD juga menghapus versi lama agar tidak menumpuk orphan; URL video eksternal dan placeholder otomatis dilewati, dan kegagalan hapus hanya dicatat di `error_log` tanpa menggagalkan aksi. Sampah orphan yang sudah ada sebelum perubahan ini tidak dibersihkan otomatis (bisa dibuat skrip sweep terpisah bila diminta).
+- Upload foto kini membiarkan pasangan: begitu varian ringan `<stempel>_opt.webp` (atau fallback JPEG) berhasil dibuat, berkas asli PNG/JPG langsung dihapus — sebelumnya asli ditinggal "arsip" padahal tak pernah dipakai. `hapus_upload()` pun membersihkan pasangan ini: menghapus varian ikut menghapus aslinya (dan sebaliknya), aman untuk berkas materi/pakta PDF yang tidak punya pasangan.
+- Protes dobel klik kini dua lapis: form yang menulis data (CRUD semua entitas + panel Referensi, Ajukan Karya/Prestasi, Pendaftaran, Daftar Pelatihan) memakai field `token_kirim` sekali-pakai yang diverifikasi di server — kiriman kedua dengan form yang sama ditolak dengan pesan flash singkat; sementara footer memasang guard global yang mematikan tombol submit segera setelah diklik dan lucut kembali tombolnya 25 detik kemudian bila pengiriman terganggu. Aksi hapus/ubah status yang alurnya sudah aman tidak diberi token.
 
 ## 9 November 2026 (branch `perbaikan-pelatihan-materi`)
 

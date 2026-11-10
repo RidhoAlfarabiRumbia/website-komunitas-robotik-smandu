@@ -541,11 +541,17 @@ function simpan_upload(string $inputName, string $subfolder, array $allowed, int
     $hasil = $relDir . $filename;
 
     // Gambar: buat varian ringan (maks 1600px, WebP) agar halaman tidak
-    // memuat foto asli yang berat. File asli TIDAK dihapus — tetap arsip.
+    // memuat foto asli yang berat. Kalau varian berhasil dibuat, berkas asli
+    // langsung dihapus — tidak ada fitur yang memakai asli itu kembali, jadi
+    // menimpannya hanya akan menumpuk disk. Bila varian gagal (hosting tanpa
+    // GD), path asli tetap dipakai seperti sebelumnya.
     if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp'], true)) {
         $varian = gambar_varian($dir . $filename, $dir . pathinfo($filename, PATHINFO_FILENAME));
         if ($varian !== null) {
             $hasil = $relDir . basename($varian);
+            if (!@unlink($dir . $filename)) {
+                error_log('[simpan_upload] Gagal menghapus berkas asli setelah varian dibuat: ' . $dir . $filename);
+            }
         }
     }
 
@@ -868,8 +874,79 @@ function hapus_upload(string $relative): bool
     $terhapus = @unlink($abs);
     if (!$terhapus) {
         error_log('[hapus_upload] Gagal menghapus berkas: ' . $abs);
+        return false;
     }
-    return $terhapus;
+
+    /* Berkas gambar tersimpan berpasangan: asli <stempel>.<ext> dan varian
+     * ringan <stempel>_opt.webp|_opt.jpg yang path-nya tercatat di database.
+     * Supaya disk tidak menyisakan "sampah kembar", sisa pasangannya ikut
+     * dibersihkan — pemakaian pola sama dengan profil.php dan
+     * komunitas-pengaturan.php. */
+    $dirpath = dirname($abs);
+    $nama = basename($abs);
+    if (preg_match('/^(.*?)_opt\.(?:webp|jpe?g|png)$/i', $nama, $m)) {
+        // Target varian: aslinya yang dihapus juga.
+        foreach (['jpg', 'jpeg', 'png', 'webp', 'gif'] as $extSaudara) {
+            $saudara = $dirpath . '/' . $m[1] . '.' . $extSaudara;
+            if (is_file($saudara)) @unlink($saudara);
+        }
+    } else {
+        // Target asli (atau image tanpa varian): varian yang terlekat ikut dibuang.
+        $stem = pathinfo($nama, PATHINFO_FILENAME);
+        foreach (['_opt.webp', '_opt.jpg'] as $sufiks) {
+            $saudara = $dirpath . '/' . $stem . $sufiks;
+            if (is_file($saudara)) @unlink($saudara);
+        }
+    }
+
+    return true;
+}
+
+/**
+ * Token sekali-pakai untuk mencegah data masuk dobel karena tombol diklik
+ * berulang (jaringan lambat, send/retry). Token diacak per render form dan
+ * disimpan di session; pemanggil form memasukkannya sebagai field hidden
+ * (lihat form_guard_field()) dan pemroses POST memverifikasinya dengan
+ * form_guard_periksa(): satu token hanya boleh dipakai satu kali, jadi
+ * pengiriman kedua dengan form yang sama pasti ditolak.
+ */
+function form_guard_token(): string
+{
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        session_start();
+    }
+    $token = bin2hex(random_bytes(16));
+    $daftar = $_SESSION['form_guard_tokens'] ?? [];
+    // Maksimal 30 token aktif (FIFO) agar session aman dari penumpukan.
+    $daftar[] = $token;
+    $_SESSION['form_guard_tokens'] = array_values(array_slice($daftar, -30));
+    return $token;
+}
+
+/**
+ * Field hidden siap tempel ke form yang butuh proteksi double-submit.
+ */
+function form_guard_field(): string
+{
+    return '<input type="hidden" name="token_kirim" value="' . e(form_guard_token()) . '" aria-hidden="true">';
+}
+
+/**
+ * Verifikasi field "token_kirim" dari POST. True hanya bila token terdaftar
+ * di sesi saat ini; token langsung dimatikan (sekali pakai).
+ */
+function form_guard_periksa(?string $token): bool
+{
+    if ($token === null || $token === '') return false;
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        return false;
+    }
+    $daftar = $_SESSION['form_guard_tokens'] ?? [];
+    $kunci = array_search($token, $daftar, true);
+    if ($kunci === false) return false;
+    unset($daftar[$kunci]);
+    $_SESSION['form_guard_tokens'] = array_values($daftar);
+    return true;
 }
 
 /**

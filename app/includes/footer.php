@@ -248,6 +248,41 @@ window.addEventListener('pageshow',tampilkanYangSudahDilihat);
   });
 })();
 
+/* Pengaman double-submit global: begitu form terkirim, tombol submitnya
+   dimatikan supaya klik berulang (jaringan lambat, dobel klik) tidak membuat
+   data masuk dobel. Form yang sedang menunggu konfirmasi modal dilewati —
+   guard baru berjalan saat tombol "Ya" di modal mengetik ulang submit.
+   Kalau pengiriman gagal (halaman masih di tempat), flag & tombol
+   dilucutkan 25 detik kemudian agar pengguna bisa mencoba lagi; sisi server
+   punya token sekali-pakai sebagai lapis kedua. */
+(function(){
+  function matikanTombol(form){ Array.prototype.forEach.call(form.querySelectorAll('button[type="submit"], input[type="submit"]'),function(b){b.disabled=true;}); }
+  function hidupkanTombol(form){ Array.prototype.forEach.call(form.querySelectorAll('button[type="submit"], input[type="submit"]'),function(b){b.disabled=false;}); }
+  document.addEventListener('submit',function(ev){
+    var form=ev.target;
+    if(!form||form.nodeName!=='FORM')return;
+    var overlay=document.getElementById('konfirmasiModal');
+    if(overlay&&overlay.__modalForm===form&&form.dataset.modalConfirmed!=='1')return; // tunggu keputusan modal
+    if(form.dataset.dikirim==='1'){ev.preventDefault();ev.stopImmediatePropagation();return;}
+    form.dataset.dikirim='1';
+    matikanTombol(form);
+    setTimeout(function(){
+      if(!form.isConnected)return; // telah berpindah halaman, ini instansi lama
+      delete form.dataset.dikirim;
+      /* JANGAN ikut hidupkan tombol saat modal masih menahan form ini. */
+      var ov=document.getElementById('konfirmasiModal');
+      if(!(ov&&ov.__modalForm===form&&!ov.hidden))hidupkanTombol(form);
+    },25000);
+  },false);
+  window.addEventListener('pageshow',function(ev){
+    if(!ev.persisted)return; // pulih dari bfcache: status tombol mungkin stale
+    document.querySelectorAll('form[data-dikirim]').forEach(function(form){
+      delete form.dataset.dikirim;
+      hidupkanTombol(form);
+    });
+  });
+})();
+
 /* Modal konfirmasi seragam, pengganti dialog confirm() bawaan browser.
    - Form dengan submit tunggal: onsubmit="return konfirmasiForm(event, 'Pesan')"
    - Form multi-tombol, modal hanya untuk satu tombol: onclick="return konfirmasiKirim(event, 'Pesan')"

@@ -12,6 +12,11 @@ $old = ['nama' => '', 'kelas' => '', 'kontak' => '', 'email' => '', 'alasan' => 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Csrf::verify();
+    // Pengaman double-submit: token sekali-pakai anti klik berulang.
+    if (!form_guard_periksa(nilai_teks($_POST, 'token_kirim'))) {
+        flash_set('error', 'Form sudah terkirim. Muat ulang halaman bila ingin mendaftar lagi.');
+        redirect('daftar.php');
+    }
 
     if (!$gate['buka']) {
         flash_set('error', 'Pendaftaran sedang ditutup. Kiriman tidak diproses.');
@@ -240,6 +245,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
       <div class="card">
         <form method="post" enctype="multipart/form-data" class="form-grid">
           <?= Csrf::field() ?>
+          <?= form_guard_field() ?>
 
           <div class="field" style="grid-column:1/-1;">
             <label for="nama">Nama Lengkap <span class="req">*</span></label>

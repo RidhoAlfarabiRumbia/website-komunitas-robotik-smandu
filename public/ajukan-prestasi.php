@@ -28,6 +28,11 @@ $tingkatOpsi = ['Sekolah', 'Kota', 'Provinsi', 'Nasional', 'Internasional'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Csrf::verify();
+    // Pengaman double-submit: token sekali-pakai anti klik berulang.
+    if (!form_guard_periksa(nilai_teks($_POST, 'token_kirim'))) {
+        flash_set('error', 'Form sudah terkirim. Muat ulang halaman bila ingin mengajukan lagi.');
+        redirect('ajukan-prestasi.php');
+    }
 
     $old = [
         'nama' => nilai_teks($_POST, 'nama'),
@@ -143,6 +148,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
     <div class="card">
       <form method="post" enctype="multipart/form-data" class="form-grid">
         <?= Csrf::field() ?>
+        <?= form_guard_field() ?>
 
         <div class="field" style="grid-column:1/-1;">
           <label for="nama">Nama Prestasi <span class="req">*</span></label>

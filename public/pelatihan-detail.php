@@ -17,6 +17,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = nilai_int($_POST, 'pelatihan_id') ?: $id;
     $p = Pelatihan::detail($id);
 
+    // Pengaman double-submit: token sekali-pakai anti klik berulang.
+    if (!form_guard_periksa(nilai_teks($_POST, 'token_kirim'))) {
+        flash_set('error', 'Pendaftaran sudah terkirim. Muat ulang halaman bila ingin mencoba lagi.');
+        redirect($id ? 'pelatihan-detail.php?id=' . $id : 'pelatihan.php');
+    }
+
     if (!$p) {
         flash_set('error', 'Pelatihan tidak ditemukan.');
         redirect('pelatihan.php');
@@ -143,6 +149,7 @@ include __DIR__ . '/../app/includes/navbar_anggota.php';
               <form method="post"
                     onsubmit="return konfirmasiForm(event, 'Daftar sebagai peserta pelatihan ini? Admin akan menyetujui daftarmu.', 'Ya, daftar', 'bi-check-lg')">
                 <?= Csrf::field() ?>
+                <?= form_guard_field() ?>
                 <input type="hidden" name="pelatihan_id" value="<?= (int) $p['id'] ?>">
                 <button class="btn btn-primary btn-block" type="submit"><i class="bi bi-pencil-square"></i> Daftar Peserta</button>
               </form>

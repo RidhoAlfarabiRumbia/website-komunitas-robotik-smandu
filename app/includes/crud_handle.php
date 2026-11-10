@@ -71,6 +71,11 @@ $refPanel = $crudReferensi
 // ---- Simpan referensi (panel Materi) ----
 if ($crudReferensi && $_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['sub_form'] ?? '') === 'referensi') {
     Csrf::verify();
+    // Pengaman double-submit yang sama dengan simpan utama.
+    if (!form_guard_periksa(nilai_teks($_POST, 'token_kirim'))) {
+        flash_set('error', 'Form sudah terkirim atau kedaluwarsa. Muat ulang halaman bila ingin mengisi lagi.');
+        redirect($crudBaseMateri . '&sub=referensi' . $qs);
+    }
     $refId = nilai_int($_POST, 'id');
     $refBack = $crudBaseMateri . '&sub=referensi&action=' . ($refId ? 'edit&id=' . $refId : 'create') . $qs;
     $refData = [
@@ -171,6 +176,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action === 'delete' && $id) {
 // ---- Simpan (create/update) ----
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     Csrf::verify();
+    // Pengaman double-submit: token sekali-pakai. Klik berulang (jaringan
+    // lambat, retry) yang berhasil sampai server hanya boleh tercatat sekali.
+    if (!form_guard_periksa(nilai_teks($_POST, 'token_kirim'))) {
+        flash_set('error', 'Form sudah terkirim atau kedaluwarsa. Muat ulang halaman bila ingin mengisi lagi.');
+        redirect($crudBase . $qs);
+    }
     $errors = [];
     $materiBaru = null; // path berkas "Unggah Materi" pada tambah pelatihan (bukan kolom tabel)
     $paktaBaru = null; // path berkas Pakta Integritas pada tambah anggota (bukan kolom tabel)

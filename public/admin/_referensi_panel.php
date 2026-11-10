@@ -31,6 +31,7 @@ $refBack = '?entity=materi&sub=referensi&action=' . ($refEditing ? 'edit&id=' . 
 
   <form class="card" style="max-width:680px; margin-bottom:18px;" method="post" action="?entity=materi">
     <?= Csrf::field() ?>
+    <?= form_guard_field() ?>
     <input type="hidden" name="sub_form" value="referensi">
     <?php if ($refEditing): ?><input type="hidden" name="id" value="<?= (int) $refEditing['id'] ?>"><?php endif; ?>
     <div class="form-grid">

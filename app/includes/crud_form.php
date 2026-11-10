@@ -11,6 +11,7 @@ $hasWhen = false;
 ?>
 <form class="crud-form" method="post" enctype="multipart/form-data">
   <?= Csrf::field() ?>
+  <?= form_guard_field() ?>
   <input type="hidden" name="manage" value="<?= e($crudEntitas) ?>">
   <?php if ($editing): ?><input type="hidden" name="id" value="<?= (int) $editing['id'] ?>"><?php endif; ?>
   <?php if ($q !== ''): ?><input type="hidden" name="q" value="<?= e($q) ?>"><?php endif; ?>
